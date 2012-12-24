@@ -7,6 +7,13 @@ from django.utils.datastructures import MultiValueDictKeyError
 
 event_handlers = []
 view_handlers = {}
+query_handlers = {}
+
+def handle_list(request):
+    pass
+
+def handle_query(request):
+    pass
 
 def handle_event(request):
     try: # Not sure why this is necessary, but on some systems it is 'msg', and on others, 'message'
@@ -19,18 +26,14 @@ def handle_event(request):
 
     return HttpResponse( "Success" )
 
-def user_render(request):
-    user = request.GET['uid']
-    print user
-
-    sba = StudentBookAccesses.objects.filter(username = user)
-    if len(sba):
-        pages = sba[0].count
-    else: 
-        pages = 0
-
-
-    return HttpResponse( "The user " + user + " saw "+str(pages)+" pages!" )
+def handle_view(request, category, name, param1=None, param2=None):
+    ''' Handles generic view. 
+        Category is where this should be place (per student, per problem, etc.)
+        Name is specific 
+    '''
+    if category == 'user':
+        username = param1
+        return HttpResponse( view_handlers[category][name](username, request.GET))
 
 def event_handler(queued=True, per_user=False, single_process=False, per_resource=False, source_queue=None):
     ''' Decorator to register an event handler. 
@@ -50,18 +53,42 @@ def event_handler(queued=True, per_user=False, single_process=False, per_resourc
         return func
     return event_handler_factory
 
-def view():
+def view(category, name):
     def view_factory(a):
+        if category not in view_handlers:
+            view_handlers[category]={}
+        if name in view_handlers[category]:
+            raise KeyError(name+" already in "+category)
+        view_handlers[category][name] = a
+
         return a
     return view_factory
 
-@view()
-def book_page_count_view(request):
-    pass
+def query(category, name):
+    def query_factory(a):
+        return a
+    return query_factory
+
+''' Sample views/events. Should be moved to a new file. 
+'''
+
+@view('user', 'page_count')
+def book_page_count_view(user, params):
+    #user = request.GET['uid']
+
+    return "The user " + user + " saw "+str(book_page_count_query(user, params))+" pages!"
+
+@query('user', 'page_count')
+def book_page_count_query(user, params):
+    sba = StudentBookAccesses.objects.filter(username = user)
+    if len(sba):
+        pages = sba[0].count
+    else: 
+        pages = 0
+    return pages
 
 @event_handler()
 def book_page_count_event(response):
-
     sba = StudentBookAccesses.objects.filter(username = response["username"])
     if len(sba) == 0:
         sba = StudentBookAccesses()

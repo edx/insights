@@ -7,7 +7,11 @@ from django.conf.urls.defaults import patterns, include, url
 urlpatterns = patterns('',
     # Examples:
     url(r'^event$', 'an_evt.views.handle_event'),
-    url(r'^render$', 'an_evt.views.user_render'),
+    url(r'^view/([a-z_]+)/([a-z_]+)$', 'an_evt.views.handle_view'), 
+    url(r'^view/([a-z_]+)/([a-z_]+)/([a-z_0-9]+)$', 'an_evt.views.handle_view'), 
+    url(r'^view/([a-z_]+)/([a-z_]+)/([a-z_0-9]+)/([a-z_0-9]+)$', 'an_evt.views.handle_view'), 
+    url(r'^query$', 'an_evt.views.handle_query'),
+    url(r'^list_views$', 'an_evt.views.handle_list'),
     # url(r'^anserv/', include('anserv.foo.urls')),
 
     # Uncomment the admin/doc line below to enable admin documentation:
