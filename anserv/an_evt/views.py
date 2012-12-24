@@ -5,7 +5,8 @@ import json
 from an_evt.models import StudentBookAccesses
 from django.utils.datastructures import MultiValueDictKeyError
 
-events = []
+event_handlers = []
+view_handlers = {}
 
 def handle_event(request):
     try: # Not sure why this is necessary, but on some systems it is 'msg', and on others, 'message'
@@ -13,7 +14,7 @@ def handle_event(request):
     except MultiValueDictKeyError: 
         response = json.loads(request.GET['msg'])
 
-    for e in events:
+    for e in event_handlers:
         e(response)
 
     return HttpResponse( "Success" )
@@ -31,7 +32,7 @@ def user_render(request):
 
     return HttpResponse( "The user " + user + " saw "+str(pages)+" pages!" )
 
-def event_handler(func, queued=True, per_user=False, single_process=False, per_resource=False, source_queue=None):
+def event_handler(queued=True, per_user=False, single_process=False, per_resource=False, source_queue=None):
     ''' Decorator to register an event handler. 
 
     queued=True ==> Normal mode of operation. Cannot break system (unimplemented)
@@ -44,17 +45,21 @@ def event_handler(func, queued=True, per_user=False, single_process=False, per_r
     
     source_queue ==> Not implemented. For a pre-filter (e.g. video)
     '''
-    events.append(func)
-    return func
+    def event_handler_factory(func):
+        event_handlers.append(func)
+        return func
+    return event_handler_factory
 
-def view(a):
-    return a
+def view():
+    def view_factory(a):
+        return a
+    return view_factory
 
-@view
+@view()
 def book_page_count_view(request):
     pass
 
-@event_handler
+@event_handler()
 def book_page_count_event(response):
 
     sba = StudentBookAccesses.objects.filter(username = response["username"])
