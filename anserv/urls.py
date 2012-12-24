@@ -6,8 +6,8 @@ from django.conf.urls.defaults import patterns, include, url
 
 urlpatterns = patterns('',
     # Examples:
-    url(r'^an_evt$', 'an_evt.views.handle_event'),
-    url(r'^user_render$', 'an_evt.views.user_render'),
+    url(r'^event$', 'an_evt.views.handle_event'),
+    url(r'^render$', 'an_evt.views.user_render'),
     # url(r'^anserv/', include('anserv.foo.urls')),
 
     # Uncomment the admin/doc line below to enable admin documentation:
