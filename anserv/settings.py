@@ -120,6 +120,8 @@ INSTALLED_APPS = (
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
     'an_evt',
+    'modules',
+    'modules.page_count',
 )
 
 # A sample logging configuration. The only tangible logging
