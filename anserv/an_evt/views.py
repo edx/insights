@@ -20,8 +20,13 @@ def handle_list(request, cls=None, category=None):
         l = request_handlers[cls][category].keys()
     return HttpResponse("\n".join(l), mimetype='text/text')
 
-def handle_query(request):
-    pass
+def handle_query(request, category, name, param1=None, param2=None):
+    if category == 'user':
+        username = param1
+        handler = request_handlers['query'][category][name]
+        collection = db[str(handler.__module__)]
+        print "Module: "+str(handler.__module__)
+        return HttpResponse( handler(collection, username, request.GET))
 
 def handle_event(request):
     try: # Not sure why this is necessary, but on some systems it is 'msg', and on others, 'message'
