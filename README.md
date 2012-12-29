@@ -89,6 +89,10 @@ Analytics can be per-student, per-resource, or global. They may also
 be per-course or per-university, but this is architecturally brittle,
 and not recommended (although likely unavoidable).
 
+For developing the system, hard realtime is the most critical, and
+we'd like to keep the invariant that it works. Next most useful is
+either queued or batched. 
+
 Sharding
 --------
 
