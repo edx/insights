@@ -35,6 +35,10 @@ The module consists of a set of functions which can be decorated as:
 * Queries: These render machine-readable results through an SOA. 
 * Future: CRON tasks
 
+To understand the system, the best place to start is by reading a
+sample module. Next place is to look at the code for the
+decorators. Final place is for the main views and dashboard. 
+
 Shortcuts/invariants
 --------------------
 
