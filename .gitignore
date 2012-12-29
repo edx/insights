@@ -34,3 +34,6 @@ nosetests.xml
 .project
 .pydevproject
 db.sql
+
+# Backups
+*~

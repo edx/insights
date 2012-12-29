@@ -17,6 +17,7 @@ urlpatterns = patterns('',
     url(r'^list/([a-z_]+)$', 'an_evt.views.handle_list'),
     url(r'^list/([a-z_]+)/([a-z_]+)$', 'an_evt.views.handle_list'),
     url(r'^list/([a-z_]+)/([a-z_]+)/([a-z_]+)$', 'an_evt.views.handle_list'),
+    url(r'^dashboard$', 'dashboard.views.dashboard'),
     # url(r'^anserv/', include('anserv.foo.urls')),
 
     # Uncomment the admin/doc line below to enable admin documentation:

@@ -1,4 +1,106 @@
 analytics-experiments
 =====================
 
-Analytics experiments
+This is a development version of an analytics framework for the edX
+infrastructure. The goal of this framework is to define an
+architecture for simple, pluggable analytics modules. The architecture
+must have the following properties:
+
+1. Easy to use. Professors, graduate students, etc. should be able to
+write plug-ins quickly and easily.
+
+2. The API must support robust, scalable implementations. The current
+back-end is not designed for mass scaling, but the modules should be. 
+
+3. Reusable. The individual analytics modules should be able to use
+the results from other modules. 
+
+Architecture
+------------
+
+The analytics framework has access to the event stream from the
+tracking architecture, a read-replica of the main database, as well
+as, in the future, course definition database, and read-replicas of
+auxilliary databases, such as discussion forums. 
+
+Each module in the analytics framework has its own Mongo database. In
+addition, in the near future, it should have read-only access to the
+DBs associated with other modules.
+
+The module consists of a set of functions which can be decorated as: 
+* Event handlers. These receive tracking events. 
+* Views. These render HTML to be shown to the user
+* Future: AJAX calls associated with events. 
+* Queries: These render machine-readable results through an SOA. 
+* Future: CRON tasks
+
+Shortcuts/invariants
+--------------------
+
+* At present, events come into the system through an SOA. The tracking
+framework is modified to use a Python HTTP logger, which are received
+by the framework. For most events, this should be replaced with
+something asynchronous, as well as queued.
+
+* The analytics have no isolation from each other. The architecture
+supports running each module in its own sandbox. This should not be
+broken (e.g. by having direct calls across modules).
+
+* Right now, all functions must be re-entrant. Some folks would like to
+write an analytic that runs in a single process without worrying about
+thread safety (e.g. while(true) { get_event(); handle_event(); }). The
+API is designed to support this, but this is not implemented.
+
+* The analytics framework has no way to generate new events. This would be 
+useful for chaining analytics.
+
+* There are no filters. E.g. an event handler cannot ask for all video events. 
+
+* We are copying code from the main mitx repo (models.py, mitmako). We
+  should figure out a better way to handle this.
+
+Target markets
+--------------
+
+The analytics has several target markets: 
+
+1. Internal system use. As we build out infrastructure for intelligent
+tutoring, partnering students into small groups, etc., we need to do
+analysis on student interactions with the system.
+
+2. Marketing. Numbers to figure out student lifecycle. 
+
+3. Instructors. Numbers to figure out who students are, and how to
+improve the courses. 
+
+4. Product. 
+
+5. Students. 
+
+6. Board of directors, reporters, etc. 
+
+Modes of operation
+------------------
+
+1. Hard realtime. When an event comes in, it is synchronously
+processed. The caller knows that by the time the event returns, it can
+extract results from the analytic.
+
+2. Soft realtime. There is a queue, but processing is fast enough that
+the queue is assumed to be nearly empty.
+
+3. Queued. There is a queue with potentially a significant backlog. 
+
+4. Batched. Processing runs at e.g. 5 minute or 1 day intervals. 
+
+Analytics can be per-student, per-resource, or global. They may also
+be per-course or per-university, but this is architecturally brittle,
+and not recommended (although likely unavoidable).
+
+Sharding
+--------
+
+Some types of analytics support sharding per-resource (e.g. number of
+views) or per-student (e.g. time spent in course). Some require global
+optimization and cannot be sharede (e.g. IRT). This is something we'll
+need to eventually think about, but this is a 2.0 feature.
