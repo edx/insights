@@ -7,13 +7,14 @@ architecture for simple, pluggable analytics modules. The architecture
 must have the following properties:
 
 1. Easy to use. Professors, graduate students, etc. should be able to
-write plug-ins quickly and easily.
-
+write plug-ins quickly and easily. These should be able to run in the
+system without impacting the overall stability. Results should be
+automatically shown to customers. 
 2. The API must support robust, scalable implementations. The current
 back-end is not designed for mass scaling, but the modules should be. 
-
 3. Reusable. The individual analytics modules should be able to use
-the results from other modules. 
+the results from other modules, and people should be able to build on
+each others' work.
 
 Architecture
 ------------
@@ -41,21 +42,16 @@ Shortcuts/invariants
 framework is modified to use a Python HTTP logger, which are received
 by the framework. For most events, this should be replaced with
 something asynchronous, as well as queued.
-
 * The analytics have no isolation from each other. The architecture
 supports running each module in its own sandbox. This should not be
 broken (e.g. by having direct calls across modules).
-
 * Right now, all functions must be re-entrant. Some folks would like to
 write an analytic that runs in a single process without worrying about
 thread safety (e.g. while(true) { get_event(); handle_event(); }). The
 API is designed to support this, but this is not implemented.
-
 * The analytics framework has no way to generate new events. This would be 
 useful for chaining analytics.
-
 * There are no filters. E.g. an event handler cannot ask for all video events. 
-
 * We are copying code from the main mitx repo (models.py, mitmako). We
   should figure out a better way to handle this.
 
@@ -67,16 +63,11 @@ The analytics has several target markets:
 1. Internal system use. As we build out infrastructure for intelligent
 tutoring, partnering students into small groups, etc., we need to do
 analysis on student interactions with the system.
-
 2. Marketing. Numbers to figure out student lifecycle. 
-
 3. Instructors. Numbers to figure out who students are, and how to
 improve the courses. 
-
 4. Product. 
-
 5. Students. 
-
 6. Board of directors, reporters, etc. 
 
 Modes of operation
@@ -85,12 +76,9 @@ Modes of operation
 1. Hard realtime. When an event comes in, it is synchronously
 processed. The caller knows that by the time the event returns, it can
 extract results from the analytic.
-
 2. Soft realtime. There is a queue, but processing is fast enough that
 the queue is assumed to be nearly empty.
-
 3. Queued. There is a queue with potentially a significant backlog. 
-
 4. Batched. Processing runs at e.g. 5 minute or 1 day intervals. 
 
 Analytics can be per-student, per-resource, or global. They may also
@@ -104,3 +92,11 @@ Some types of analytics support sharding per-resource (e.g. number of
 views) or per-student (e.g. time spent in course). Some require global
 optimization and cannot be sharede (e.g. IRT). This is something we'll
 need to eventually think about, but this is a 2.0 feature.
+
+Useful pointers
+---------------
+
+Pivotal Tracker has a set of possible metrics of mixed quality. The
+wiki has another set of possible metrics. The most useful metrics
+we've found were in competing systems and in publications from the
+research community.
