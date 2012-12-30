@@ -6,6 +6,8 @@ from an_evt.models import StudentBookAccesses
 from django.utils.datastructures import MultiValueDictKeyError
 from modules.decorators import event_handlers, request_handlers
 
+import inspect
+
 ### HACK ###
 import modules.page_count.book_count
 import modules.user_stats.user_stats
@@ -27,7 +29,7 @@ def handle_list(request, cls=None, category=None):
 def handle_query(request, category, name, param1=None, param2=None):
     if category == 'user':
         username = param1
-        handler = request_handlers['query'][category][name]
+        handler = request_handlers['query'][category][name]['function']
         collection = connection[str(handler.__module__).replace(".","_")]
         print "Module: "+str(handler.__module__)
         return HttpResponse( handler(collection, username, request.GET))
@@ -49,8 +51,7 @@ def handle_view(request, category, name, param1=None, param2=None):
         Category is where this should be place (per student, per problem, etc.)
         Name is specific 
     '''
-    handler = request_handlers['view'][category][name]
-    print request_handlers
+    handler = request_handlers['view'][category][name]['function']
     collection = connection[str(handler.__module__).replace(".","_")]
     if category == 'user':
         username = param1

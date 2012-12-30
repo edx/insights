@@ -1,3 +1,5 @@
+import inspect
+
 event_handlers = []
 
 request_handlers = {'view':{}, 'query':{}}
@@ -23,14 +25,28 @@ def event_handler(queued=True, per_user=False, per_resource=False, single_proces
         return func
     return event_handler_factory
 
-def view(category, name):
+def view(category = None, name = None, docstring = None):
     def view_factory(a):
         ## Register function in the registry
-        if category not in request_handlers['view']:
-            request_handlers['view'][category]={}
-        if name in request_handlers['view'][category]:
-            raise KeyError(name+" already in "+category)
-        request_handlers['view'][category][name] = a
+        registered_name = name
+        doc = docstring
+        cat = category
+        if not registered_name:
+            registered_name = str(a.func_name)
+        if not doc: 
+            doc = str(a.func_doc)
+
+        if not cat:
+            if inspect.getargspec(a).args == ['db','params']:
+                cat = 'global'
+            else:
+                raise ValueError('Function arguments do not match recognized type. Explicitly set category in decorator.')
+
+        if cat not in request_handlers['view']:
+            request_handlers['view'][cat]={}
+        if registered_name in request_handlers['view'][cat]:
+            raise KeyError(registered_name+" already in "+cat)
+        request_handlers['view'][cat][registered_name] = {'function': a, 'name': registered_name, 'doc': doc}
         return a
     return view_factory
 
