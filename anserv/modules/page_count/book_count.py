@@ -1,12 +1,16 @@
 from modules.decorators import view, query, event_handler
 from an_evt.models import StudentBookAccesses
 
-@view('user', 'page_count')
+@view(name = 'page_count')
 def book_page_count_view(db, user, params):
+    ''' Dummy test function. In the future, this should return some stats on 
+    how many textbook pages the user saw '''
     return "The user " + user + " saw "+str(book_page_count_query(db, user, params))+" pages!"
 
 @query('user', 'page_count')
 def book_page_count_query(db, user, params):
+    ''' Dummy test function. In the future, this should return some stats on 
+    how many textbook pages the user saw '''
     collection = db['page_count']
     sba = list(collection.find({'user':user}))
     if len(sba) == 0:

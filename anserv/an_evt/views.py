@@ -6,8 +6,6 @@ from an_evt.models import StudentBookAccesses
 from django.utils.datastructures import MultiValueDictKeyError
 from modules.decorators import event_handlers, request_handlers
 
-import inspect
-
 ### HACK ###
 import modules.page_count.book_count
 import modules.user_stats.user_stats
@@ -17,13 +15,15 @@ from pymongo import MongoClient
 connection = MongoClient()
 #db = connection['analytic_store']
 
-def handle_list(request, cls=None, category=None):
+def handle_probe(request, cls=None, category=None, details = None):
     if cls == None:
         l = ['view','query']
     elif category == None:
         l = request_handlers[cls].keys()
-    else:
+    elif details == None:
         l = request_handlers[cls][category].keys()
+    else: 
+        l = [request_handlers[cls][category][details]['doc']]
     return HttpResponse("\n".join(l), mimetype='text/text')
 
 def handle_query(request, category, name, param1=None, param2=None):
