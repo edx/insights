@@ -99,7 +99,10 @@ Sharding
 Some types of analytics support sharding per-resource (e.g. number of
 views) or per-student (e.g. time spent in course). Some require global
 optimization and cannot be sharede (e.g. IRT). This is something we'll
-need to eventually think about, but this is a 2.0 feature.
+need to eventually think about, but this is a 2.0 feature. Note that
+the current decorator design pattern does not help -- it merely helps
+define a storage API. A statistic like class rank may be per-user, but
+require data from all users. 
 
 Useful pointers
 ---------------

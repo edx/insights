@@ -2,11 +2,12 @@ from modules.decorators import view, query, event_handler
 from an_evt.models import StudentBookAccesses
 
 @view('user', 'page_count')
-def book_page_count_view(collection, user, params):
-    return "The user " + user + " saw "+str(book_page_count_query(collection, user, params))+" pages!"
+def book_page_count_view(db, user, params):
+    return "The user " + user + " saw "+str(book_page_count_query(db, user, params))+" pages!"
 
 @query('user', 'page_count')
-def book_page_count_query(collection, user, params):
+def book_page_count_query(db, user, params):
+    collection = db['page_count']
     sba = list(collection.find({'user':user}))
     if len(sba) == 0:
         return 0
@@ -20,7 +21,8 @@ def book_page_count_query(collection, user, params):
     return pages
 
 @event_handler(queued = False)
-def book_page_count_event(collection, response):
+def book_page_count_event(db, response):
+    collection = db['page_count']
     user = response["username"]
     sba = list(collection.find({'user':user}))
     print "XXXX", user, sba

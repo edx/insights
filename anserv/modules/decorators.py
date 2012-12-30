@@ -31,7 +31,6 @@ def view(category, name):
         if name in request_handlers['view'][category]:
             raise KeyError(name+" already in "+category)
         request_handlers['view'][category][name] = a
-        
         return a
     return view_factory
 

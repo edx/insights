@@ -122,6 +122,7 @@ INSTALLED_APPS = (
     'an_evt',
     'modules',
     'modules.page_count',
+    'modules.user_stats',
 )
 
 # A sample logging configuration. The only tangible logging

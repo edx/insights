@@ -5,5 +5,3 @@ def dashboard(request):
     dashboard = ""
     return HttpResponse(dashboard)
 
-Talk to Ike about offer
-Connect Keith, Teppo, etc. 
