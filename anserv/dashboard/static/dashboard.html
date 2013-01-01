@@ -1,0 +1,64 @@
+<!doctype html>
+ 
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>jQuery UI Tabs - Default functionality</title>
+    <link rel="stylesheet" href="http://code.jquery.com/ui/1.9.2/themes/base/jquery-ui.css" />
+    <script src="http://code.jquery.com/jquery-1.8.3.js"></script>
+    <script src="http://code.jquery.com/ui/1.9.2/jquery-ui.js"></script>
+    <script>
+    $(function() {
+        $( "#tabs" ).tabs();
+
+        $.get('/probe/view/global', function(data) {
+          var split_data = data.split('\n');
+          var i;
+          for(i = 0 ; i< split_data.length; i++) {
+	    $("#globalselect").append('<option value='+split_data[i]+'=>'+split_data[i]+'</option>');
+          }
+        })
+        $( "#global_tab" ).change(function(){
+           $("#global_data").load("/view/global/"+$("select option:selected").text());
+         });
+
+        $.get('/probe/view/user', function(data) {
+          var split_data = data.split('\n');
+          var i;
+          for(i = 0 ; i< split_data.length; i++) {
+	    $("#userselect").append('<option value='+split_data[i]+'=>'+split_data[i]+'</option>');
+          }
+        })
+        $( "#user_tab" ).change(function(){
+           $("#user_data").load("/view/user/"+$("select option:selected").text()+"/"+$("#user_input").val());
+         });
+    });
+    </script>
+</head>
+<body>
+ 
+<div id="tabs">
+    <ul>
+        <li><a href="#global_tab">Global</a></li>
+        <li><a href="#user_tab">User</a></li>
+    </ul>
+    <div id="global_tab">
+      <table>
+	<tr>
+<td>
+ <select id="globalselect" name="globalselect" size=10 width=150 style="width:150px">
+ </select>
+</td><td><div id="global_data"></div></td></tr>
+      </table>
+    </div>
+    <div id="user_tab">
+      <table>
+	<tr><td> <select id="userselect" name="userselect" size=10 width=150 style="width:150px"> </select> <br><input id="user_input" style="width:150px">
+</td><td><div id="user_data"></div></td></tr>
+      </table>
+    </div>
+</div>
+ 
+ 
+</body>
+</html>
