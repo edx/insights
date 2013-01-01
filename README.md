@@ -111,3 +111,14 @@ Pivotal Tracker has a set of possible metrics of mixed quality. The
 wiki has another set of possible metrics. The most useful metrics
 we've found were in competing systems and in publications from the
 research community.
+
+Next Steps
+----------
+
+1. Add support for asynchronous views. When the client issues a
+request for a view which takes a while to calculate, there should be
+visual feedback.
+2. Add support for an @cron decorator.
+3. Add support for an @memoize decorator
+4. Add gridfs/pythonfs support for e.g. generating plots with
+matplotlib.

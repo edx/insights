@@ -1,5 +1,5 @@
 from modules.decorators import view, query, event_handler
-from an_evt.models import StudentBookAccesses
+#from an_evt.models import StudentBookAccesses
 
 @view(name = 'page_count')
 def book_page_count_view(db, user, params):
@@ -29,22 +29,7 @@ def book_page_count_event(db, response):
     collection = db['page_count']
     user = response["username"]
     sba = list(collection.find({'user':user}))
-    print "XXXX", user, sba
     if len(sba):
         collection.update({'user':user}, {'$inc':{'pages':1}}, True);
     else: 
         collection.insert({'user':user,'pages':1})
-    #if len(sba) == 0:
-    #    collection.insert({'user':user,'pages':1})
-    #else:
-    #    collection.
-    # sba = StudentBookAccesses.objects.filter(username = response["username"])
-    # if len(sba) == 0:
-    #     sba = StudentBookAccesses()
-    #     sba.username = response["username"]
-    #     sba.count = 0
-    # else:
-    #     sba=sba[0]
-    # sba.count = sba.count + 1
-    # sba.save()
-#    pass

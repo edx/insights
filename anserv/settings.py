@@ -120,6 +120,7 @@ INSTALLED_APPS = (
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
     'an_evt',
+    'dashboard',
     'modules',
     'modules.page_count',
     'modules.user_stats',
@@ -147,3 +148,10 @@ LOGGING = {
         },
     }
 }
+
+import os
+BASE_DIR = os.path.abspath(os.path.join(__file__, "..", "..", ".."))
+override_settings = os.path.join(BASE_DIR, "override_settings.py")
+print override_settings
+if os.path.isfile(override_settings):
+    execfile(override_settings)

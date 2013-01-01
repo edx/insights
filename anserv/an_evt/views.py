@@ -2,7 +2,7 @@
 
 from django.http import HttpResponse
 import json
-from an_evt.models import StudentBookAccesses
+#from an_evt.models import StudentBookAccesses
 from django.utils.datastructures import MultiValueDictKeyError
 from modules.decorators import event_handlers, request_handlers
 
@@ -16,6 +16,10 @@ connection = MongoClient()
 #db = connection['analytic_store']
 
 def handle_probe(request, cls=None, category=None, details = None):
+    ''' Handles probes for what types of modules are available, and
+    what they do. Shown as, effectively, a big directory tree to the
+    caller.
+    '''
     if cls == None:
         l = ['view','query']
     elif category == None:
@@ -26,7 +30,27 @@ def handle_probe(request, cls=None, category=None, details = None):
         l = [request_handlers[cls][category][details]['doc']]
     return HttpResponse("\n".join(l), mimetype='text/text')
 
+def handle_view(request, category, name, param1=None, param2=None):
+    ''' Handles generic view. 
+        Category is where this should be place (per student, per problem, etc.)
+        Name is specific 
+    '''
+    handler = request_handlers['view'][category][name]['function']
+    collection = connection[str(handler.__module__).replace(".","_")]
+    if category == 'user':
+        username = param1
+        return HttpResponse( handler(collection, username, request.GET))
+
+    if category == 'global': 
+        return HttpResponse( handler(collection, request.GET))
+
+
 def handle_query(request, category, name, param1=None, param2=None):
+    ''' Handles programmatic queries to retrieve analytics data. 
+
+    Cut-and-paste code from an old version of handle_view. Should be
+    made generic to both. 
+    '''
     if category == 'user':
         username = param1
         handler = request_handlers['query'][category][name]['function']
@@ -46,16 +70,3 @@ def handle_event(request):
 
     return HttpResponse( "Success" )
 
-def handle_view(request, category, name, param1=None, param2=None):
-    ''' Handles generic view. 
-        Category is where this should be place (per student, per problem, etc.)
-        Name is specific 
-    '''
-    handler = request_handlers['view'][category][name]['function']
-    collection = connection[str(handler.__module__).replace(".","_")]
-    if category == 'user':
-        username = param1
-        return HttpResponse( handler(collection, username, request.GET))
-
-    if category == 'global': 
-        return HttpResponse( handler(collection, request.GET))
