@@ -119,8 +119,7 @@ Next steps for API evolution
 request for a view which takes a while to calculate, there should be
 visual feedback.
 2. Add support for an @cron decorator.
-3. Add support for an @memoize decorator
-4. Add gridfs/pythonfs support for e.g. generating plots with
+3. Add gridfs/pythonfs support for e.g. generating plots with
 matplotlib, animations, etc.
-5. Move views into an iframe. 
+4. Move views into an iframe. 
 
