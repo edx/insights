@@ -15,6 +15,9 @@ from pymongo import MongoClient
 connection = MongoClient()
 #db = connection['analytic_store']
 
+def get_database(f):
+    return connection[str(f.__module__).replace(".","_")]
+
 def handle_probe(request, cls=None, category=None, details = None):
     ''' Handles probes for what types of modules are available, and
     what they do. Shown as, effectively, a big directory tree to the
@@ -36,13 +39,13 @@ def handle_view(request, category, name, param1=None, param2=None):
         Name is specific 
     '''
     handler = request_handlers['view'][category][name]['function']
-    collection = connection[str(handler.__module__).replace(".","_")]
+    database = get_database(handler)
     if category == 'user':
         username = param1
-        return HttpResponse( handler(collection, username, request.GET))
+        return HttpResponse( handler(database, username, request.GET))
 
     if category == 'global': 
-        return HttpResponse( handler(collection, request.GET))
+        return HttpResponse( handler(database, request.GET))
 
 
 def handle_query(request, category, name, param1=None, param2=None):
@@ -54,9 +57,9 @@ def handle_query(request, category, name, param1=None, param2=None):
     if category == 'user':
         username = param1
         handler = request_handlers['query'][category][name]['function']
-        collection = connection[str(handler.__module__).replace(".","_")]
+        database = get_database(handler)
         print "Module: "+str(handler.__module__)
-        return HttpResponse( handler(collection, username, request.GET))
+        return HttpResponse( handler(database, username, request.GET))
 
 def handle_event(request):
     try: # Not sure why this is necessary, but on some systems it is 'msg', and on others, 'message'
@@ -65,8 +68,8 @@ def handle_event(request):
         response = json.loads(request.GET['msg'])
 
     for e in event_handlers:
-        collection = connection[str(e.__module__).replace(".","_")]
-        e(collection, response)
+        database = get_database(e)
+        e(database, response)
 
     return HttpResponse( "Success" )
 

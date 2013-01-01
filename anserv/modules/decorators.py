@@ -1,5 +1,5 @@
 import inspect
-from django_cron import cronScheduler, Job
+#from django_cron import cronScheduler, Job
 from django.core.cache import cache
 import time
 
@@ -63,6 +63,21 @@ def query(category = None, name = None, docstring = None):
         register_handler('query',category, name, docstring, f)
         return f
     return query_factory
+
+def cron(period, params=None):
+    ''' Run command periodically
+    Command takes database and 
+    
+    '''
+    raise UnimplementedException("Still writing this code")
+    def factory(f):
+        class CornJob(Job):
+            run_every = period
+            def job(self):
+                f(db, params)
+        return f
+    return factory
+
 
 def memoize_query(cache_time = 60*4, timeout = 60*15):
     ''' Call function only if we do not have the results for it's execution already
