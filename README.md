@@ -118,7 +118,7 @@ Next steps for API evolution
 1. Add support for asynchronous views. When the client issues a
 request for a view which takes a while to calculate, there should be
 visual feedback.
-2. Add support for an @cron decorator.
+2. Rewrite the cron code from scratch .
 3. Add gridfs/pythonfs support for e.g. generating plots with
 matplotlib, animations, etc.
 4. Move views into an iframe. 

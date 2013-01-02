@@ -1,7 +1,11 @@
-from modules.decorators import view, query, event_handler
+from modules.decorators import view, query, event_handler, cron
 #from an_evt.models import StudentBookAccesses
 from django.contrib.auth.models import User
 from courseware.models import StudentModule
+
+@cron(1)
+def foo(db, params):
+    print "Test"
 
 @view(name = 'user_count')
 def total_user_count_view(db, params):

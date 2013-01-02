@@ -172,6 +172,5 @@ LOGGING = {
 import os
 BASE_DIR = os.path.abspath(os.path.join(__file__, "..", "..", ".."))
 override_settings = os.path.join(BASE_DIR, "override_settings.py")
-print override_settings
 if os.path.isfile(override_settings):
     execfile(override_settings)

@@ -1,7 +1,8 @@
 import inspect
-#from django_cron import cronScheduler, Job
+from django_cron.base import register, Job
 from django.core.cache import cache
 import time
+import an_evt.views
 
 event_handlers = []
 
@@ -69,12 +70,14 @@ def cron(period, params=None):
     Command takes database and 
     
     '''
-    raise UnimplementedException("Still writing this code")
     def factory(f):
-        class CornJob(Job):
+        class CronJob(Job):
             run_every = period
+            id = f.__module__+'/'+f.__name__
             def job(self):
+                db = an_evt.views.get_database(f)
                 f(db, params)
+        register(CronJob)
         return f
     return factory
 
