@@ -2,13 +2,13 @@ from modules.decorators import view, query, event_handler
 #from an_evt.models import StudentBookAccesses
 
 @view(name = 'page_count')
-def book_page_count_view(db, user, params):
+def book_page_count_view(fs, db, user, params):
     ''' Dummy test function. In the future, this should return some stats on 
     how many textbook pages the user saw '''
-    return "The user " + user + " saw "+str(book_page_count_query(db, user, params))+" pages!"
+    return "The user " + user + " saw "+str(book_page_count_query(fs, db, user, params))+" pages!"
 
 @query('user', 'page_count')
-def book_page_count_query(db, user, params):
+def book_page_count_query(fs, db, user, params):
     ''' Dummy test function. In the future, this should return some stats on 
     how many textbook pages the user saw '''
     collection = db['page_count']
@@ -25,7 +25,7 @@ def book_page_count_query(db, user, params):
     return pages
 
 @event_handler(queued = False)
-def book_page_count_event(db, response):
+def book_page_count_event(fs, db, response):
     collection = db['page_count']
     user = response["username"]
     sba = list(collection.find({'user':user}))

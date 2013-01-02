@@ -29,8 +29,8 @@ def event_handler(queued=True, per_user=False, per_resource=False, single_proces
         return func
     return event_handler_factory
 
-funcspecs = [ (['db','params'], 'global'), 
-              (['db','user','params'], 'user') ]
+funcspecs = [ (['fs','db','params'], 'global'), 
+              (['fs','db','user','params'], 'user') ]
 
 def register_handler(cls, category, name, docstring, f):
      if cls not in ['view', 'query']:

@@ -122,4 +122,5 @@ visual feedback.
 3. Add gridfs/pythonfs support for e.g. generating plots with
 matplotlib, animations, etc.
 4. Move views into an iframe. 
-
+5. Be more clever about inspection. Recognize names of arguments (fs, database, etc.), and pass in whatever is required. 
+6. Create appropriate userspace. 

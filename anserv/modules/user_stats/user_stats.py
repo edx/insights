@@ -4,25 +4,25 @@ from django.contrib.auth.models import User
 from courseware.models import StudentModule
 
 @cron(1)
-def foo(db, params):
+def foo(fs, db, params):
     print "Test"
 
 @view(name = 'user_count')
-def total_user_count_view(db, params):
-    return "The system has "+str(total_user_count_query(db, params)) + " users total"
+def total_user_count_view(fs, db, params):
+    return "The system has "+str(total_user_count_query(fs, db, params)) + " users total"
 
 @view(name = 'course_enrollment')
-def total_course_enrollment(db,params):
+def total_course_enrollment(fs, db,params):
     # SELECT course_id,COUNT(DISTINCT user_id) AS students FROM student_courseenrollment GROUP BY course_id;
     return "Unimplemented"
 
 @view(name = 'active_students')
-def active_course_enrollment(db,params):
+def active_course_enrollment(fs, db,params):
     # SELECT course_id,COUNT(DISTINCT student_id) FROM `courseware_studentmodule` WHERE DATE(modified) >= DATE(DATE_ADD(NOW(), INTERVAL -7 DAY)) GROUP BY course_id
     return "Unimplemented"
 
 @view(name = 'active_plot')
-def active_user_plot(db, params):
+def active_user_plot(fs, db, params):
     return "Unimplemented"
     u=list(User.objects.all())
     ul = u[:200]
@@ -40,11 +40,11 @@ def active_user_plot(db, params):
     #### IN PROGRESS
 
 @query('global', 'total_user_count')
-def total_user_count_query(db, params):
+def total_user_count_query(fs, db, params):
     return User.objects.count()
 
 @query('global', 'enrolled_user_count')
-def enrolled_user_count_query(db, params):
+def enrolled_user_count_query(fs, db, params):
     queries=[]
     queries.append("select count(distinct user_id) as unique_students from student_courseenrollment;")
     from django.db import connection
