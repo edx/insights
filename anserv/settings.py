@@ -10,15 +10,25 @@ ADMINS = (
 MANAGERS = ADMINS
 
 DATABASES = {
-    'default': {
+    'default': { ## Main analytics read replica
         'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': 'db.sql',                      # Or path to database file if using sqlite3.
+        'NAME': '../../db.sql',                      # Or path to database file if using sqlite3.
+        'USER': '',                      # Not used with sqlite3.
+        'PASSWORD': '',                  # Not used with sqlite3.
+        'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
+        'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
+    }, 
+    'local': { ## Small, local read/write DB for things like settings, cron tasks, etc. 
+        'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
+        'NAME': '../../localdb.sql',            # Or path to database file if using sqlite3.
         'USER': '',                      # Not used with sqlite3.
         'PASSWORD': '',                  # Not used with sqlite3.
         'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
         'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
     }
 }
+
+DATABASE_ROUTERS = ['an_evt.router.DatabaseRouter']
 
 CACHES = {
     'default': {
@@ -117,7 +127,9 @@ TEMPLATE_DIRS = (
 
 INSTALLED_APPS = (
     'django.contrib.auth',
-    'django.contrib.contenttypes',
+# contenttypes has weird conflicts with multiple databases. My guess this 
+# has something to do with having auth in a read-only DB. 
+    'django.contrib.contenttypes', 
     'django.contrib.sessions',
     'django.contrib.sites',
     'django.contrib.messages',
@@ -126,6 +138,7 @@ INSTALLED_APPS = (
     # 'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
+    'django_cron',
     'an_evt',
     'dashboard',
     'modules',
