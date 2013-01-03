@@ -26,9 +26,18 @@ def total_course_enrollment_query(fs, db, params):
     return r
 
 @view(name = 'active_students')
-def active_course_enrollment(fs, db,params):
-    # SELECT course_id,COUNT(DISTINCT student_id) FROM `courseware_studentmodule` WHERE DATE(modified) >= DATE(DATE_ADD(NOW(), INTERVAL -7 DAY)) GROUP BY course_id
-    return "Unimplemented"
+def active_course_enrollment_view(fs, db,params):
+    ''' Student who were active in the course in the past week
+    '''
+    ''' UNTESTED '''
+    return json.dumps(active_course_enrollment_query(fs, db, params), indent=2)
+
+@query(name = 'active_students')
+@memoize_query(cache_time=15*60)
+def active_course_enrollment_query(fs, db, params):
+    ''' UNTESTED '''
+    r = query_results("SELECT course_id,COUNT(DISTINCT student_id) FROM `courseware_studentmodule` WHERE DATE(modified) >= DATE(DATE_ADD(NOW(), INTERVAL -7 DAY)) GROUP BY course_id;")
+    return r
 
 @view(name = 'active_plot')
 def active_user_plot(fs, db, params):
