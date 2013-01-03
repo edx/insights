@@ -2,6 +2,7 @@ from modules.decorators import view, query, event_handler, cron
 #from an_evt.models import StudentBookAccesses
 from django.contrib.auth.models import User
 from courseware.models import StudentModule
+import json
 
 @cron(1)
 def foo(fs, db, params):
@@ -11,10 +12,18 @@ def foo(fs, db, params):
 def total_user_count_view(fs, db, params):
     return "The system has "+str(total_user_count_query(fs, db, params)) + " users total"
 
+@query('global', 'total_user_count')
+def total_user_count_query(fs, db, params):
+    return User.objects.count()
+
 @view(name = 'course_enrollment')
 def total_course_enrollment(fs, db,params):
-    # SELECT course_id,COUNT(DISTINCT user_id) AS students FROM student_courseenrollment GROUP BY course_id;
-    return "Unimplemented"
+    return json.dumps(total_course_enrollment_query(fs, db, params), indent=2)
+
+@query(name = 'course_enrollment')
+def total_course_enrollment_query(fs, db, params):
+    r = query_results("SELECT course_id,COUNT(DISTINCT user_id) AS students FROM student_courseenrollment GROUP BY course_id;")
+    return r
 
 @view(name = 'active_students')
 def active_course_enrollment(fs, db,params):
@@ -37,11 +46,15 @@ def active_user_plot(fs, db, params):
         ''' Helper function to count number of students active on a given day '''
         return len([d for d in dicts2 if d['joined']<day and d['lastseen']>day])
 
-    #### IN PROGRESS
+#### IN PROGRESS
 
-@query('global', 'total_user_count')
-def total_user_count_query(fs, db, params):
-    return User.objects.count()
+def query_results(query):
+    from django.db import connection
+    cursor = connection.cursor()
+    cursor.execute(query)
+    desc = [d[0] for d in cursor.description] # Names of table columns
+    results = zip(*cursor.fetchall()) # Results for each column
+    return dict(zip(desc, results))
 
 @query('global', 'enrolled_user_count')
 def enrolled_user_count_query(fs, db, params):
@@ -59,6 +72,9 @@ def enrolled_user_count_query(fs, db, params):
 @query('global', 'per_course_user_count')
 def per_course_user_count():
     queries.append("select count(user_id) as students, course_id from student_courseenrollment group by course_id order by students desc;")
+
+@query('global', 'course_enrollment_histogram')
+def course_enrollment_histogram():
     queries.append("select registrations, count(registrations) from (select count(user_id) as registrations from student_courseenrollment group by user_id) as registrations_per_user group by registrations;")
     
 
