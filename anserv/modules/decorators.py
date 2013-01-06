@@ -3,7 +3,6 @@ import decorator
 from django_cron.base import register, Job
 from django.core.cache import cache
 import time
-import an_evt.views
 
 
 import traceback
@@ -84,6 +83,7 @@ def cron(period, params=None):
             run_every = period
             id = f.__module__+'/'+f.__name__
             def job(self):
+                import an_evt.views
                 db = an_evt.views.get_database(f)
                 f(db, params)
         register(CronJob)
