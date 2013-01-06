@@ -52,11 +52,17 @@ pip install django pymongo pymysql flup fs mysql-client
     python manage.py runserver localhost:9902
 
 For a half-broken dashboard, go to: 
+
     http://127.0.0.1:9022/static/dashboard.html
+
 To see a listing of modules, go to: 
+
     http://127.0.0.1:9022/probe
+
 Then 
+
     http://127.0.0.1:9022/probe/view
+
 Etc. 
 
 Writing a New Module
@@ -64,14 +70,18 @@ Writing a New Module
 Modules should be placed in the modules/[module_name]
 
 Each module can have decorators: 
+
     @cron(time_in_seconds)
+
 Runs periodically. 
 
 To declare a new view (human-readable HTML), decorate with: 
+
     @view(name="User_Activity", 
         category="global", 
         args=['db','fs'], 
         description="Plot of per-day user activity")
+
 If any parameters to the decorator are omitted, the system will make a
 best guess. Parameters to the function are passed a keyword args, as
 specified by the args parameter.
