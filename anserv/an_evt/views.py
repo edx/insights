@@ -60,13 +60,11 @@ def handle_probe(request, cls=None, category=None, details = None):
         l = [request_handlers[cls][category][details]['doc']]
     return HttpResponse("\n".join(l), mimetype='text/text')
 
-def handle_view(request, category, name, param1=None, param2=None):
-    ''' Handles generic view. 
-        Category is where this should be place (per student, per problem, etc.)
-        Name is specific 
-    '''
+def handle_request(request, cls, category, name, param1=None, param2=None):
+    ''' Generic code from handle_view and handle_query '''
     args = dict()
-    handler_dict = request_handlers['view'][category][name]
+    print cls
+    handler_dict = request_handlers[cls][category][name]
     handler = handler_dict['function']
     if 'args' in handler_dict:
         arglist = handler_dict['arglist']
@@ -87,30 +85,21 @@ def handle_view(request, category, name, param1=None, param2=None):
         else:
             raise TypeError("We do not know how to handle ", arg)
 
-    return HttpResponse( handler(**args))
+    return handler(**args)
 
-    database = get_database(handler)
-    fs = get_filesystem(handler)
-    if category == 'user':
-        username = param1
-        return HttpResponse( handler(fs, database, username, request.GET))
-
-    if category == 'global': 
-        return HttpResponse( handler(fs, database, request.GET))
-
+def handle_view(request, category, name, param1=None, param2=None):
+    ''' Handles generic view. 
+        Category is where this should be place (per student, per problem, etc.)
+        Name is specific 
+    '''
+    return HttpResponse(handle_request(request, 'view', category, name, param1, param2))
 
 def handle_query(request, category, name, param1=None, param2=None):
-    ''' Handles programmatic queries to retrieve analytics data. 
-
-    Cut-and-paste code from an old version of handle_view. Should be
-    made generic to both, from contemporary handle_view. 
+    ''' Handles generic view. 
+        Category is where this should be place (per student, per problem, etc.)
+        Name is specific 
     '''
-    if category == 'user':
-        username = param1
-        handler = request_handlers['query'][category][name]['function']
-        database = get_database(handler)
-        fs = get_filesystem(handler)
-        return HttpResponse( handler(fs, database, username, request.GET))
+    return HttpResponse(handle_request(request, 'query', category, name, param1, param2))
 
 def handle_event(request):
     try: # Not sure why this is necessary, but on some systems it is 'msg', and on others, 'message'
