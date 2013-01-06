@@ -50,7 +50,8 @@ pip install django pymongo pymysql flup fs mysql-client
     cd anserv
     python manage.py syncdb
     python manage.py syncdb --database=local
-    [Create an override_settings.py, pointing to your SQL database]
+    [If you want real data, create an override_settings.py, pointing to your 
+    SQL database, and disable DUMMY_MODE]
     python manage.py runserver localhost:9902
 
 For a half-broken dashboard, go to: 
