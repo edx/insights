@@ -45,7 +45,9 @@ apt-get install python-pip python-matplotlib python-scipy emacs mongodb apache2-
 pip install django pymongo pymysql flup fs mysql-client
 
     git clone git@github.com:MITx/analytics-experiments.git
+    cd analytics-experiments
     git checkout pmitros/api-devel
+    cd anserv
     python manage.py syncdb
     python manage.py syncdb --database=local
     [Create an override_settings.py, pointing to your SQL database]
