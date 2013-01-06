@@ -39,6 +39,53 @@ To understand the system, the best place to start is by reading a
 sample module. Next place is to look at the code for the
 decorators. Final place is for the main views and dashboard. 
 
+Installing
+----------
+apt-get install python-pip python-matplotlib python-scipy emacs mongodb apache2-utils python-mysqldb subversion ipython nginx git 
+pip install django pymongo pymysql flup fs mysql-client
+
+git clone git@github.com:MITx/analytics-experiments.git
+git checkout pmitros/api-devel
+python manage.py syncdb
+python manage.py syncdb --database=local
+[Create an override_settings.py, pointing to your SQL database]
+python manage.py runserver localhost:9902
+
+For a half-broken dashboard, go to: 
+  http://127.0.0.1:9022/static/dashboard.html
+To see a listing of modules, go to: 
+  http://127.0.0.1:9022/probe
+Then 
+  http://127.0.0.1:9022/probe/view
+Etc. 
+
+Writing a New Module
+--------------------
+Modules should be placed in the modules/[module_name]
+
+Each module can have decorators: 
+  @cron(time_in_seconds)
+Runs periodically. 
+
+To declare a new view (human-readable HTML), decorate with: 
+  @view(name="User_Activity", 
+        category="global", 
+        args=['db','fs'], 
+        description="Plot of per-day user activity")
+If any parameters to the decorator are omitted, the system will make a
+best guess. Parameters to the function are passed a keyword args, as
+specified by the args parameter.
+
+@query will have the same syntax as @view, although at the moment, the
+code is lagging.
+
+@memoize(t) tells the system not to rerun a query for 't'
+seconds. Right now, it breaks some of the logic for guessing category,
+etc. It needs to be modified to use decorator.decorator so it doesn't
+drop function metainformation.
+
+See examples for syntax. 
+
 Shortcuts/invariants
 --------------------
 
