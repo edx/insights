@@ -1,5 +1,7 @@
+import inspect
 import json
 import os
+
 
 from django.http import HttpResponse
 from django.utils.datastructures import MultiValueDictKeyError
@@ -63,7 +65,30 @@ def handle_view(request, category, name, param1=None, param2=None):
         Category is where this should be place (per student, per problem, etc.)
         Name is specific 
     '''
-    handler = request_handlers['view'][category][name]['function']
+    args = dict()
+    handler_dict = request_handlers['view'][category][name]
+    handler = handler_dict['function']
+    if 'args' in handler_dict:
+        arglist = handler_dict['arglist']
+    else:
+        arglist = inspect.getargspec(handler).args
+    for arg in arglist:
+        if arg == 'db':
+            args[arg] = get_database(handler)
+        elif arg == 'fs':
+            args[arg] = get_filesystem(handler)
+        elif arg == 'user':
+            args[arg] = param1
+        elif arg == 'params':
+            params = {}
+            params.update(request.GET)
+            params.update(request.POST)
+            args[arg] = params
+        else:
+            raise TypeError("We do not know how to handle ", arg)
+
+    return HttpResponse( handler(**args))
+
     database = get_database(handler)
     fs = get_filesystem(handler)
     if category == 'user':
@@ -78,7 +103,7 @@ def handle_query(request, category, name, param1=None, param2=None):
     ''' Handles programmatic queries to retrieve analytics data. 
 
     Cut-and-paste code from an old version of handle_view. Should be
-    made generic to both. 
+    made generic to both, from contemporary handle_view. 
     '''
     if category == 'user':
         username = param1

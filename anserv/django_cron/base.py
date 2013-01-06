@@ -122,4 +122,5 @@ def register(job_class, *args, **kwargs):
 	job.kwargs = cPickle.dumps(kwargs)
 	job.run_frequency = job_instance.run_every
 	job.save()
-	execute()
+	# Commented out; this way, no process starts for development purposes
+	#execute()

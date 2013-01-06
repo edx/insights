@@ -1,4 +1,4 @@
-from modules.decorators import view, query, event_handler, cron
+from modules.decorators import view, query, event_handler, cron, memoize_query
 #from an_evt.models import StudentBookAccesses
 from django.contrib.auth.models import User
 from courseware.models import StudentModule
@@ -8,12 +8,12 @@ import json
 def foo(fs, db, params):
     print "Test"
 
-@view(name = 'user_count')
-def total_user_count_view(fs, db, params):
-    return "The system has "+str(total_user_count_query(fs, db, params)) + " users total"
+@view(name = 'user_count', category = 'global', args=[])
+def total_user_count_view():
+    return "The system has "+str(total_user_count_query()) + " users total"
 
 @query('global', 'total_user_count')
-def total_user_count_query(fs, db, params):
+def total_user_count_query():
     return User.objects.count()
 
 @view(name = 'course_enrollment')
@@ -32,7 +32,7 @@ def active_course_enrollment_view(fs, db,params):
     ''' UNTESTED '''
     return json.dumps(active_course_enrollment_query(fs, db, params), indent=2)
 
-@query(name = 'active_students')
+@query(name = 'active_students', category = 'global')
 @memoize_query(cache_time=15*60)
 def active_course_enrollment_query(fs, db, params):
     ''' UNTESTED '''

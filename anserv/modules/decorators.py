@@ -1,8 +1,12 @@
 import inspect
+import decorator
 from django_cron.base import register, Job
 from django.core.cache import cache
 import time
 import an_evt.views
+
+
+import traceback
 
 event_handlers = []
 
@@ -32,36 +36,41 @@ def event_handler(queued=True, per_user=False, per_resource=False, single_proces
 funcspecs = [ (['fs','db','params'], 'global'), 
               (['fs','db','user','params'], 'user') ]
 
-def register_handler(cls, category, name, docstring, f):
-     if cls not in ['view', 'query']:
-         raise ValueError("We can only register views and queries")
-     if not name: 
-         name = str(f.func_name)
-     if not docstring: 
-         docstring = str(f.func_doc)
-     if not category:
-         for (params, cat) in funcspecs:
-             if inspect.getargspec(f).args == params:
-                 category = cat
-     if not category: 
-         raise ValueError('Function arguments do not match recognized type. Explicitly set category in decorator.')
-     if category not in request_handlers[cls]:
-         request_handlers[cls][category]={}
-     if name in request_handlers[cls][category]:
-         raise KeyError(name+" already in "+category)
-     request_handlers[cls][category][name] = {'function': f, 'name': name, 'doc': docstring}
+def register_handler(cls, category, name, docstring, f, args):
+    print "Register", cls, category, name, f
+    if args == None:
+        args = inspect.getargspec(f).args
+    print args
+#    traceback.print_stack()
+    if cls not in ['view', 'query']:
+        raise ValueError("We can only register views and queries")
+    if not name: 
+        name = str(f.func_name)
+    if not docstring: 
+        docstring = str(f.func_doc)
+    if not category:
+        for (params, cat) in funcspecs:
+            if inspect.getargspec(f).args == params:
+                category = cat
+    if not category: 
+        raise ValueError('Function arguments do not match recognized type. Explicitly set category in decorator.')
+    if category not in request_handlers[cls]:
+        request_handlers[cls][category]={}
+    if name in request_handlers[cls][category]:
+        raise KeyError(name+" already in "+category)
+    request_handlers[cls][category][name] = {'function': f, 'name': name, 'doc': docstring}
 
-def view(category = None, name = None, docstring = None):
+def view(category = None, name = None, docstring = None, args = None):
     def view_factory(f):
-        register_handler('view',category, name, docstring, f)
+        register_handler('view',category, name, docstring, f, args)
         return f
     return view_factory
 
-def query(category = None, name = None, docstring = None):
+def query(category = None, name = None, docstring = None, args = None):
     ''' 
     ''' 
     def query_factory(f):
-        register_handler('query',category, name, docstring, f)
+        register_handler('query',category, name, docstring, f, args)
         return f
     return query_factory
 
