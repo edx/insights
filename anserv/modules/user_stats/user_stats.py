@@ -3,6 +3,8 @@ from modules.decorators import view, query, event_handler, cron, memoize_query
 from django.contrib.auth.models import User
 from courseware.models import StudentModule
 import json
+from django.conf import settings
+import dummy_values
 
 @cron(1)
 def foo(fs, db, params):
@@ -14,6 +16,8 @@ def total_user_count_view():
 
 @query('global', 'total_user_count')
 def total_user_count_query():
+    if settings.DUMMY_MODE:
+        return dummy_values.total_user_count_query
     return User.objects.count()
 
 @view(name = 'course_enrollment')
@@ -22,6 +26,8 @@ def total_course_enrollment(fs, db,params):
 
 @query(name = 'course_enrollment')
 def total_course_enrollment_query(fs, db, params):
+    if settings.DUMMY_MODE:
+        return dummy_values.total_course_enrollment_query
     r = query_results("SELECT course_id,COUNT(DISTINCT user_id) AS students FROM student_courseenrollment GROUP BY course_id;")
     return r
 
@@ -35,7 +41,10 @@ def active_course_enrollment_view(fs, db,params):
 @query(name = 'active_students', category = 'global')
 @memoize_query(cache_time=15*60)
 def active_course_enrollment_query(fs, db, params):
-    ''' UNTESTED '''
+    if settings.DUMMY_MODE:
+        import time
+        time.sleep(60)
+        return dummy_values.active_course_enrollment
     r = query_results("SELECT course_id,COUNT(DISTINCT student_id) FROM `courseware_studentmodule` WHERE DATE(modified) >= DATE(DATE_ADD(NOW(), INTERVAL -7 DAY)) GROUP BY course_id;")
     return r
 

@@ -1,5 +1,7 @@
 # Django settings for anserv project.
 
+DUMMY_MODE = True
+
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 

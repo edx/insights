@@ -179,5 +179,15 @@ visual feedback.
 3. Add gridfs/pythonfs support for e.g. generating plots with
 matplotlib, animations, etc.
 4. Move views into an iframe. 
-5. Be more clever about inspection. Recognize names of arguments (fs, database, etc.), and pass in whatever is required. 
-6. Create appropriate userspace. 
+5. Be more clever about inspection. Recognize names of arguments (fs,
+database, etc.), and pass in whatever is required.
+6. Create appropriate userspace. We need higher-level functions to
+extract information from events.
+
+Other useful next steps
+-----------------------
+
+1. Test infrastructure. We should have a dummy dataset and database,
+and be able to confirm output of all queries.
+2. Development data. We need sample outputs for all queries for when
+the DB is not available for UI development (some of this exists). 
