@@ -12,16 +12,12 @@ from fs.osfs import OSFS
 
 from modules.decorators import event_handlers, request_handlers
 
-
-
 ### HACK ###
 # This is the way in which we activate modules, pending a proper
 # loader
 import modules.page_count.book_count
 import modules.user_stats.user_stats
 ### END HACK ###
-
-
 
 from pymongo import MongoClient
 connection = MongoClient()

@@ -16,8 +16,6 @@ def total_user_count_view():
 
 @query('global', 'total_user_count')
 def total_user_count_query():
-    if settings.DUMMY_MODE:
-        return dummy_values.total_user_count_query
     return User.objects.count()
 
 @view(name = 'course_enrollment')
@@ -26,8 +24,6 @@ def total_course_enrollment(fs, db,params):
 
 @query(name = 'course_enrollment')
 def total_course_enrollment_query(fs, db, params):
-    if settings.DUMMY_MODE:
-        return dummy_values.total_course_enrollment_query
     r = query_results("SELECT course_id,COUNT(DISTINCT user_id) AS students FROM student_courseenrollment GROUP BY course_id;")
     return r
 
@@ -41,10 +37,6 @@ def active_course_enrollment_view(fs, db,params):
 @query(name = 'active_students', category = 'global')
 @memoize_query(cache_time=15*60)
 def active_course_enrollment_query(fs, db, params):
-    if settings.DUMMY_MODE:
-        import time
-        time.sleep(60)
-        return dummy_values.active_course_enrollment
     r = query_results("SELECT course_id,COUNT(DISTINCT student_id) FROM `courseware_studentmodule` WHERE DATE(modified) >= DATE(DATE_ADD(NOW(), INTERVAL -7 DAY)) GROUP BY course_id;")
     return r
 
@@ -96,3 +88,5 @@ def course_enrollment_histogram():
     queries.append("select registrations, count(registrations) from (select count(user_id) as registrations from student_courseenrollment group by user_id) as registrations_per_user group by registrations;")
     
 
+if settings.DUMMY_MODE:
+    from dummy_values import *
