@@ -77,7 +77,7 @@ def total_course_enrollment_query(fs, db, params):
 @memoize_query(cache_time=15*60)
 def active_course_enrollment_query(fs, db, params):
     import time
-    time.sleep(60)
+    time.sleep(15)
     return {'COUNT(DISTINCT student_id)': (121L,
                                            341L,
                                            4532L,

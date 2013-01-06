@@ -92,6 +92,13 @@ def cron(period, params=None):
         return f
     return factory
 
+import hashlib
+import json
+
+def isuseful(a):
+    if str(type(a)) in ["<class 'pymongo.database.Database'>", "<class 'fs.osfs.OSFS'>"]:
+        return False
+    return True
 
 def memoize_query(cache_time = 60*4, timeout = 60*15):
     ''' Call function only if we do not have the results for it's execution already
@@ -104,15 +111,20 @@ def memoize_query(cache_time = 60*4, timeout = 60*15):
             # this is just for SOA queries, but may break 
             # down if this were to be used as a generic 
             # memoization framework
-            key = str({'uniquifier': 'anevt.memoize', 
-                       'name' : f.__name__, 
-                       'module' : f.__module__, 
-                       'args': args, 
-                       'kwargs': kwargs})
+            m = hashlib.new("md4")
+            s = str({'uniquifier': 'anevt.memoize', 
+                     'name' : f.__name__, 
+                     'module' : f.__module__, 
+                     'args': [a for a in args if isuseful(a)], 
+                     'kwargs': kwargs})
+            print s, repr(type(args[1]))
+            m.update(s)
+            key = m.hexdigest()
             # Check if we've cached the computation, or are in the
             # process of computing it
             cached = cache.get(key)
             if cached: 
+                print "Cache hit", key
                 # If we're already computing it, wait to finish
                 # computation
                 while cached == 'Processing':
@@ -124,6 +136,7 @@ def memoize_query(cache_time = 60*4, timeout = 60*15):
                 results = cached
 
             if not cached: 
+                print "Cache miss", key
                 # HACK: There's a slight race condition here, where we
                 # might recompute twice.
                 cache.set(key, 'Processing', timeout)
