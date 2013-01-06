@@ -44,19 +44,19 @@ Installing
 apt-get install python-pip python-matplotlib python-scipy emacs mongodb apache2-utils python-mysqldb subversion ipython nginx git 
 pip install django pymongo pymysql flup fs mysql-client
 
-git clone git@github.com:MITx/analytics-experiments.git
-git checkout pmitros/api-devel
-python manage.py syncdb
-python manage.py syncdb --database=local
-[Create an override_settings.py, pointing to your SQL database]
-python manage.py runserver localhost:9902
+    git clone git@github.com:MITx/analytics-experiments.git
+    git checkout pmitros/api-devel
+    python manage.py syncdb
+    python manage.py syncdb --database=local
+    [Create an override_settings.py, pointing to your SQL database]
+    python manage.py runserver localhost:9902
 
 For a half-broken dashboard, go to: 
-  http://127.0.0.1:9022/static/dashboard.html
+    http://127.0.0.1:9022/static/dashboard.html
 To see a listing of modules, go to: 
-  http://127.0.0.1:9022/probe
+    http://127.0.0.1:9022/probe
 Then 
-  http://127.0.0.1:9022/probe/view
+    http://127.0.0.1:9022/probe/view
 Etc. 
 
 Writing a New Module
@@ -64,11 +64,11 @@ Writing a New Module
 Modules should be placed in the modules/[module_name]
 
 Each module can have decorators: 
-  @cron(time_in_seconds)
+    @cron(time_in_seconds)
 Runs periodically. 
 
 To declare a new view (human-readable HTML), decorate with: 
-  @view(name="User_Activity", 
+    @view(name="User_Activity", 
         category="global", 
         args=['db','fs'], 
         description="Plot of per-day user activity")
