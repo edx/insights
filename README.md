@@ -41,9 +41,10 @@ decorators. Final place is for the main views and dashboard.
 
 Installing
 ----------
-apt-get install python-pip python-matplotlib python-scipy emacs mongodb apache2-utils python-mysqldb subversion ipython nginx git 
-pip install django pymongo pymysql flup fs mysql-client
 
+    apt-get install python-pip python-matplotlib python-scipy emacs mongodb apache2-utils python-mysqldb subversion ipython nginx git 
+    pip install django pymongo pymysql flup fs mysql-client
+    
     git clone git@github.com:MITx/analytics-experiments.git
     cd analytics-experiments
     git checkout pmitros/api-devel
