@@ -1,5 +1,7 @@
 from modules.decorators import view, query, event_handler
 from django.conf import settings
+from mitxmako.shortcuts import render_to_response, render_to_string
+
 #from an_evt.models import StudentBookAccesses
 
 @view(name = 'page_count')

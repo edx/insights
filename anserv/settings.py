@@ -2,6 +2,9 @@
 
 DUMMY_MODE = True
 
+MAKO_TEMPLATES = {}
+MAKO_MODULE_DIR = 'compiled_templates'
+
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
@@ -119,6 +122,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
+    'mitxmako.middleware.MakoMiddleware',
 )
 
 ROOT_URLCONF = 'anserv.urls'
@@ -148,6 +152,7 @@ INSTALLED_APPS = (
     'modules',
     'modules.page_count',
     'modules.user_stats',
+    'mitxmako',
 )
 
 # A sample logging configuration. The only tangible logging

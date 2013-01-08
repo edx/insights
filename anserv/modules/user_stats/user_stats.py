@@ -6,6 +6,8 @@ import json
 from django.conf import settings
 import dummy_values
 
+from mitxmako.shortcuts import render_to_response, render_to_string
+
 @cron(1)
 def foo(fs, db, params):
     print "Test"
