@@ -3,13 +3,26 @@
 <html lang="en">
 <head>
     <meta charset="utf-8" />
-    <title>jQuery UI Tabs - Default functionality</title>
+    <title>Dashboard - edX</title>
     <link rel="stylesheet" href="http://code.jquery.com/ui/1.9.2/themes/base/jquery-ui.css" />
+    <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.2.2/css/bootstrap-combined.min.css" rel="stylesheet">
     <script src="http://code.jquery.com/jquery-1.8.3.js"></script>
     <script src="http://code.jquery.com/ui/1.9.2/jquery-ui.js"></script>
     <script>
+    function load_global_rcontent(node)
+    {
+        $('#rcontent').load("/view/global/"+node);
+    }
+    function load_user_rcontent(node)
+    {
+        $('#rcontent').load("/view/user/"+node+"/"+$('#username_text').val());
+    }
+    function tidy_str(str)
+    {
+        return str.replace('_', ' ').replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
+    }
     $(function() {
-        $( "#tabs" ).tabs();
+        /*$( "#tabs" ).tabs();        
 
         $.get('/probe/view/global', function(data) {
           var split_data = data.split('\n');
@@ -31,16 +44,78 @@
         })
         $( "#user_tab" ).change(function(){
            $("#user_data").load("/view/user/"+$("select option:selected").text()+"/"+$("#user_input").val());
-         });
+         });       
+         */
+        $("#global_tab").click(function(){
+            $.get('/probe/view/global', function(data) {
+                $('#global_tab').parent().attr('class', 'active');
+                $('#user_tab').parent().attr('class', '');
+                var split_data = data.split('\n');
+                var i;
+                $('#sidebar_ul').empty();
+                for(i = 0 ; i< split_data.length; i++){
+	                $("#sidebar_ul").append('<li><a href="#" onclick="load_global_rcontent(\'' + split_data[i] + '\');">'+tidy_str(split_data[i])+'</li>');
+                }
+            });
+        });
+         
+        $("#user_tab").click(function(){
+            $.get('/probe/view/user', function(data) {
+                $('#global_tab').parent().attr('class', '');
+                $('#user_tab').parent().attr('class', 'active');
+                var split_data = data.split('\n');
+                var i;
+                $('#sidebar_ul').empty();
+                for(i = 0 ; i< split_data.length; i++){
+	                $("#sidebar_ul").append('<li><a href="#" onclick="load_user_rcontent(\'' + split_data[i] + '\');">'+tidy_str(split_data[i])+'</li>');
+                }
+            });
+        });
+        
+        $('#global_tab').click();
     });
     </script>
 </head>
 <body>
- 
+
+
+    <div class="container-fluid"><br /><br />
+        <ul class="nav nav-tabs">
+            <li class="active"><a href="#" id="global_tab">Global</a></li>
+            <li><a href="#" id="user_tab">User</a></li>
+            <li><form class="navbar-search pull-left">
+    <input type="text" id="username_text" class="search-query" placeholder="Username">
+    </form></li>
+        </ul>
+    
+      <div class="row-fluid">
+        <div class="span3">
+          <div class="well sidebar-nav">
+            <ul class="nav nav-list" id="sidebar_ul">
+              <li class="nav-header">Sidebar</li>
+              <li class="active"><a href="#">Link</a></li>
+              <li><a href="#">Link</a></li>              
+            </ul>
+          </div><!--/.well -->
+        </div><!--/span-->
+        <div class="span9" id="rcontent">      
+          
+          
+        </div><!--/span-->
+      </div><!--/row-->
+
+      <hr>
+
+      <footer>
+        <p></p>
+      </footer>
+
+    </div><!--/.fluid-container-->
+ <!--
 <div id="tabs">
     <ul>
-        <li><a href="#global_tab">Global</a></li>
-        <li><a href="#user_tab">User</a></li>
+        <li><a href="#global_tab2">Global</a></li>
+        <li><a href="#user_tab2">User</a></li>
     </ul>
     <div id="global_tab">
       <table>
@@ -59,6 +134,6 @@
     </div>
 </div>
  
- 
+ -->
 </body>
 </html>
