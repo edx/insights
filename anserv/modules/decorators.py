@@ -32,8 +32,9 @@ def event_handler(queued=True, per_user=False, per_resource=False, single_proces
         return func
     return event_handler_factory
 
-funcspecs = [ (['fs','db','params'], 'global'), 
-              (['fs','db','user','params'], 'user') ]
+funcskips = ['fs','db','params']
+funcspecs = [ ([], 'global'), 
+              (['user'], 'user') ]
 
 def register_handler(cls, category, name, description, f, args):
     print "Register", cls, category, name, f
@@ -48,8 +49,9 @@ def register_handler(cls, category, name, description, f, args):
     if not description: 
         description = str(f.func_doc)
     if not category:
+        url_argspec = [a for a in inspect.getargspec(f).args if a not in funcskips]
         for (params, cat) in funcspecs:
-            if inspect.getargspec(f).args == params:
+            if url_argspec == params:
                 category = cat
     if not category: 
         raise ValueError('Function arguments do not match recognized type. Explicitly set category in decorator.')
