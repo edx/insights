@@ -17,6 +17,7 @@ from modules.decorators import event_handlers, request_handlers
 # loader
 import modules.page_count.book_count
 import modules.user_stats.user_stats
+import modules.user_stats.logins
 ### END HACK ###
 
 from pymongo import MongoClient
@@ -95,7 +96,7 @@ def handle_query(request, category, name, param1=None, param2=None):
         Category is where this should be place (per student, per problem, etc.)
         Name is specific 
     '''
-    return HttpResponse(handle_request(request, 'query', category, name, param1, param2))
+    return HttpResponse(json.dumps(handle_request(request, 'query', category, name, param1, param2)))
 
 def handle_event(request):
     try: # Not sure why this is necessary, but on some systems it is 'msg', and on others, 'message'

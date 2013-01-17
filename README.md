@@ -173,7 +173,7 @@ wiki has another set of possible metrics. The most useful metrics
 we've found were in competing systems and in publications from the
 research community.
 
-Next steps for API evolution
+Product Backlog
 ----------
 
 1. Add support for asynchronous views. When the client issues a
@@ -187,6 +187,8 @@ matplotlib, animations, etc.
 database, etc.), and pass in whatever is required.
 6. Create appropriate userspace. We need higher-level functions to
 extract information from events.
+7. Convert views to take arbitrary sets of parameters and advertise
+that (e.g. user+course, course+resource, etc.)
 
 Other useful next steps
 -----------------------
