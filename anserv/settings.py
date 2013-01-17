@@ -1,5 +1,8 @@
 # Django settings for anserv project.
 
+import os
+BASE_DIR = os.path.abspath(os.path.join(__file__, "..", "..", ".."))
+
 DUMMY_MODE = True
 
 MAKO_TEMPLATES = {}
@@ -131,6 +134,7 @@ TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
+    BASE_DIR
 )
 
 INSTALLED_APPS = (
@@ -178,8 +182,6 @@ LOGGING = {
     }
 }
 
-import os
-BASE_DIR = os.path.abspath(os.path.join(__file__, "..", "..", ".."))
 override_settings = os.path.join(BASE_DIR, "override_settings.py")
 if os.path.isfile(override_settings):
     execfile(override_settings)
