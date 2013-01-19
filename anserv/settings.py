@@ -5,7 +5,7 @@ BASE_DIR = os.path.abspath(os.path.join(__file__, "..", "..", ".."))
 
 DUMMY_MODE = True
 
-MAKO_TEMPLATES = {}
+MAKO_TEMPLATES = {'main': 'templates'}
 MAKO_MODULE_DIR = 'compiled_templates'
 
 DEBUG = True
@@ -181,6 +181,7 @@ LOGGING = {
         },
     }
 }
+MITX_ROOT_URL = ''
 
 override_settings = os.path.join(BASE_DIR, "override_settings.py")
 if os.path.isfile(override_settings):
