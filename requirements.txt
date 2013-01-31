@@ -1,0 +1,7 @@
+django
+pymongo
+pymysql
+flup
+fs
+mysql-client
+mako
