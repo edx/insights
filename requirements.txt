@@ -3,5 +3,5 @@ pymongo
 pymysql
 flup
 fs
-mysql-client
+# mysql-client
 mako

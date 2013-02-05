@@ -88,7 +88,7 @@ def per_course_user_count():
 @query('global', 'course_enrollment_histogram')
 def course_enrollment_histogram():
     queries.append("select registrations, count(registrations) from (select count(user_id) as registrations from student_courseenrollment group by user_id) as registrations_per_user group by registrations;")
-    
+
 
 if settings.DUMMY_MODE:
     from dummy_values import *

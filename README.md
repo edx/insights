@@ -53,7 +53,7 @@ Installing
     python manage.py syncdb --database=local
     [If you want real data, create an override_settings.py, pointing to your 
     SQL database, and disable DUMMY_MODE]
-    python manage.py runserver localhost:9902
+    python manage.py runserver localhost:9022
 
 For a half-broken dashboard, go to: 
 
