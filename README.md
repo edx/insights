@@ -197,3 +197,22 @@ Other useful next steps
 and be able to confirm output of all queries.
 2. Development data. We need sample outputs for all queries for when
 the DB is not available for UI development (some of this exists). 
+
+
+Issues:
+-------
+
+Issues 1:
+memoize_query does not use decorator.decorator, so it drops function spec
+Answer 1: I can't found `decorator` module. So only with comment I can run project:
+# import decorator
+What does it mean "drops function spec"?
+
+Issues 2: Right now, analytics can only take one argument (e.g. user). This should take an arbitrary number of args
+Answer 2: Can you describe this in more detail?
+
+Issues 3: event_handler also does not do introspection in the way other decorators do.
+Answer 3: About what introspection did you say?
+
+Issues 4: event_handler needs to be able to take a list of many events (still support 1, but default for should be many)
+Answer 4: `event_handler` is just decorator, which save function to the global list `event_handlers`. What do you mean by "list of many events"? Can you explain how it works in more details?
