@@ -5,6 +5,7 @@ from courseware.models import StudentModule
 import json
 from django.conf import settings
 import dummy_values
+import re
 
 from mitxmako.shortcuts import render_to_response, render_to_string
 
@@ -22,7 +23,36 @@ def total_user_count_query():
 
 @view(name = 'course_enrollment')
 def total_course_enrollment(fs, db,params):
-    return json.dumps(total_course_enrollment_query(fs, db, params), indent=2)
+    data = total_course_enrollment_query(fs, db, params)
+    course_enrollment_unis = []
+    course_enrollment_courses = { }
+    course_enrollment_terms = { };
+    course_enrollment_courses_by_term = { };
+    course_enrollment_terms_by_course = { };
+    for i in range(0, len(data['course_id'])):
+        mch = re.search('^(.*?)\/(.*?)\/(.*?)$', data['course_id'][i])
+        uni = mch.group(1)
+        course = mch.group(2)
+        term = mch.group(3)
+        if not uni in course_enrollment_unis:
+            course_enrollment_unis.append(uni)
+            course_enrollment_courses[uni] = []
+            course_enrollment_terms[uni] = []
+            course_enrollment_courses_by_term[uni] = { }
+            course_enrollment_terms_by_course[uni] = { }
+        if not course in course_enrollment_courses[uni]:
+            course_enrollment_courses[uni].append(course)
+            if not term in course_enrollment_terms[uni]:
+                course_enrollment_terms[uni].append(term)
+                if not term in course_enrollment_courses_by_term[uni]:
+                    course_enrollment_courses_by_term[uni][term] = {}
+                    course_enrollment_courses_by_term[uni][term][course] = data['students'][i]
+                if not course in course_enrollment_terms_by_course[uni]:
+                    course_enrollment_terms_by_course[uni][course] = {}
+                    course_enrollment_terms_by_course[uni][course][term] = data['students'][i]
+                  
+    return render_to_response('user_stats_course_enrollment.html', { 'unis': course_enrollment_unis, 'courses': course_enrollment_courses, 'terms': course_enrollment_terms, 'courses_by_term': course_enrollment_courses_by_term, 'terms_by_course': course_enrollment_terms_by_course })
+    #return json.dumps(total_course_enrollment_query(fs, db, params), indent=2)
 
 @query(name = 'course_enrollment')
 def total_course_enrollment_query(fs, db, params):
