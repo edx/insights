@@ -4,7 +4,7 @@ import imp
 from django.conf import settings
 from django.utils.importlib import import_module
 from django.utils import timezone
-import datetime
+from an_evt import views as an_views
 
 import cronjobs
 from models import CronLock
@@ -24,41 +24,62 @@ def run_all_jobs():
             continue
 
         try:
-            imp.find_module('cron', app_path)
+            imp.find_module('user_stats', app_path)
         except ImportError as e:
             continue
+        import_module('%s.user_stats' % app)
 
-    import_module('%s.cron' % app)
     registered = cronjobs.registered
+    log.debug(registered)
+    jobs_run = 0
     for script in registered:
+        lock_name = 'django_cron.%s.%s' % (LOCK, script)
         # Acquire lock if needed.
-            if script in cronjobs.registered_lock:
-                lock_name = 'django_cron.%s.%s' % (LOCK, script)
-                try:
-                    cron_locks = CronLock.objects.filter(name=lock_name).order_by("-date_created")
-                    lock_count = cron_locks.count()
-                    has_lock = False
-                    #Remove extraneous locks
-                    if lock_count>=1:
-                        for lock in cron_locks[1:]:
-                            lock.delete()
-                        transaction.commit_unless_managed()
-                        lock=cron_locks[0]
-                        #Remove lock if it has timed out
-                        if lock.date_modified < (timezone.now() - datetime.timedelta(seconds=LOCK_TIMEOUT)):
-                            lock.delete()
-                        else:
-                            has_lock = True
-                        transaction.commit_unless_managed()
+        has_lock = False
+        if script in cronjobs.registered_lock:
+            try:
+                cron_locks = get_all_locks(lock_name)
+                lock_count = cron_locks.count()
 
-                    if not has_lock:
-                        run_single_job(script, registered, )
+                #Remove extraneous locks
+                if lock_count>=1:
+                    remove_locks(cron_locks[1:])
+                    lock = cron_locks[0]
+                    #Remove lock if it has timed out
+                    if lock.date_modified < (timezone.now() - datetime.timedelta(seconds=LOCK_TIMEOUT)):
+                        lock.delete()
+                    else:
+                        has_lock = True
+                    transaction.commit_unless_managed()
 
-                except:
-                    pass
+                if not has_lock:
+                    create_lock(lock_name)
+            except:
+                log.exception("Could not modify locks correctly.")
+        if not has_lock:
+            run_single_job(script, registered)
+            jobs_run+=1
 
+            remove_locks(get_all_locks(lock_name))
+
+    return jobs_run
+
+def create_lock(lock_name):
+    lock = CronLock(
+        name=lock_name
+    )
+    lock.save()
+
+def get_all_locks(lock_name):
+    cron_locks = CronLock.objects.filter(name=lock_name).order_by("-date_created")
+    return cron_locks
+
+def remove_locks(cron_locks):
+    for lock in cron_locks:
+        lock.delete()
 
 def run_single_job(script, registered, *args):
     log.info("Beginning job: %s %s" % (script, args))
-    registered[script](*args)
+    db = an_views.get_database(registered[script])
+    registered[script](db, *args)
     log.info("Ending job: %s %s" % (script, args))

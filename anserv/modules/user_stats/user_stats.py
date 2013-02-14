@@ -6,13 +6,14 @@ import json
 from django.conf import settings
 import dummy_values
 import logging
+import cronjobs
 
 log=logging.getLogger(__name__)
 
 from mitxmako.shortcuts import render_to_response, render_to_string
 
-@cron(1)
-def foo(fs, db, params):
+@cronjobs.register
+def foo(db):
     print "Test"
 
 @view(name = 'user_count', category = 'global', args=[])
