@@ -1,6 +1,5 @@
 import inspect
 # import decorator
-from django_cron.base import register, Job
 from django.core.cache import cache
 import time
 from decorator import decorator

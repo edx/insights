@@ -28,5 +28,3 @@ urlpatterns = patterns('',
     # url(r'^admin/', include(admin.site.urls)),
 )
 
-import django_cron
-
