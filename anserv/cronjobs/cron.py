@@ -54,8 +54,11 @@ def run_all_jobs():
             job_created = True
 
         #Check if job needs to run
+        log.debug(job_data.date_modified )
+        log.debug((timezone.now() - datetime.timedelta(seconds=job_data.time_between_runs)))
         if job_data.date_modified < (timezone.now() - datetime.timedelta(seconds=job_data.time_between_runs)) or job_created:
             # Acquire lock if needed.
+            log.debug("Job needs to be run.")
             has_lock = False
             if script in cronjobs.registered_lock:
                 try:
