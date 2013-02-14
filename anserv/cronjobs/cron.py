@@ -54,7 +54,7 @@ def run_all_jobs():
             job_created = True
 
         #Check if job needs to run
-        if job_data.date_modified< (timezone.now() - datetime.timedelta(seconds=job_data.time_between_runs)) or job_created:
+        if job_data.date_modified < (timezone.now() - datetime.timedelta(seconds=job_data.time_between_runs)) or job_created:
             # Acquire lock if needed.
             has_lock = False
             if script in cronjobs.registered_lock:
@@ -77,11 +77,16 @@ def run_all_jobs():
                         create_lock(lock_name)
                 except:
                     log.exception("Could not modify locks correctly.")
+
             if not has_lock:
-                run_single_job(registered[script], parameters[script])
-                jobs_run+=1
+                try:
+                    run_single_job(registered[script], parameters[script])
+                    jobs_run+=1
+                    job_data.save()
+                except:
+                    log.error("Failed to run job {0} with params {1}".format(script, parameters[script]))
                 remove_locks(get_all_locks(lock_name))
-                job_data.save()
+
 
     return jobs_run
 
@@ -101,6 +106,6 @@ def remove_locks(cron_locks):
 
 def run_single_job(f, params):
     log.info("Beginning job: %s %s" % (f,params))
-    db = an_views.get_database(registered[script])
+    db = an_views.get_database(f)
     f(db, params)
     log.info("Ending job: %s %s" % (f, params))

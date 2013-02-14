@@ -13,7 +13,7 @@ log=logging.getLogger(__name__)
 from mitxmako.shortcuts import render_to_response, render_to_string
 
 @cronjobs.register
-def foo(db):
+def foo(db,params):
     print "Test"
 
 @view(name = 'user_count', category = 'global', args=[])
