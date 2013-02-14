@@ -1,4 +1,4 @@
-from modules.decorators import view, query, event_handler, cron, memoize_query
+from modules.decorators import view, query, event_handler, memoize_query
 
 # Dummy values for queries; useful for off-line development
 # Took real queries, then changed all numbers, and reshuffled. 
