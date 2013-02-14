@@ -14,7 +14,7 @@ event_handlers = []
 request_handlers = {'view':{}, 'query':{}}
 
 def event_handler(queued=True, per_user=False, per_resource=False,
-    single_process=False, source_queue=None, batch = False):
+    single_process=False, source_queue=None, batch= False):
     ''' Decorator to register an event handler.
 
     queued=True ==> Normal mode of operation. Cannot break system (unimplemented)

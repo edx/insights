@@ -109,9 +109,9 @@ def handle_event(request):
         batch = e['batch']
         fs = get_filesystem(event_func)
         database = get_database(event_func)
-        if not batch and isinstance(response,list):
+        if not batch and not isinstance(response,list):
             for i in xrange(0,len(response)):
-                e(fs, database, response)
+                e(fs, database, [response])
         else:
             e(fs, database, response)
 
