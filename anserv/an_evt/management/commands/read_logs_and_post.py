@@ -67,14 +67,7 @@ def _http_get(session, url, data={}):
 
 def handle_single_log_file(args):
     filename = args
-
-    import logging.handlers
-    import sys
-
-    logger = logging.getLogger(filename)
-    http_handler = logging.handlers.HTTPHandler('127.0.0.1:9022', '/event', method='GET')
-    logger.addHandler(http_handler)
-
+    session = requests.session()
     file = open(filename,'r')
 
     #Find the size of the file and move to the end
@@ -89,5 +82,6 @@ def handle_single_log_file(args):
             time.sleep(1)
             file.seek(where)
         else:
-            logger.critical(line)
+            json_dict= {'message' : json.dumps(line)}
+            response_text = _http_get(session,settings.LOG_POST_URL,json_dict)
 

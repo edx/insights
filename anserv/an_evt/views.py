@@ -23,6 +23,10 @@ from pymongo import MongoClient
 connection = MongoClient()
 #db = connection['analytic_store']
 
+import logging
+
+log=logging.getLogger(__name__)
+
 def get_database(f):
     ''' Given a function in a module, return the Mongo DB associated
     with that function. 
@@ -112,6 +116,7 @@ def handle_query(request, category, name, **kwargs):
     return HttpResponse(json.dumps(handle_request(request, 'query', category, name, **kwargs)))
 
 def handle_event(request):
+    log.debug(request)
     try: # Not sure why this is necessary, but on some systems it is 'msg', and on others, 'message'
         response = json.loads(request.GET['message'])
     except MultiValueDictKeyError: 
@@ -127,9 +132,15 @@ def handle_event(request):
             event_func(fs, database, [response])
         elif not batch:
             for event in response:
-                event_func(fs, database, [event])
+                try:
+                    event_func(fs, database, [event])
+                except:
+                    log.error("Handler {0} failed".format(e['function']))
         else:
-            event_func(fs, database, response)
+            try:
+                event_func(fs, database, response)
+            except:
+                log.error("Handler {0} failed".format(e['function']))
 
     return HttpResponse( "Success" )
 
