@@ -56,6 +56,8 @@ def register_handler(cls, category, name, description, f, args):
         url_argspec = [a for a in inspect.getargspec(f).args if a not in funcskips]
         for (params, cat) in funcspecs:
             if url_argspec == params:
+                log.debug(cat)
+                log.debug(params)
                 category = cat
     if not category:
         raise ValueError('Function arguments do not match recognized type. Explicitly set category in decorator.')
@@ -111,7 +113,7 @@ def memoize_query(cache_time = 60*4, timeout = 60*15):
     ''' Call function only if we do not have the results for it's execution already
     '''
     def view_factory(f):
-        def wrap_function(*args, **kwargs):
+        def wrap_function(f, *args, **kwargs):
             # Assumption: dict gets dumped in same order
             # Arguments are serializable. This is okay since
             # this is just for SOA queries, but may break
@@ -147,10 +149,11 @@ def memoize_query(cache_time = 60*4, timeout = 60*15):
                 # might recompute twice.
                 cache.set(key, 'Processing', timeout)
                 function_argspec = inspect.getargspec(f)
-                if function_argspec.varargs:
+                if function_argspec.varargs or function_argspec.args:
                     if function_argspec.keywords:
                         results = f(*args, **kwargs)
                     else:
+                        print args
                         results = f(*args)
                 else:
                     results = f()
