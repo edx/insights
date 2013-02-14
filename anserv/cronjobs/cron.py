@@ -1,6 +1,5 @@
 import logging
 import imp
-import os
 
 from django.conf import settings
 from django.utils.importlib import import_module
@@ -23,13 +22,14 @@ def run_all_jobs():
         try:
             app_path = import_module(app).__path__
         except AttributeError:
-            continue        
-        module_set = set([os.path.splitext(module)[0] for module in os.listdir([0]app_path) if module.endswith(MODULE_EXTENSIONS)])
-        for module in module_set:
-            try:
-                import_module("{0}.{1}".format(app,module))
-            except ImportError as e:
-                continue
+            continue
+
+        try:
+            imp.find_module('user_stats', app_path)
+        except ImportError as e:
+            continue
+
+        import_module('%s.user_stats' % app)
 
     registered = cronjobs.registered
     log.debug(registered)
