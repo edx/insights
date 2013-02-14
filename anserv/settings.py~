@@ -1,5 +1,13 @@
 # Django settings for anserv project.
 
+import os
+BASE_DIR = os.path.abspath(os.path.join(__file__, "..", "..", ".."))
+
+DUMMY_MODE = True
+
+MAKO_TEMPLATES = {}
+MAKO_MODULE_DIR = 'compiled_templates'
+
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
@@ -10,13 +18,30 @@ ADMINS = (
 MANAGERS = ADMINS
 
 DATABASES = {
-    'default': {
+    'default': { ## Main analytics read replica
         'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': 'db.sql',                      # Or path to database file if using sqlite3.
+        'NAME': '../../db.sql',                      # Or path to database file if using sqlite3.
         'USER': '',                      # Not used with sqlite3.
         'PASSWORD': '',                  # Not used with sqlite3.
         'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
         'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
+    }, 
+    'local': { ## Small, local read/write DB for things like settings, cron tasks, etc. 
+        'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
+        'NAME': '../../localdb.sql',            # Or path to database file if using sqlite3.
+        'USER': '',                      # Not used with sqlite3.
+        'PASSWORD': '',                  # Not used with sqlite3.
+        'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
+        'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
+    }
+}
+
+DATABASE_ROUTERS = ['an_evt.router.DatabaseRouter']
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake'
     }
 }
 
@@ -56,7 +81,9 @@ MEDIA_URL = ''
 # Don't put anything in this directory yourself; store your static files
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/home/media/media.lawrence.com/static/"
-STATIC_ROOT = ''
+STATIC_ROOT = '../static'
+
+MODULE_RESOURCE_STATIC = 'modules/static/resource'
 
 # URL prefix for static files.
 # Example: "http://media.lawrence.com/static/"
@@ -98,6 +125,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
+    'mitxmako.middleware.MakoMiddleware',
 )
 
 ROOT_URLCONF = 'anserv.urls'
@@ -106,11 +134,15 @@ TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
+    BASE_DIR
 )
+print BASE_DIR
 
 INSTALLED_APPS = (
     'django.contrib.auth',
-    'django.contrib.contenttypes',
+# contenttypes has weird conflicts with multiple databases. My guess this 
+# has something to do with having auth in a read-only DB. 
+    'django.contrib.contenttypes', 
     'django.contrib.sessions',
     'django.contrib.sites',
     'django.contrib.messages',
@@ -119,6 +151,13 @@ INSTALLED_APPS = (
     # 'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
+    'django_cron',
+    'an_evt',
+    'dashboard',
+    'modules',
+    'modules.page_count',
+    'modules.user_stats',
+    'mitxmako',
 )
 
 # A sample logging configuration. The only tangible logging
@@ -143,3 +182,7 @@ LOGGING = {
         },
     }
 }
+
+override_settings = os.path.join(BASE_DIR, "override_settings.py")
+if os.path.isfile(override_settings):
+    execfile(override_settings)

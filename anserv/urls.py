@@ -6,8 +6,19 @@ from django.conf.urls.defaults import patterns, include, url
 
 urlpatterns = patterns('',
     # Examples:
-    url(r'^an_evt$', 'an_evt.views.handle_event'),
-    url(r'^user_render$', 'an_evt.views.user_render'),
+    url(r'^event$', 'an_evt.views.handle_event'),
+    url(r'^view/([A-Za-z_]+)/([A-Za-z_]+)$', 'an_evt.views.handle_view'), 
+    url(r'^view/([A-Za-z_]+)/([A-Za-z_]+)/([A-Za-z_0-9]+)$', 'an_evt.views.handle_view'), 
+    url(r'^view/([A-Za-z_]+)/([A-Za-z_]+)/([A-Za-z_0-9]+)/([A-Za-z_0-9]+)$', 'an_evt.views.handle_view'), 
+    url(r'^query/([A-Za-z_]+)/([A-Za-z_]+)$', 'an_evt.views.handle_query'), 
+    url(r'^query/([A-Za-z_]+)/([A-Za-z_]+)/([A-Za-z_0-9]+)$', 'an_evt.views.handle_query'), 
+    url(r'^query/([A-Za-z_]+)/([A-Za-z_]+)/([A-Za-z_0-9]+)/([A-Za-z_0-9]+)$', 'an_evt.views.handle_query'), 
+    url(r'^probe$', 'an_evt.views.handle_probe'),
+    url(r'^probe/([A-Za-z_]+)$', 'an_evt.views.handle_probe'),
+    url(r'^probe/([A-Za-z_]+)/([A-Za-z_]+)$', 'an_evt.views.handle_probe'),
+    url(r'^probe/([A-Za-z_]+)/([A-Za-z_]+)/([A-Za-z_]+)$', 'an_evt.views.handle_probe'),
+    url(r'^probe/([A-Za-z_]+)/([A-Za-z_]+)/([A-Za-z_]+)/([A-Za-z_]+)$', 'an_evt.views.handle_probe'),
+    url(r'^dashboard$', 'dashboard.views.dashboard'),
     # url(r'^anserv/', include('anserv.foo.urls')),
 
     # Uncomment the admin/doc line below to enable admin documentation:
@@ -16,3 +27,6 @@ urlpatterns = patterns('',
     # Uncomment the next line to enable the admin:
     # url(r'^admin/', include(admin.site.urls)),
 )
+
+import django_cron
+
