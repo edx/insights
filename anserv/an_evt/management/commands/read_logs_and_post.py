@@ -47,6 +47,23 @@ def _http_post(session, url, data, timeout):
         return (False, 'Unexpected HTTP status code [%d]' % r.status_code)
     return (True, r.text)
 
+def _http_get(session, url, data={}):
+    """
+    Send an HTTP get request:
+    session: requests.session object.
+    url : url to send request to
+    data: optional dictionary to send
+    """
+    try:
+        r = session.get(url, params=data)
+    except requests.exceptions.ConnectionError, err:
+        log.error(err)
+        return (False, 'Cannot connect to server.')
+
+    if r.status_code not in [200]:
+        return (False, 'Unexpected HTTP status code [%d]' % r.status_code)
+    return r.text
+
 
 def handle_single_log_file(args):
     filename = args
@@ -66,6 +83,6 @@ def handle_single_log_file(args):
             file.seek(where)
         else:
             log.debug("Posting {0}".format(line))
-            json_dict= json.dumps({'message' : line})
-            _http_post(session,settings.LOG_POST_URL,line,10)
+            json_dict= {'message' : json.dumps(line)}
+            response_text = _http_get(session,settings.LOG_POST_URL,json_dict)
 
