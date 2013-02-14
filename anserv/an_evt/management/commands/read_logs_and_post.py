@@ -71,7 +71,7 @@ def handle_single_log_file(args):
     import sys
 
     logger = logging.getLogger('simple_example')
-    http_handler = logging.handlers.HTTPHandler('127.0.0.1:9902', '/event', method='GET')
+    http_handler = logging.handlers.HTTPHandler('127.0.0.1:9022', '/event', method='GET')
     logger.addHandler(http_handler)
 
     filename = args

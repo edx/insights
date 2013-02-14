@@ -48,7 +48,7 @@ CACHES = {
 }
 
 LOG_READ_DIRECTORY = "../../analytics-logs/"
-LOG_POST_URL = "http://127.0.0.1:9902/event"
+LOG_POST_URL = "http://127.0.0.1:9022/event"
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name

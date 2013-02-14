@@ -9,7 +9,7 @@ import base64
 import time
 from django.conf import settings
 
-TOKEN = settings.MIXPANEL_KEY
+TOKEN = getattr('settings', 'MIXPANEL_KEY', '')
 
 class EventTracker(object):
     """Simple Event Tracker
