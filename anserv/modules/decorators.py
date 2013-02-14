@@ -82,23 +82,6 @@ def query(category = None, name = None, description = None, args = None):
         return f
     return query_factory
 
-def cron(period, params=None):
-    ''' Run command periodically
-    Command takes database and
-
-    '''
-    def factory(f):
-        class CronJob(Job):
-            run_every = period
-            id = f.__module__+'/'+f.__name__
-            def job(self):
-                import an_evt.views
-                db = an_evt.views.get_database(f)
-                f(db, params)
-        register(CronJob)
-        return f
-    return factory
-
 import hashlib
 import json
 
