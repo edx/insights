@@ -65,7 +65,7 @@ def register_handler(cls, category, name, description, f, args):
                 spec = url_argspec[i]
                 category += "{0}".format(spec)
                 if i!= len(url_argspec) -1:
-                    category+="_"
+                    category+="+"
             funcspecs.append((url_argspec, category))
             log.debug(funcspecs)
     if not category:
