@@ -5,3 +5,5 @@ flup
 fs
 # mysql-client
 mako
+requests
+multiprocessing
