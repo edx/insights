@@ -247,7 +247,7 @@
     }
     function load_global_rcontent(node)
     {
-        if (node == 'course_enrollment') {
+        if (node == '_course_enrollment') {
             jQuery.getJSON('/view/global/'+node, 
                 function (data) {
                     course_enrollment_data = data;

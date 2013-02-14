@@ -48,7 +48,7 @@ def run_all_jobs():
         else:
             job_data = CronJob(
                 name = lock_name,
-                time_between_runs = 10,
+                time_between_runs = parameters.get('time_between_jobs',2 * 60 * 60),
             )
             job_data.save()
             job_created = True

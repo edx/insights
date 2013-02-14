@@ -4,6 +4,7 @@ from django.core.cache import cache
 import time
 from decorator import decorator
 import logging
+import cronjobs
 
 log=logging.getLogger(__name__)
 
@@ -13,12 +14,12 @@ event_handlers = []
 
 request_handlers = {'view':{}, 'query':{}}
 
-def event_handler(queued=True, per_user=False, per_resource=False,
-    single_process=False, source_queue=None, batch = False):
+def event_handler(batch=True, per_user=False, per_resource=False,
+    single_process=False, source_queue=None):
     ''' Decorator to register an event handler.
 
-    queued=True ==> Normal mode of operation. Cannot break system (unimplemented)
-    queued=False ==> Event handled immediately operation. Slow handlers can break system.
+    batch=True ==> Normal mode of operation. Cannot break system (unimplemented)
+    batch=False ==> Event handled immediately operation. Slow handlers can break system.
 
     per_user = True ==> Can be sharded on a per-user basis (default: False)
     per_resource = True ==> Can be sharded on a per-resource basis (default: False)
@@ -28,8 +29,8 @@ def event_handler(queued=True, per_user=False, per_resource=False,
     source_queue ==> Not implemented. For a pre-filter (e.g. video)
     '''
 
-    if single_process or source_queue or queued:
-        raise NotImplementedError("Framework isn't done. Sorry. queued=False, source_queue=None, single_proces=False")
+    if single_process or source_queue or not batch:
+        raise NotImplementedError("Framework isn't done. Sorry. batch=True, source_queue=None, single_proces=False")
     def event_handler_factory(func):
         event_handlers.append({'function' : func, 'batch' : batch})
         return func
@@ -119,7 +120,6 @@ def memoize_query(cache_time = 60*4, timeout = 60*15):
                      'module' : f.__module__,
                      'args': [a for a in args if isuseful(a)],
                      'kwargs': kwargs})
-            print args
             m.update(s)
             key = m.hexdigest()
             # Check if we've cached the computation, or are in the
@@ -147,7 +147,6 @@ def memoize_query(cache_time = 60*4, timeout = 60*15):
                     if function_argspec.keywords:
                         results = f(*args, **kwargs)
                     else:
-                        print args
                         results = f(*args)
                 else:
                     results = f()
@@ -156,6 +155,9 @@ def memoize_query(cache_time = 60*4, timeout = 60*15):
             return results
         return decorator(wrap_function,f)
     return view_factory
+
+def cron(f=None, time = 5 * 60 * 60, lock=True, params={}):
+    return cronjobs.register(f, time, lock, params)
 
 if False:
     # Test case. Should be made into a proper test case.
