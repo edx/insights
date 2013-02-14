@@ -12,6 +12,7 @@ log=logging.getLogger(__name__)
 
 from mitxmako.shortcuts import render_to_response, render_to_string
 
+@memoize_query
 @cronjobs.register
 def foo(db,params):
     print "Test"
