@@ -53,11 +53,25 @@ def register_handler(cls, category, name, description, f, args):
         description = str(f.func_doc)
     if not category:
         url_argspec = [a for a in inspect.getargspec(f).args if a not in funcskips]
+        found_in_funcspec = False
         for (params, cat) in funcspecs:
             if url_argspec == params:
                 category = cat
+                found_in_funcspec = True
+        if not found_in_funcspec:
+            category=""
+            for i in xrange(0,len(url_argspec)):
+                spec = url_argspec[i]
+                category += "{0}".format(spec)
+                if i!= len(url_argspec) -1:
+                    category+="_"
+            funcspecs.append((url_argspec, category))
+            log.debug(funcspecs)
     if not category:
-        raise ValueError('Function arguments do not match recognized type. Explicitly set category in decorator.')
+        pass
+        #raise ValueError('Function arguments do not match recognized type. Explicitly set category in decorator.')
+    if cls not in request_handlers:
+        request_handlers[cls] = {}
     if category not in request_handlers[cls]:
         request_handlers[cls][category]={}
     if name in request_handlers[cls][category]:

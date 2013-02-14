@@ -2,7 +2,6 @@ import inspect
 import json
 import os
 
-
 from django.http import HttpResponse
 from django.utils.datastructures import MultiValueDictKeyError
 

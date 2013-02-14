@@ -30,6 +30,28 @@ def book_page_count_query(fs, db, user, params):
     #     pages = 0
     return pages
 
+
+@query(name='page_count_course')
+def book_page_count_query(fs, db, user, course, params):
+    ''' Dummy test function. In the future, this should return some stats on
+    how many textbook pages the user saw '''
+    if settings.DUMMY_MODE:
+        return sum(map(ord, user))
+
+    collection = db['page_count']
+    sba = list(collection.find({'user':user}))
+    if len(sba) == 0:
+        return 0
+    else:
+        return sba[0]['pages']
+        # sba = StudentBookAccesses.objects.filter(username = user)
+    # if len(sba):
+    #     pages = sba[0].count
+    # else:
+    #     pages = 0
+    return pages
+
+
 @event_handler(queued = False)
 def book_page_count_event(fs, db, response):
     collection = db['page_count']
