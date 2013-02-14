@@ -36,7 +36,9 @@ def run_all_jobs():
     log.debug(registered)
     jobs_run = 0
     job_created = False
-    for script in registered:
+    for script_num in xrange(0,len(registered.keys())):
+        script = registered.keys()[script_num]
+        param_name = parameters.keys()[script_num]
         lock_name = 'django_cron.%s.%s' % (LOCK, script)
 
         #Get metadata about job
@@ -48,15 +50,14 @@ def run_all_jobs():
         else:
             job_data = CronJob(
                 name = lock_name,
-                time_between_runs = parameters.get('time_between_jobs',2 * 60 * 60),
+                time_between_runs = parameters[param_name].get('time_between_jobs',2 * 60 * 60),
             )
             job_data.save()
             job_created = True
 
         #Check if job needs to run
-        log.debug(job_data.date_modified )
-        log.debug((timezone.now() - datetime.timedelta(seconds=job_data.time_between_runs)))
-        if job_data.date_modified < (timezone.now() - datetime.timedelta(seconds=job_data.time_between_runs)) or job_created:
+        current_time = timezone.now()
+        if job_data.date_modified < (current_time - datetime.timedelta(seconds=job_data.time_between_runs)) or job_created:
             # Acquire lock if needed.
             log.debug("Job needs to be run.")
             has_lock = False
@@ -70,7 +71,7 @@ def run_all_jobs():
                         remove_locks(cron_locks[1:])
                         lock = cron_locks[0]
                         #Remove lock if it has timed out
-                        if lock.date_modified < (timezone.now() - datetime.timedelta(seconds=LOCK_TIMEOUT)):
+                        if lock.date_modified < (current_time - datetime.timedelta(seconds=LOCK_TIMEOUT)):
                             lock.delete()
                         else:
                             has_lock = True

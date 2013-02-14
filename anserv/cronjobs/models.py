@@ -1,5 +1,6 @@
 from django.db import models
 from datetime import datetime
+from django.utils import timezone
 
 class CronLock(models.Model):
     name = models.CharField(max_length=100)
