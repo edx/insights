@@ -91,7 +91,7 @@ def handle_request(request, cls, category, name, **kwargs):
             if arg in kwargs:
                 args[arg] = kwargs[arg]
             elif arg in params:
-                args[arg] = params[arg]
+                args[arg] = params[arg][0]
             else:
                 raise TypeError("Missing argument needed for handler ", arg)
 

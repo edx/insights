@@ -1,6 +1,9 @@
 from modules.decorators import view, query, event_handler
 from django.conf import settings
 from mitxmako.shortcuts import render_to_response, render_to_string
+import logging
+
+log=logging.getLogger(__name__)
 
 #from an_evt.models import StudentBookAccesses
 
@@ -34,7 +37,9 @@ def book_page_count_query(fs, db, user, params):
 def book_page_count_view_course(fs, db, user, course, params):
     ''' Dummy test function. In the future, this should return some stats on
     how many textbook pages the user saw '''
-    return "The user " + user + " saw "+str(book_page_count_query_course(fs, db, user, params))+" pages!"
+    log.debug(user)
+    log.debug(course)
+    return "The user " + user + " saw "+str(book_page_count_query_course(fs, db, user, course, params))+" pages!"
 
 @query(name='page_count')
 def book_page_count_query_course(fs, db, user, course, params):
