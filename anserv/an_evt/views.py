@@ -17,7 +17,7 @@ from modules.decorators import event_handlers, request_handlers
 import modules.page_count.book_count
 import modules.user_stats.user_stats
 import modules.user_stats.logins
-import modules.mixpanel.mixpanel_event_handlers
+import modules.mixpanel.generic_event_handlers
 ### END HACK ###
 
 from pymongo import MongoClient
