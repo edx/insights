@@ -116,7 +116,6 @@ def handle_query(request, category, name, **kwargs):
     return HttpResponse(json.dumps(handle_request(request, 'query', category, name, **kwargs)))
 
 def handle_event(request):
-    log.debug(request)
     try: # Not sure why this is necessary, but on some systems it is 'msg', and on others, 'message'
         response = json.loads(request.GET['message'])
     except MultiValueDictKeyError: 
@@ -129,18 +128,24 @@ def handle_event(request):
         fs = get_filesystem(event_func)
         database = get_database(event_func)
         if not isinstance(response,list):
-            event_func(fs, database, [response])
+            try:
+                event_func(fs, database, [response])
+            except:
+                handle_event_exception(e['function'])
         elif not batch:
             for event in response:
                 try:
                     event_func(fs, database, [event])
                 except:
-                    log.error("Handler {0} failed".format(e['function']))
+                    handle_event_exception(e['function'])
         else:
             try:
                 event_func(fs, database, response)
             except:
-                log.error("Handler {0} failed".format(e['function']))
+                handle_event_exception(e['function'])
 
     return HttpResponse( "Success" )
+
+def handle_event_exception(function):
+    log.error("Handler {0} failed".format(function))
 
