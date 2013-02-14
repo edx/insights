@@ -161,7 +161,7 @@ INSTALLED_APPS = (
     'modules.page_count',
     'modules.user_stats',
     'mitxmako',
-    'cronjobs'
+    'cronjobs',
 )
 
 # A sample logging configuration. The only tangible logging

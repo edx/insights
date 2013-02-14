@@ -17,6 +17,7 @@ from modules.decorators import event_handlers, request_handlers
 import modules.page_count.book_count
 import modules.user_stats.user_stats
 import modules.user_stats.logins
+import modules.mixpanel.mixpanel_event_handlers
 ### END HACK ###
 
 from pymongo import MongoClient
@@ -121,8 +122,7 @@ def handle_event(request):
     except MultiValueDictKeyError:
         response = json.loads(request.GET['msg'])
 
-    log.debug(response)
-    print event_handlers
+    log.debug(event_handlers)
     for e in event_handlers:
         event_func = e['function']
         batch = e['batch']
