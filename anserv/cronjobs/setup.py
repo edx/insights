@@ -4,7 +4,7 @@ setup(
     name='django-cronjobs',
     version='0.2.3',
     description='A simple Django app for running cron jobs.',
-    long_description=open('README.rst').read(),
+    long_description="",
     author='Mozilla',
     author_email='james@mozilla.com',
     url='http://github.com/jsocol/django-cronjobs',
