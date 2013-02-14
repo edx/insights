@@ -76,19 +76,22 @@ def handle_request(request, cls, category, name, **kwargs):
         arglist = handler_dict['arglist']
     else:
         arglist = inspect.getargspec(handler).args
+
+    params = {}
+    params.update(request.GET)
+    params.update(request.POST)
     for arg in arglist:
         if arg == 'db':
             args[arg] = get_database(handler)
         elif arg == 'fs':
             args[arg] = get_filesystem(handler)
         elif arg == 'params':
-            params = {}
-            params.update(request.GET)
-            params.update(request.POST)
             args[arg] = params
         else:
             if arg in kwargs:
                 args[arg] = kwargs[arg]
+            elif arg in params:
+                args[arg] = params[arg]
             else:
                 raise TypeError("Missing argument needed for handler ", arg)
 
