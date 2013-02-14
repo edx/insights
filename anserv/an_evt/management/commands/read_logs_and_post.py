@@ -66,6 +66,14 @@ def _http_get(session, url, data={}):
 
 
 def handle_single_log_file(args):
+
+    import logging, logging.handlers
+    import sys
+
+    logger = logging.getLogger('simple_example')
+    http_handler = logging.handlers.HTTPHandler('127.0.0.1:9902', '/event', method='GET')
+    logger.addHandler(http_handler)
+
     filename = args
     session = requests.session()
     file = open(filename,'r')
@@ -82,6 +90,7 @@ def handle_single_log_file(args):
             time.sleep(1)
             file.seek(where)
         else:
-            json_dict= {'message' : json.dumps(line)}
-            response_text = _http_get(session,settings.LOG_POST_URL,json_dict)
+            json_dict= line
+            #response_text = _http_get(session,settings.LOG_POST_URL,json_dict)
+            logger.critical(line)
 

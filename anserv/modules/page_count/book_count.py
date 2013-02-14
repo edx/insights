@@ -63,12 +63,13 @@ def book_page_count_query_course(fs, db, user, course, params):
 @event_handler()
 def book_page_count_event(fs, db, response):
     collection = db['page_count']
-    user = response["username"]
+    user = response[0]["username"]
     sba = list(collection.find({'user':user}))
     if len(sba):
         collection.update({'user':user}, {'$inc':{'pages':1}}, True);
     else: 
         collection.insert({'user':user,'pages':1})
 
-    track_event_mixpanel('book_page_count_event',{'user' : user})
+
+    track_event_mixpanel('book_page_count_event',{'user' : user, 'distinct_id' : response[0]['ip']})
 

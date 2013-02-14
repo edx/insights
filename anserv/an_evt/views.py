@@ -118,9 +118,10 @@ def handle_query(request, category, name, **kwargs):
 def handle_event(request):
     try: # Not sure why this is necessary, but on some systems it is 'msg', and on others, 'message'
         response = json.loads(request.GET['message'])
-    except MultiValueDictKeyError: 
+    except MultiValueDictKeyError:
         response = json.loads(request.GET['msg'])
 
+    log.debug(response)
     print event_handlers
     for e in event_handlers:
         event_func = e['function']
@@ -147,5 +148,5 @@ def handle_event(request):
     return HttpResponse( "Success" )
 
 def handle_event_exception(function):
-    log.error("Handler {0} failed".format(function))
+    log.exception("Handler {0} failed".format(function))
 
