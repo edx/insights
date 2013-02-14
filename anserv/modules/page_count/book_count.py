@@ -2,6 +2,7 @@ from modules.decorators import view, query, event_handler
 from django.conf import settings
 from mitxmako.shortcuts import render_to_response, render_to_string
 import logging
+from modules.mixpanel.mixpanel import track_event_mixpanel
 
 log=logging.getLogger(__name__)
 
@@ -68,3 +69,6 @@ def book_page_count_event(fs, db, response):
         collection.update({'user':user}, {'$inc':{'pages':1}}, True);
     else: 
         collection.insert({'user':user,'pages':1})
+
+    track_event_mixpanel('book_page_count_event',{'user' : user})
+
