@@ -28,10 +28,15 @@ def book_page_count_query(fs, db, user, params):
     #     pages = sba[0].count
     # else: 
     #     pages = 0
-    return pages
+    #return pages
 
+@view(name = 'page_count')
+def book_page_count_view_course(fs, db, user, course, params):
+    ''' Dummy test function. In the future, this should return some stats on
+    how many textbook pages the user saw '''
+    return "The user " + user + " saw "+str(book_page_count_query_course(fs, db, user, params))+" pages!"
 
-@query(name='page_count_course')
+@query(name='page_count')
 def book_page_count_query_course(fs, db, user, course, params):
     ''' Dummy test function. In the future, this should return some stats on
     how many textbook pages the user saw '''

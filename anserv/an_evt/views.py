@@ -66,7 +66,7 @@ def handle_probe(request, cls=None, category=None, details = None):
             l = [error_message.format(details,request_handlers)]
     return HttpResponse("\n".join(l), mimetype='text/text')
 
-def handle_request(request, cls, category, name, param1=None, param2=None):
+def handle_request(request, cls, category, name, **kwargs):
     ''' Generic code from handle_view and handle_query '''
     args = dict()
     print cls
@@ -81,31 +81,32 @@ def handle_request(request, cls, category, name, param1=None, param2=None):
             args[arg] = get_database(handler)
         elif arg == 'fs':
             args[arg] = get_filesystem(handler)
-        elif arg == 'user':
-            args[arg] = param1
         elif arg == 'params':
             params = {}
             params.update(request.GET)
             params.update(request.POST)
             args[arg] = params
         else:
-            raise TypeError("We do not know how to handle ", arg)
+            if arg in kwargs:
+                args[arg] = kwargs[arg]
+            else:
+                raise TypeError("Missing argument needed for handler ", arg)
 
     return handler(**args)
 
-def handle_view(request, category, name, param1=None, param2=None):
+def handle_view(request, category, name, **kwargs):
     ''' Handles generic view. 
         Category is where this should be place (per student, per problem, etc.)
         Name is specific 
     '''
-    return HttpResponse(handle_request(request, 'view', category, name, param1, param2))
+    return HttpResponse(handle_request(request, 'view', category, name, **kwargs))
 
-def handle_query(request, category, name, param1=None, param2=None):
+def handle_query(request, category, name, **kwargs):
     ''' Handles generic view. 
         Category is where this should be place (per student, per problem, etc.)
         Name is specific 
     '''
-    return HttpResponse(json.dumps(handle_request(request, 'query', category, name, param1, param2)))
+    return HttpResponse(json.dumps(handle_request(request, 'query', category, name, **kwargs)))
 
 def handle_event(request):
     try: # Not sure why this is necessary, but on some systems it is 'msg', and on others, 'message'
