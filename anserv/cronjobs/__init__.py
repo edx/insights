@@ -1,7 +1,8 @@
 registered = {}
 registered_lock = {}
+parameters = {}
 
-def register(f=None, lock=True):
+def register(f=None, lock=True, params={}):
     """Decorator to add the function to the cronjob library.
 
         @cronjobs.register
@@ -16,6 +17,7 @@ def register(f=None, lock=True):
 
     def decorator(f, lock=lock):
         registered[f.__name__] = f
+        parameters[f.__name__] = params
         if lock:
             registered_lock[f.__name__] = f
         return f

@@ -32,6 +32,7 @@ def run_all_jobs():
         import_module('%s.user_stats' % app)
 
     registered = cronjobs.registered
+    parameters = cronjobs.parameters
     log.debug(registered)
     jobs_run = 0
     job_created = False
@@ -77,7 +78,7 @@ def run_all_jobs():
                 except:
                     log.exception("Could not modify locks correctly.")
             if not has_lock:
-                run_single_job(script, registered)
+                run_single_job(registered[script], parameters[script])
                 jobs_run+=1
                 remove_locks(get_all_locks(lock_name))
                 job_data.save()
@@ -98,8 +99,8 @@ def remove_locks(cron_locks):
     for lock in cron_locks:
         lock.delete()
 
-def run_single_job(script, registered, *args):
-    log.info("Beginning job: %s %s" % (script, args))
+def run_single_job(f, params):
+    log.info("Beginning job: %s %s" % (f,params))
     db = an_views.get_database(registered[script])
-    registered[script](db, *args)
-    log.info("Ending job: %s %s" % (script, args))
+    f(db, params)
+    log.info("Ending job: %s %s" % (f, params))
