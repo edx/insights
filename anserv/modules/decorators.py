@@ -14,12 +14,12 @@ event_handlers = []
 
 request_handlers = {'view':{}, 'query':{}}
 
-def event_handler(queued=True, per_user=False, per_resource=False,
-    single_process=False, source_queue=None, batch= False):
+def event_handler(batch=True, per_user=False, per_resource=False,
+    single_process=False, source_queue=None):
     ''' Decorator to register an event handler.
 
-    queued=True ==> Normal mode of operation. Cannot break system (unimplemented)
-    queued=False ==> Event handled immediately operation. Slow handlers can break system.
+    batch=True ==> Normal mode of operation. Cannot break system (unimplemented)
+    batch=False ==> Event handled immediately operation. Slow handlers can break system.
 
     per_user = True ==> Can be sharded on a per-user basis (default: False)
     per_resource = True ==> Can be sharded on a per-resource basis (default: False)
@@ -29,8 +29,8 @@ def event_handler(queued=True, per_user=False, per_resource=False,
     source_queue ==> Not implemented. For a pre-filter (e.g. video)
     '''
 
-    if single_process or source_queue or queued:
-        raise NotImplementedError("Framework isn't done. Sorry. queued=False, source_queue=None, single_proces=False")
+    if single_process or source_queue or not batch:
+        raise NotImplementedError("Framework isn't done. Sorry. batch=True, source_queue=None, single_proces=False")
     def event_handler_factory(func):
         event_handlers.append({'function' : func, 'batch' : batch})
         return func
