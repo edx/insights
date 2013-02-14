@@ -3,7 +3,7 @@ registered_lock = {}
 parameters = {}
 from decorator import decorator
 
-def register(f=None, lock=True, params={}):
+def register(f, time, lock, params):
     """Decorator to add the function to the cronjob library.
 
         @cronjobs.register
@@ -18,6 +18,7 @@ def register(f=None, lock=True, params={}):
 
     def cron_decorator(f, lock=lock):
         registered[f.__name__] = f
+        params['time_between_jobs'] = time
         parameters[f.__name__] = params
         if lock:
             registered_lock[f.__name__] = f

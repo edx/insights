@@ -4,6 +4,7 @@ from django.core.cache import cache
 import time
 from decorator import decorator
 import logging
+import cronjobs
 
 log=logging.getLogger(__name__)
 
@@ -105,7 +106,6 @@ def memoize_query(cache_time = 60*4, timeout = 60*15):
                      'module' : f.__module__,
                      'args': [a for a in args if isuseful(a)],
                      'kwargs': kwargs})
-            print args
             m.update(s)
             key = m.hexdigest()
             # Check if we've cached the computation, or are in the
@@ -133,7 +133,6 @@ def memoize_query(cache_time = 60*4, timeout = 60*15):
                     if function_argspec.keywords:
                         results = f(*args, **kwargs)
                     else:
-                        print args
                         results = f(*args)
                 else:
                     results = f()
@@ -142,6 +141,9 @@ def memoize_query(cache_time = 60*4, timeout = 60*15):
             return results
         return decorator(wrap_function,f)
     return view_factory
+
+def cron(f=None, time = 5 * 60 * 60, lock=True, params={}):
+    return cronjobs.register(f, time, lock, params)
 
 if False:
     # Test case. Should be made into a proper test case.

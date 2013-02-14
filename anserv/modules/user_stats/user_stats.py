@@ -1,4 +1,4 @@
-from modules.decorators import view, query, event_handler, memoize_query
+from modules.decorators import view, query, event_handler, memoize_query, cron
 #from an_evt.models import StudentBookAccesses
 from django.contrib.auth.models import User
 from courseware.models import StudentModule
@@ -6,7 +6,6 @@ import json
 from django.conf import settings
 import dummy_values
 import logging
-import cronjobs
 
 log=logging.getLogger(__name__)
 import re
@@ -14,7 +13,7 @@ import re
 from mitxmako.shortcuts import render_to_response, render_to_string
 
 @memoize_query
-@cronjobs.register
+@cron(time = 2)
 def foo(db,params):
     print "Test"
 
