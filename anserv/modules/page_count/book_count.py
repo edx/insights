@@ -30,12 +30,13 @@ def book_page_count_query(fs, db, user, params):
     #     pages = 0
     return pages
 
-@event_handler(queued = False)
-def book_page_count_event(fs, db, response):
-    collection = db['page_count']
-    user = response["username"]
-    sba = list(collection.find({'user':user}))
-    if len(sba):
-        collection.update({'user':user}, {'$inc':{'pages':1}}, True);
-    else: 
-        collection.insert({'user':user,'pages':1})
+@event_handler()
+def book_page_count_event(fs, db, events):
+    for event in events: 
+        collection = db['page_count']
+        user = event["username"]
+        sba = list(collection.find({'user':user}))
+        if len(sba):
+            collection.update({'user':user}, {'$inc':{'pages':1}}, True);
+        else: 
+            collection.insert({'user':user,'pages':1})

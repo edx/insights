@@ -1,9 +1,11 @@
 # Django settings for anserv project.
 
 import os
+import sys
+
 BASE_DIR = os.path.abspath(os.path.join(__file__, "..", "..", ".."))
 
-DUMMY_MODE = True
+DUMMY_MODE = False
 
 MAKO_TEMPLATES = {'main': 'templates'}
 MAKO_MODULE_DIR = 'compiled_templates'
@@ -20,7 +22,7 @@ MANAGERS = ADMINS
 DATABASES = {
     'default': { ## Main analytics read replica
         'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': '../../db.sql',                      # Or path to database file if using sqlite3.
+        'NAME': '../../db/mitx.db',                      # Or path to database file if using sqlite3.
         'USER': '',                      # Not used with sqlite3.
         'PASSWORD': '',                  # Not used with sqlite3.
         'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
@@ -150,13 +152,13 @@ INSTALLED_APPS = (
     # 'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
-    'django_cron',
     'an_evt',
     'dashboard',
     'modules',
     'modules.page_count',
     'modules.user_stats',
     'mitxmako',
+    'cronjobs'
 )
 
 # A sample logging configuration. The only tangible logging
@@ -164,20 +166,41 @@ INSTALLED_APPS = (
 # the site admins on every HTTP 500 error.
 # See http://docs.djangoproject.com/en/dev/topics/logging for
 # more details on how to customize your logging configuration.
+
+syslog_format = ("[%(name)s][env:{logging_env}] %(levelname)s "
+                 "[{hostname}  %(process)d] [%(filename)s:%(lineno)d] "
+                 "- %(message)s").format(
+    logging_env="", hostname="")
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
+    'formatters': {
+        'standard': {
+            'format': '%(asctime)s %(levelname)s %(process)d '
+                      '[%(name)s] %(filename)s:%(lineno)d - %(message)s',
+            },
+        'syslog_format': {'format': syslog_format},
+        'raw': {'format': '%(message)s'},
+        },
     'handlers': {
-        'mail_admins': {
-            'level': 'ERROR',
-            'class': 'django.utils.log.AdminEmailHandler'
-        }
+        'console': {
+            'level': 'DEBUG' if DEBUG else 'INFO',
+            'class': 'logging.StreamHandler',
+            'formatter': 'standard',
+            'stream': sys.stdout,
+        },
     },
     'loggers': {
         'django.request': {
-            'handlers': ['mail_admins'],
+            'handlers': ['console'],
             'level': 'ERROR',
             'propagate': True,
+        },
+        '': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': False
         },
     }
 }

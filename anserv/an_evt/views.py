@@ -104,10 +104,19 @@ def handle_event(request):
     except MultiValueDictKeyError: 
         response = json.loads(request.GET['msg'])
 
+    print event_handlers
     for e in event_handlers:
-        fs = get_filesystem(e)
-        database = get_database(e)
-        e(fs, database, response)
+        event_func = e['function']
+        batch = e['batch']
+        fs = get_filesystem(event_func)
+        database = get_database(event_func)
+        if not isinstance(response,list):
+            event_func(fs, database, [response])
+        elif not batch:
+            for event in response:
+                event_func(fs, database, [event])
+        else:
+            event_func(fs, database, response)
 
     return HttpResponse( "Success" )
 

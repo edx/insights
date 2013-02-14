@@ -1,19 +1,24 @@
-from modules.decorators import view, query, event_handler, cron, memoize_query
+from modules.decorators import view, query, event_handler, memoize_query, cron
 #from an_evt.models import StudentBookAccesses
 from django.contrib.auth.models import User
 from courseware.models import StudentModule
 import json
 from django.conf import settings
 import dummy_values
+import logging
+
+log=logging.getLogger(__name__)
 import re
 
 from mitxmako.shortcuts import render_to_response, render_to_string
 
-@cron(1)
-def foo(fs, db, params):
+@memoize_query
+@cron(time = 2)
+def foo(db,params):
     print "Test"
 
 @view(name = 'user_count', category = 'global', args=[])
+@memoize_query(cache_time=1)
 def total_user_count_view():
     return "The system has "+str(total_user_count_query()) + " users total"
 
@@ -92,11 +97,15 @@ def active_user_plot(fs, db, params):
 
 def query_results(query):
     from django.db import connection
-    cursor = connection.cursor()
-    cursor.execute(query)
-    desc = [d[0] for d in cursor.description] # Names of table columns
-    results = zip(*cursor.fetchall()) # Results for each column
-    return dict(zip(desc, results))
+    try:
+        cursor = connection.cursor()
+        cursor.execute(query)
+        desc = [d[0] for d in cursor.description] # Names of table columns
+        results = zip(*cursor.fetchall()) # Results for each column
+        return dict(zip(desc, results))
+    except:
+        log.error("Could not execute query {0}".format(query))
+        return {}
 
 @query('global', 'enrolled_user_count')
 def enrolled_user_count_query(fs, db, params):
