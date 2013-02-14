@@ -32,12 +32,9 @@ def book_page_count_query(fs, db, user, params):
 
 
 @query(name='page_count_course')
-def book_page_count_query(fs, db, user, course, params):
+def book_page_count_query_course(fs, db, user, course, params):
     ''' Dummy test function. In the future, this should return some stats on
     how many textbook pages the user saw '''
-    if settings.DUMMY_MODE:
-        return sum(map(ord, user))
-
     collection = db['page_count']
     sba = list(collection.find({'user':user}))
     if len(sba) == 0:

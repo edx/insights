@@ -46,14 +46,24 @@ def handle_probe(request, cls=None, category=None, details = None):
     what they do. Shown as, effectively, a big directory tree to the
     caller.
     '''
+    error_message = "{0} not found in {1}."
     if cls == None:
         l = ['view','query']
     elif category == None:
-        l = request_handlers[cls].keys()
+        if cls in request_handlers:
+            l = request_handlers[cls].keys()
+        else:
+            l = [error_message.format(cls,request_handlers)]
     elif details == None:
-        l = request_handlers[cls][category].keys()
-    else: 
-        l = [request_handlers[cls][category][details]['doc']]
+        if cls in request_handlers and category in request_handlers[cls]:
+            l = request_handlers[cls][category].keys()
+        else:
+            l = [error_message.format(category,request_handlers)]
+    else:
+        if cls in request_handlers and category in request_handlers[cls] and details in request_handlers[cls][category]:
+            l = [request_handlers[cls][category][details]['doc']]
+        else:
+            l = [error_message.format(details,request_handlers)]
     return HttpResponse("\n".join(l), mimetype='text/text')
 
 def handle_request(request, cls, category, name, param1=None, param2=None):
