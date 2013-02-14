@@ -14,7 +14,9 @@ class Command(NoArgsCommand):
     """
 
     def handle_noargs(self, **options):
-        pass
+        length = len(log_files)
+        p = Pool(processes=length)
+        p.map(handle_single_log_file,[(log_files[i]) for i in xrange(0,length)])
 
 def _http_post(session, url, data, timeout):
     '''
@@ -42,7 +44,9 @@ def _http_post(session, url, data, timeout):
     return (True, r.text)
 
 
-def handle_single_log_file(filename):
+def handle_single_log_file(args):
+    filename = args
+    session = requests.session()
     file = open(filename,'r')
 
     #Find the size of the file and move to the end
@@ -50,12 +54,12 @@ def handle_single_log_file(filename):
     st_size = st_results[6]
     file.seek(st_size)
 
-    while 1:
+    while True:
         where = file.tell()
         line = file.readline()
         if not line:
             time.sleep(1)
             file.seek(where)
         else:
-            print line, # already has newline
+            _http_post(line,settings.LOG_POST_URL)
 
