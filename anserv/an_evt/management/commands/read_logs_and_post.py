@@ -3,10 +3,14 @@ import time
 from multiprocessing import Pool
 from django.conf import settings
 import requests
+import logging
+import json
+
+log=logging.getLogger(__name__)
 
 from django.core.management.base import NoArgsCommand
 
-log_files = os.path.listdir(settings.LOG_READ_DIRECTORY)
+log_files = [ f for f in os.listdir(settings.LOG_READ_DIRECTORY) if os.path.isfile(os.path.join(settings.LOG_READ_DIRECTORY,f)) ]
 
 class Command(NoArgsCommand):
     """
@@ -16,7 +20,7 @@ class Command(NoArgsCommand):
     def handle_noargs(self, **options):
         length = len(log_files)
         p = Pool(processes=length)
-        p.map(handle_single_log_file,[(log_files[i]) for i in xrange(0,length)])
+        p.map_async(handle_single_log_file,[os.path.join(settings.LOG_READ_DIRECTORY,log_files[i]) for i in xrange(0,length)]).get(9999999)
 
 def _http_post(session, url, data, timeout):
     '''
@@ -61,5 +65,7 @@ def handle_single_log_file(args):
             time.sleep(1)
             file.seek(where)
         else:
-            _http_post(line,settings.LOG_POST_URL)
+            log.debug("Posting {0}".format(line))
+            json_dict= json.dumps({'message' : line})
+            _http_post(session,settings.LOG_POST_URL,line,10)
 
