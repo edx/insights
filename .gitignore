@@ -37,3 +37,6 @@ db.sql
 
 # Backups
 *~
+
+#Random files
+.idea/

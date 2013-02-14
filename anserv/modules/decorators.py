@@ -3,7 +3,10 @@ import inspect
 from django_cron.base import register, Job
 from django.core.cache import cache
 import time
+from decorator import decorator
+import logging
 
+log=logging.getLogger(__name__)
 
 import traceback
 
@@ -103,10 +106,10 @@ def isuseful(a):
         return False
     return True
 
+
 def memoize_query(cache_time = 60*4, timeout = 60*15):
     ''' Call function only if we do not have the results for it's execution already
     '''
-
     def view_factory(f):
         def wrap_function(*args, **kwargs):
             # Assumption: dict gets dumped in same order
@@ -120,7 +123,7 @@ def memoize_query(cache_time = 60*4, timeout = 60*15):
                      'module' : f.__module__,
                      'args': [a for a in args if isuseful(a)],
                      'kwargs': kwargs})
-            print s, repr(type(args[1]))
+            print args
             m.update(s)
             key = m.hexdigest()
             # Check if we've cached the computation, or are in the
@@ -143,11 +146,18 @@ def memoize_query(cache_time = 60*4, timeout = 60*15):
                 # HACK: There's a slight race condition here, where we
                 # might recompute twice.
                 cache.set(key, 'Processing', timeout)
-                results = f(*args, **kwargs)
+                function_argspec = inspect.getargspec(f)
+                if function_argspec.varargs:
+                    if function_argspec.keywords:
+                        results = f(*args, **kwargs)
+                    else:
+                        results = f(*args)
+                else:
+                    results = f()
                 cache.set(key, results, cache_time)
 
             return results
-        return wrap_function
+        return decorator(wrap_function,f)
     return view_factory
 
 if False:
