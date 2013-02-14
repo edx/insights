@@ -14,7 +14,7 @@ event_handlers = []
 request_handlers = {'view':{}, 'query':{}}
 
 def event_handler(queued=True, per_user=False, per_resource=False,
-    single_process=False, source_queue=None):
+    single_process=False, source_queue=None, batch = False):
     ''' Decorator to register an event handler.
 
     queued=True ==> Normal mode of operation. Cannot break system (unimplemented)
@@ -31,7 +31,7 @@ def event_handler(queued=True, per_user=False, per_resource=False,
     if single_process or source_queue or queued:
         raise NotImplementedError("Framework isn't done. Sorry. queued=False, source_queue=None, single_proces=False")
     def event_handler_factory(func):
-        event_handlers.append(func)
+        event_handlers.append({'function' : func, 'batch' : batch})
         return func
     return event_handler_factory
 
@@ -55,8 +55,6 @@ def register_handler(cls, category, name, description, f, args):
         url_argspec = [a for a in inspect.getargspec(f).args if a not in funcskips]
         for (params, cat) in funcspecs:
             if url_argspec == params:
-                log.debug(cat)
-                log.debug(params)
                 category = cat
     if not category:
         raise ValueError('Function arguments do not match recognized type. Explicitly set category in decorator.')
