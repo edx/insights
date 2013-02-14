@@ -59,7 +59,7 @@ def book_page_count_query_course(fs, db, user, course, params):
     return pages
 
 
-@event_handler(queued = False)
+@event_handler()
 def book_page_count_event(fs, db, response):
     collection = db['page_count']
     user = response["username"]
