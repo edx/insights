@@ -1,5 +1,5 @@
 *.py[cod]
-
+.DS_Store
 # C extensions
 *.so
 
@@ -28,6 +28,8 @@ nosetests.xml
 
 # Translations
 *.mo
+
+/compiled_templates/*
 
 # Mr Developer
 .mr.developer.cfg

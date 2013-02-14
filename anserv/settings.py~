@@ -5,7 +5,7 @@ BASE_DIR = os.path.abspath(os.path.join(__file__, "..", "..", ".."))
 
 DUMMY_MODE = True
 
-MAKO_TEMPLATES = {}
+MAKO_TEMPLATES = {'main': 'anserv/template'}
 MAKO_MODULE_DIR = 'compiled_templates'
 
 DEBUG = True
@@ -136,7 +136,6 @@ TEMPLATE_DIRS = (
     # Don't forget to use absolute paths, not relative paths.
     BASE_DIR
 )
-print BASE_DIR
 
 INSTALLED_APPS = (
     'django.contrib.auth',
@@ -182,6 +181,7 @@ LOGGING = {
         },
     }
 }
+MITX_ROOT_URL = ''
 
 override_settings = os.path.join(BASE_DIR, "override_settings.py")
 if os.path.isfile(override_settings):
