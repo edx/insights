@@ -2,7 +2,6 @@ import inspect
 import json
 import os
 
-
 from django.http import HttpResponse
 from django.utils.datastructures import MultiValueDictKeyError
 
@@ -47,17 +46,27 @@ def handle_probe(request, cls=None, category=None, details = None):
     what they do. Shown as, effectively, a big directory tree to the
     caller.
     '''
+    error_message = "{0} not found in {1}."
     if cls == None:
         l = ['view','query']
     elif category == None:
-        l = request_handlers[cls].keys()
+        if cls in request_handlers:
+            l = request_handlers[cls].keys()
+        else:
+            l = [error_message.format(cls,request_handlers)]
     elif details == None:
-        l = request_handlers[cls][category].keys()
-    else: 
-        l = [request_handlers[cls][category][details]['doc']]
+        if cls in request_handlers and category in request_handlers[cls]:
+            l = request_handlers[cls][category].keys()
+        else:
+            l = [error_message.format(category,request_handlers)]
+    else:
+        if cls in request_handlers and category in request_handlers[cls] and details in request_handlers[cls][category]:
+            l = [request_handlers[cls][category][details]['doc']]
+        else:
+            l = [error_message.format(details,request_handlers)]
     return HttpResponse("\n".join(l), mimetype='text/text')
 
-def handle_request(request, cls, category, name, param1=None, param2=None):
+def handle_request(request, cls, category, name, **kwargs):
     ''' Generic code from handle_view and handle_query '''
     args = dict()
     print cls
@@ -67,36 +76,40 @@ def handle_request(request, cls, category, name, param1=None, param2=None):
         arglist = handler_dict['arglist']
     else:
         arglist = inspect.getargspec(handler).args
+
+    params = {}
+    params.update(request.GET)
+    params.update(request.POST)
     for arg in arglist:
         if arg == 'db':
             args[arg] = get_database(handler)
         elif arg == 'fs':
             args[arg] = get_filesystem(handler)
-        elif arg == 'user':
-            args[arg] = param1
         elif arg == 'params':
-            params = {}
-            params.update(request.GET)
-            params.update(request.POST)
             args[arg] = params
         else:
-            raise TypeError("We do not know how to handle ", arg)
+            if arg in kwargs:
+                args[arg] = kwargs[arg]
+            elif arg in params:
+                args[arg] = params[arg][0]
+            else:
+                raise TypeError("Missing argument needed for handler ", arg)
 
     return handler(**args)
 
-def handle_view(request, category, name, param1=None, param2=None):
+def handle_view(request, category, name, **kwargs):
     ''' Handles generic view. 
         Category is where this should be place (per student, per problem, etc.)
         Name is specific 
     '''
-    return HttpResponse(handle_request(request, 'view', category, name, param1, param2))
+    return HttpResponse(handle_request(request, 'view', category, name, **kwargs))
 
-def handle_query(request, category, name, param1=None, param2=None):
+def handle_query(request, category, name, **kwargs):
     ''' Handles generic view. 
         Category is where this should be place (per student, per problem, etc.)
         Name is specific 
     '''
-    return HttpResponse(json.dumps(handle_request(request, 'query', category, name, param1, param2)))
+    return HttpResponse(json.dumps(handle_request(request, 'query', category, name, **kwargs)))
 
 def handle_event(request):
     try: # Not sure why this is necessary, but on some systems it is 'msg', and on others, 'message'
