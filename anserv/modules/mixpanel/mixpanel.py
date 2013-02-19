@@ -3,13 +3,18 @@ Event tracking, currently uses Mixpanel: https://mixpanel.com
 """
 TRACK_BASE_URL = "http://api.mixpanel.com/track/?data=%s"
 ARCHIVE_BASE_URL = "http://api.mixpanel.com/import/?data=%s&api_key=%s"
+ARCHIVE_POST_URL = "http://api.mixpanel.com/import"
+TRACK_POST_URL = "http://api.mixpanel.com/track"
 import urllib2
 import json
 import base64
 import time
 from django.conf import settings
+import logging
+import requests
+log=logging.getLogger(__name__)
 
-TOKEN = getattr('settings', 'MIXPANEL_KEY', '')
+TOKEN = getattr(settings, 'MIXPANEL_KEY', None)
 
 class EventTracker(object):
     """Simple Event Tracker
@@ -50,11 +55,18 @@ class EventTracker(object):
 
         params = {"event": event, "properties": properties}
         data = base64.b64encode(json.dumps(params))
+        post_data = {
+            'data' : params,
+            'api_key' : self.api_key
+        }
         if self.api_key:
-            resp = urllib2.urlopen(ARCHIVE_BASE_URL % (data, self.api_key))
+            resp = requests.post(ARCHIVE_POST_URL,data = post_data)
+            resp.read()
         else:
-            resp = urllib2.urlopen(TRACK_BASE_URL % data)
-        resp.read()
+            if self.token:
+                resp = requests.post(TRACK_POST_URL, data=params)
+            else:
+                log.error("Could not find an API key to post to mixpanel.  Is MIXPANEL_KEY defined in the settings?")
 
         if callback is not None:
             callback(event, properties)
