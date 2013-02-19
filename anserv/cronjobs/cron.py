@@ -44,13 +44,14 @@ def run_all_jobs():
         #Get metadata about job
         job_data = CronJob.objects.filter(name=lock_name).order_by("date_created")
         job_data_count = job_data.count()
+        time_between_runs = parameters[param_name].get('time_between_jobs',2 * 60 * 60)
         if job_data_count >=1:
             remove_locks(job_data[1:])
             job_data = job_data[0]
         else:
             job_data = CronJob(
                 name = lock_name,
-                time_between_runs = parameters[param_name].get('time_between_jobs',2 * 60 * 60),
+                time_between_runs = time_between_runs,
             )
             job_data.save()
             job_created = True
@@ -86,6 +87,7 @@ def run_all_jobs():
                 try:
                     run_single_job(registered[script], parameters[script])
                     jobs_run+=1
+                    job.data.time_between_runs = time_between_runs
                     job_data.save()
                 except:
                     log.error("Failed to run job {0} with params {1}".format(script, parameters[script]))
