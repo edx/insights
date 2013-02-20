@@ -59,14 +59,18 @@ class EventTracker(object):
             'data' : params,
             'api_key' : self.api_key
         }
+        track_data = {
+            'data' : data
+        }
         if self.api_key:
             resp = requests.post(ARCHIVE_POST_URL,data = post_data)
             resp.read()
         else:
             if self.token:
-                resp = requests.post(TRACK_POST_URL, data=params)
+                resp = requests.post(TRACK_POST_URL, data=track_data, headers = {'Content-Type': 'application/json'})
+                log.debug(resp.text)
             else:
-                log.error("Could not find an API key to post to mixpanel.  Is MIXPANEL_KEY defined in the settings?")
+                log.error("Could not find a token to post to mixpanel.  Is MIXPANEL_KEY defined in the settings?")
 
         if callback is not None:
             callback(event, properties)

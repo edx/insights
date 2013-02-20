@@ -9,7 +9,9 @@ def single_page_track_event(fs, db, response):
     for resp in response:
         if resp['event_type'] in  SINGLE_PAGES_TO_TRACK:
             user = resp["username"]
-            track_event_mixpanel(resp['event_type'],{'user' : user, 'distinct_id' : user})
+            host = resp['host']
+            agent = resp['agent']
+            track_event_mixpanel(resp['event_type'],{'user' : user, 'distinct_id' : user, 'host' : host, 'agent' : agent})
 
 @event_handler()
 def course_track_event(fs,db,response):
@@ -21,4 +23,6 @@ def course_track_event(fs,db,response):
                 split_url = resp['event_type'].split("/")
                 org = split_url[2]
                 course = split_url[3]
-                track_event_mixpanel(regex,{'user' : user, 'distinct_id' : user, 'full_url' : resp['event_type'], 'course' : course, 'org' : org})
+                host = resp['host']
+                agent = resp['agent']
+                track_event_mixpanel(regex,{'user' : user, 'distinct_id' : user, 'full_url' : resp['event_type'], 'course' : course, 'org' : org, 'host' : host, 'agent' : agent})
