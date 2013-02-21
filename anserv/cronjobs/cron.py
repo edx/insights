@@ -113,5 +113,6 @@ def remove_locks(cron_locks):
 def run_single_job(f, params):
     log.info("Beginning job: %s %s" % (f,params))
     db = an_views.get_database(f)
-    f(db, params)
+    fs = an_views.get_filesystem(f)
+    f(fs, db, params)
     log.info("Ending job: %s %s" % (f, params))

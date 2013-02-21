@@ -16,7 +16,7 @@ from mitxmako.shortcuts import render_to_response, render_to_string
 
 @memoize_query
 @cron(time = 2)
-def foo(db,params):
+def foo(fs, db,params):
     print "Test"
 
 @view(name = 'user_count', category = 'global', args=[])
