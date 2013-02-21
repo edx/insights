@@ -5,6 +5,10 @@ import sys
 
 BASE_DIR = os.path.abspath(os.path.join(__file__, "..", "..", ".."))
 
+ROOT_PATH = path(__file__).dirname()
+REPO_PATH = ROOT_PATH.dirname()
+ENV_ROOT = REPO_PATH.dirname()
+
 DUMMY_MODE = False
 
 MAKO_TEMPLATES = {'main': 'templates'}
