@@ -32,7 +32,14 @@ class Command(NoArgsCommand):
 
         all_files = []
         for directory in all_directories:
-            log_files = [ os.path.join(directory,f) for f in os.listdir(directory) if os.path.isfile(os.path.join(directory,f)) and f.endswith(".log")]
+            files_in_dir = os.listdir(directory)
+            log_files = []
+            for dir_file in files_in_dir:
+                joined_filename = os.path.join(directory,dir_file)
+                if os.path.isfile(joined_filename):
+                    #or (".log" in joined_filename and not ".gz" in joined_filename)
+                    if joined_filename.endswith(".log"):
+                        log_files.append(joined_filename)
             all_files = all_files + log_files
 
         return all_files
