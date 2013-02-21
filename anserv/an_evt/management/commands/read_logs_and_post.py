@@ -47,9 +47,9 @@ def handle_single_log_file(args):
         if not line:
             time.sleep(1)
             file.seek(where)
+            i+=1
         else:
             json_dict= line
             #response_text = _http_get(session,settings.LOG_POST_URL,json_dict)
             logger.critical(line)
-        i+=1
 
