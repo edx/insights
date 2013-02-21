@@ -50,15 +50,14 @@ def run_all_jobs():
             job_data = job_data[0]
         else:
             job_data = CronJob(
-                name = lock_name,
-                time_between_runs = time_between_runs,
+                name = lock_name
             )
             job_data.save()
             job_created = True
 
         #Check if job needs to run
         current_time = timezone.now()
-        if job_data.date_modified < (current_time - datetime.timedelta(seconds=job_data.time_between_runs)) or job_created:
+        if job_data.date_modified < (current_time - datetime.timedelta(seconds=time_between_runs)) or job_created or job_data.date_modified>current_time :
             # Acquire lock if needed.
             log.debug("Job needs to be run.")
             has_lock = False
@@ -87,10 +86,9 @@ def run_all_jobs():
                 try:
                     run_single_job(registered[script], parameters[script])
                     jobs_run+=1
-                    job.data.time_between_runs = time_between_runs
                     job_data.save()
                 except:
-                    log.error("Failed to run job {0} with params {1}".format(script, parameters[script]))
+                    log.exception("Failed to run job {0} with params {1}".format(script, parameters[script]))
                 remove_locks(get_all_locks(lock_name))
 
 
