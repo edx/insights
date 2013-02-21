@@ -7,3 +7,4 @@ fs
 mako
 requests
 multiprocessing
+gunicorn
