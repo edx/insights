@@ -20,7 +20,7 @@ class Command(NoArgsCommand):
             log_files = self.get_log_files()
             length = len(log_files)
             p = Pool(processes=length)
-            p.map_async(handle_single_log_file,[os.path.join(settings.LOG_READ_DIRECTORY,log_files[i]) for i in xrange(0,length)]).get(9999999)
+            p.map_async(handle_single_log_file,[log_files[i] for i in xrange(0,length)]).get(9999999)
 
     def get_log_files(self):
         all_directories = []
@@ -32,7 +32,7 @@ class Command(NoArgsCommand):
 
         all_files = []
         for directory in all_directories:
-            log_files = [ f for f in os.listdir(directory) if os.path.isfile(os.path.join(directory,f)) ]
+            log_files = [ os.path.join(directory,f) for f in os.listdir(directory) if os.path.isfile(os.path.join(directory,f)) and f.endswith(".log")]
             all_files = all_files + log_files
 
         return all_files
