@@ -63,16 +63,19 @@ def handle_single_log_file(args):
     file.seek(st_size)
 
     i=0
-    while i<60:
-        where = file.tell()
-        line = file.readline()
-        if not line:
-            time.sleep(1)
-            file.seek(where)
-            i+=1
-        else:
-            json_dict= line
-            #response_text = _http_get(session,settings.LOG_POST_URL,json_dict)
-            logger.critical(line)
+    while True:
+        try:
+            where = file.tell()
+            line = file.readline()
+            if not line:
+                time.sleep(1)
+                file.seek(where)
+            else:
+                json_dict= line
+                #response_text = _http_get(session,settings.LOG_POST_URL,json_dict)
+                logger.critical(line)
+        except:
+            file.close()
+            file = open(filename,'r')
     file.close()
 

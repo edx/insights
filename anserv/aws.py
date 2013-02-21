@@ -16,6 +16,4 @@ MODULE_RESOURCE_STATIC = '/opt/wwc/modules/static/resource'
 DEFAULT_DATABASE = AUTH_TOKENS.get("DATABASES",DATABASES)
 DATABASES['default'] = DEFAULT_DATABASE['default']
 
-
-
 ROOT_URLCONF = 'urls'
