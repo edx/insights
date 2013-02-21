@@ -2,6 +2,7 @@
 
 import os
 import sys
+from path import path
 
 BASE_DIR = os.path.abspath(os.path.join(__file__, "..", "..", ".."))
 
@@ -212,6 +213,8 @@ LOGGING = {
     }
 }
 MITX_ROOT_URL = ''
+
+DIRECTORIES_TO_READ = []
 
 override_settings = os.path.join(BASE_DIR, "override_settings.py")
 if os.path.isfile(override_settings):
