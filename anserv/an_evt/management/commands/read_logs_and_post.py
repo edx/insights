@@ -41,7 +41,7 @@ def handle_single_log_file(args):
     file.seek(st_size)
 
     i=0
-    while i<1000:
+    while i<60:
         where = file.tell()
         line = file.readline()
         if not line:
