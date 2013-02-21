@@ -11,3 +11,4 @@ gunicorn
 path.py
 decorator
 MySQL-python
+simplejson
