@@ -9,3 +9,4 @@ requests
 multiprocessing
 gunicorn
 path.py
+decorator

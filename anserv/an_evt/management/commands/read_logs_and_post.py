@@ -26,7 +26,9 @@ class Command(NoArgsCommand):
         all_directories = []
         all_directories.append(settings.LOG_READ_DIRECTORY)
         for directory in settings.DIRECTORIES_TO_READ:
-            all_directories.append(os.path.join(settings.LOG_READ_DIRECTORY, directory))
+            full_dir = os.path.join(settings.LOG_READ_DIRECTORY, directory)
+            if os.path.isdir(full_dir):
+                all_directories.append(full_dir)
 
         all_files = []
         for directory in all_directories:
