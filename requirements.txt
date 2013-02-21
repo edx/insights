@@ -8,3 +8,4 @@ mako
 requests
 multiprocessing
 gunicorn
+path.py
