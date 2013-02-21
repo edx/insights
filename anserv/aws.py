@@ -10,3 +10,5 @@ with open(ENV_ROOT / "auth.json") as auth_file:
 MIXPANEL_KEY = AUTH_TOKENS.get("MIXPANEL_KEY","")
 LOG_READ_DIRECTORY = "/mnt/edx-all-tracking-logs"
 DIRECTORIES_TO_READ = ["prod-edx-00{0}".format(i) for i in xrange(0,9)]
+
+ROOT_URLCONF = 'urls'
