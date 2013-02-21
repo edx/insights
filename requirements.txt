@@ -10,3 +10,4 @@ multiprocessing
 gunicorn
 path.py
 decorator
+MySQL-python
