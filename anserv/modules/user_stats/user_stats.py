@@ -1,4 +1,5 @@
 from modules.decorators import view, query, event_handler, memoize_query, cron
+from modules.tasks import cron_new
 #from an_evt.models import StudentBookAccesses
 from django.contrib.auth.models import User
 from courseware.models import StudentModule
@@ -13,11 +14,6 @@ log=logging.getLogger(__name__)
 import re
 
 from mitxmako.shortcuts import render_to_response, render_to_string
-
-@memoize_query
-@cron(time = 2)
-def foo(fs, db,params):
-    print "Test"
 
 @view(name = 'user_count', category = 'global', args=[])
 @memoize_query(cache_time=1)
