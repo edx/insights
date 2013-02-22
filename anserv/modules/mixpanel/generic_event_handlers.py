@@ -18,7 +18,7 @@ def single_page_track_event(fs, db, response):
             user = resp["username"]
             host = resp['host']
             agent = resp['agent']
-            track_event_mixpanel_async(resp['event_type'],{'user' : user, 'distinct_id' : user, 'host' : host, 'agent' : agent})
+            track_event_mixpanel(resp['event_type'],{'user' : user, 'distinct_id' : user, 'host' : host, 'agent' : agent})
 
 @event_handler()
 def course_track_event(fs,db,response):
