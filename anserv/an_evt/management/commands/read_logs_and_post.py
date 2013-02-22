@@ -34,6 +34,9 @@ class Command(NoArgsCommand):
                     file_size = log_file_sizes[l_file]
                 file_size = handle_single_log_file_serial(l_file,file_size,i)
                 log_file_sizes[l_file] = file_size
+            if i%10000 == 0:
+                log.debug("Epoch {0}".format(i))
+                log.debug(log_file_sizes)
             i+=1
 
     def get_log_files(self):
