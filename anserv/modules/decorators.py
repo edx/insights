@@ -157,6 +157,21 @@ def memoize_query(cache_time = 60*4, timeout = 60*15):
         return decorator(wrap_function,f)
     return view_factory
 
+def cron_new(period, params=None):
+    ''' Run command periodically
+    Command takes database and
+
+    '''
+    def factory(f):
+        @periodic_task(run_every=period, name=f.__name__)
+        def run():
+            import an_evt.views
+            db = an_evt.views.get_database(f)
+            fs = an_evt.views.get_filesystem(f)
+            f(fs, db, params)
+        return decorator(run,f)
+    return factory
+
 if False:
     # Test case. Should be made into a proper test case.
     @memoize_query(1)
