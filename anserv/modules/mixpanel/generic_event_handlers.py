@@ -10,12 +10,16 @@ COURSE_PAGES_TO_TRACK = ['/courses', '/about']
 VIDEO_EVENTS_TO_TRACK = ['play_video', 'pause_video']
 PROBLEM_EVENTS_TO_TRACK = ['problem_check', 'problem_show', 'show_answer', 'save_problem_check', 'reset_problem']
 BOOK_EVENTS_TO_TRACK = ['book']
+OPEN_ENDED_EVENTS_TO_TRACK = ['rubric_select', 'oe_staff_grading_show_problem', 'oe_peer_grading_show_problem',
+                              'oe_staff_grading_hide_problem', 'oe_peer_grading_hide_problem', 'oe_show_full_feedback',
+                              'oe_show_respond_to_feedback', 'oe_feedback_response_selected'
+                              ]
 
 @event_handler()
 def single_page_track_event(fs, db, response):
     mixpanel_data = []
     for resp in response:
-        if resp['event_type'] in  SINGLE_PAGES_TO_TRACK + BOOK_EVENTS_TO_TRACK + PROBLEM_EVENTS_TO_TRACK + VIDEO_EVENTS_TO_TRACK:
+        if resp['event_type'] in  SINGLE_PAGES_TO_TRACK + BOOK_EVENTS_TO_TRACK + PROBLEM_EVENTS_TO_TRACK + VIDEO_EVENTS_TO_TRACK + OPEN_ENDED_EVENTS_TO_TRACK:
             user = resp["username"]
             host = resp['host']
             agent = resp['agent']

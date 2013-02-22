@@ -13,3 +13,5 @@ decorator
 MySQL-python
 simplejson
 grequests
+south
+django-celery

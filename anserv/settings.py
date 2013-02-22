@@ -4,6 +4,10 @@ import os
 import sys
 from path import path
 
+#Initialize celery
+import djcelery
+djcelery.setup_loader()
+
 BASE_DIR = os.path.abspath(os.path.join(__file__, "..", "..", ".."))
 
 ROOT_PATH = path(__file__).dirname()
@@ -167,6 +171,8 @@ INSTALLED_APPS = (
     'modules.user_stats',
     'mitxmako',
     'cronjobs',
+    'djcelery',
+    'south'
 )
 
 # A sample logging configuration. The only tangible logging
