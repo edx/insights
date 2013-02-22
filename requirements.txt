@@ -12,7 +12,6 @@ path.py
 decorator
 MySQL-python
 simplejson
-grequests
 south
 django-celery
 celery-with-redis

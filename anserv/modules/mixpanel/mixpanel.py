@@ -46,18 +46,25 @@ class EventTracker(object):
           This is mostly used for handling Async operations
         :type callback: function
         """
-        if properties is None:
-            properties = {}
-        if not properties.has_key("token"):
-            properties['token'] = self.token
-        if not properties.has_key("time"):
-            properties['time'] = int(time.time())
 
         if not event_list:
+            if properties is None:
+                properties = {}
+            if not properties.has_key("token"):
+                properties['token'] = self.token
+            if not properties.has_key("time"):
+                properties['time'] = int(time.time())
             assert(properties.has_key("distinct_id")), "Must specify a distinct ID"
 
             params = {"event": event, "properties": properties}
         else:
+            for i in xrange(0,len(event)):
+                if event[i]['properties'] is None:
+                    event[i]['properties'] = {}
+                if not event[i]['properties'].has_key("token"):
+                    event[i]['properties']['token'] = self.token
+                if not event[i]['properties'].has_key("time"):
+                    event[i]['properties']['time'] = int(time.time())
             params = event
 
         data = base64.b64encode(json.dumps(params))
@@ -74,6 +81,7 @@ class EventTracker(object):
         else:
             if self.token:
                 resp = requests.post(TRACK_POST_URL, data=track_data, headers = {'Content-Type': 'application/json'})
+                log.info(resp.text)
             else:
                 log.error("Could not find a token to post to mixpanel.  Is MIXPANEL_KEY defined in the settings?")
 
