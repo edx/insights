@@ -20,6 +20,7 @@ import modules.user_stats.user_stats
 import modules.user_stats.logins
 import modules.mixpanel.generic_event_handlers
 import modules.course_stats.course_stats
+import modules.tasks
 ### END HACK ###
 
 from pymongo import MongoClient

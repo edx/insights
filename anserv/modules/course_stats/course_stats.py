@@ -7,7 +7,7 @@ from django.conf import settings
 import logging
 from django.utils import timezone
 import datetime
-from modules.user_stats import user_stats
+from modules import common
 
 log=logging.getLogger(__name__)
 import re
@@ -49,15 +49,29 @@ def videos_watched_in_course_count_view(fs, db, course, params):
 @query('global', 'users_per_course_count')
 def users_per_course_count_query():
     query_string = "SELECT course_id, COUNT(DISTINCT user_id) AS count FROM student_courseenrollment GROUP BY course_id"
-    return user_stats.query_results(query_string)
+    return common.query_results(query_string)
 
 @view('global', 'users_per_course')
 def users_per_course_count_view():
     query_data = users_per_course_count_query()
+    return render_query_as_table(query_data)
+
+@query('global', 'new_students')
+@memoize_query(cache_time=15*60)
+def new_course_enrollment_query(fs, db, params):
+    r = common.query_results("SELECT course_id,COUNT(DISTINCT student_id) FROM `courseware_studentmodule` WHERE DATE(created) >= DATE(DATE_ADD(NOW(), INTERVAL -7 DAY)) GROUP BY course_id;")
+    return r
+
+@view('global', 'new_students')
+def new_course_enrollment_query(fs, db, params):
+    r = new_course_enrollment_query
+    return render_query_as_table(r)
+
+def render_query_as_table(query_dict):
     html_string="<table><tr><td>Course ID</td><td>Count</td></tr>"
     for i in xrange(0,len(query_data['course_id'])):
         html_string+="<tr><td>{0}</td><td>{1}</td></tr>".format(query_data['course_id'][i],query_data['count'][i])
     html_string+="</table>"
-    log.debug(html_string)
     return html_string
+
 

@@ -7,7 +7,8 @@ from django.conf import settings
 import dummy_values
 import logging
 from django.utils import timezone
-import datetime
+from modules import tasks
+from modules.common import query_results
 
 log=logging.getLogger(__name__)
 import re
@@ -66,13 +67,7 @@ def active_course_enrollment_view(fs, db,params):
     ''' Student who were active in the course in the past week
     '''
     ''' UNTESTED '''
-    return json.dumps(active_course_enrollment_query(fs, db, params), indent=2)
-
-@query(name = 'active_students', category = 'global')
-@memoize_query(cache_time=15*60)
-def active_course_enrollment_query(fs, db, params):
-    r = query_results("SELECT course_id,COUNT(DISTINCT student_id) FROM `courseware_studentmodule` WHERE DATE(modified) >= DATE(DATE_ADD(NOW(), INTERVAL -7 DAY)) GROUP BY course_id;")
-    return r
+    return json.dumps(tasks.active_course_enrollment_query(fs, db, params), indent=2)
 
 @view(name = 'active_plot')
 def active_user_plot(fs, db, params):
@@ -92,17 +87,6 @@ def active_user_plot(fs, db, params):
 
 #### IN PROGRESS
 
-def query_results(query):
-    from django.db import connection
-    try:
-        cursor = connection.cursor()
-        cursor.execute(query)
-        desc = [d[0] for d in cursor.description] # Names of table columns
-        results = zip(*cursor.fetchall()) # Results for each column
-        return dict(zip(desc, results))
-    except:
-        log.error("Could not execute query {0}".format(query))
-        return {}
 
 @query('global', 'enrolled_user_count')
 def enrolled_user_count_query(fs, db, params):
