@@ -5,7 +5,7 @@ import time
 from decorator import decorator
 import logging
 import cronjobs
-from celery.task import PeriodicTask
+from celery.task import PeriodicTask, periodic_task
 from datetime import timedelta
 
 log=logging.getLogger(__name__)
@@ -167,15 +167,13 @@ def cron_new(period, params=None):
 
     '''
     def factory(f):
-        class CronTask(PeriodicTask):
-            run_every = timedelta(seconds=period)
-            id = f.__module__+'/'+f.__name__
-            def run(self):
-                import an_evt.views
-                db = an_evt.views.get_database(f)
-                fs = an_evt.views.get_filesystem(f)
-                f(fs, db, params)
-        return decorator(CronTask,f)
+        @periodic_task(run_every=period)
+        def run():
+            import an_evt.views
+            db = an_evt.views.get_database(f)
+            fs = an_evt.views.get_filesystem(f)
+            f(fs, db, params)
+        return decorator(run,f)
     return factory
 
 if False:
