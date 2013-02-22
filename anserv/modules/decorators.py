@@ -106,47 +106,6 @@ def isuseful(a):
         return False
     return True
 
-def cache_results(f, cache_time, timeout, *args, **kwargs):
-    m = hashlib.new("md4")
-    s = str({'uniquifier': 'anevt.memoize',
-             'name' : f.__name__,
-             'module' : f.__module__,
-             'args': [a for a in args if isuseful(a)],
-             'kwargs': kwargs})
-    m.update(s)
-    key = m.hexdigest()
-    # Check if we've cached the computation, or are in the
-    # process of computing it
-    cached = cache.get(key)
-    if cached:
-        print "Cache hit", key
-        # If we're already computing it, wait to finish
-        # computation
-        while cached == 'Processing':
-            cached = cache.get(key)
-            time.sleep(0.1)
-            # At this point, cached should be the result of the
-        # cache line, unless we had a failure/timeout, in
-        # which case, it is false
-        results = cached
-
-    if not cached:
-        print "Cache miss", key
-        # HACK: There's a slight race condition here, where we
-        # might recompute twice.
-        cache.set(key, 'Processing', timeout)
-        function_argspec = inspect.getargspec(f)
-        if function_argspec.varargs or function_argspec.args:
-            if function_argspec.keywords:
-                results = f(*args, **kwargs)
-            else:
-                results = f(*args)
-        else:
-            results = f()
-        cache.set(key, results, cache_time)
-    return results
-
-
 def memoize_query(cache_time = 60*4, timeout = 60*15):
     ''' Call function only if we do not have the results for it's execution already
     '''
@@ -157,7 +116,43 @@ def memoize_query(cache_time = 60*4, timeout = 60*15):
             # this is just for SOA queries, but may break
             # down if this were to be used as a generic
             # memoization framework
-            results = cache_results(f, cache_time, timeout)
+            m = hashlib.new("md4")
+            s = str({'uniquifier': 'anevt.memoize',
+                     'name' : f.__name__,
+                     'module' : f.__module__,
+                     'args': [a for a in args if isuseful(a)],
+                     'kwargs': kwargs})
+            m.update(s)
+            key = m.hexdigest()
+            # Check if we've cached the computation, or are in the
+            # process of computing it
+            cached = cache.get(key)
+            if cached:
+                print "Cache hit", key
+                # If we're already computing it, wait to finish
+                # computation
+                while cached == 'Processing':
+                    cached = cache.get(key)
+                    time.sleep(0.1)
+                    # At this point, cached should be the result of the
+                # cache line, unless we had a failure/timeout, in
+                # which case, it is false
+                results = cached
+
+            if not cached:
+                print "Cache miss", key
+                # HACK: There's a slight race condition here, where we
+                # might recompute twice.
+                cache.set(key, 'Processing', timeout)
+                function_argspec = inspect.getargspec(f)
+                if function_argspec.varargs or function_argspec.args:
+                    if function_argspec.keywords:
+                        results = f(*args, **kwargs)
+                    else:
+                        results = f(*args)
+                else:
+                    results = f()
+                cache.set(key, results, cache_time)
             return results
         return decorator(wrap_function,f)
     return view_factory

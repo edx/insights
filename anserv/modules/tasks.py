@@ -1,5 +1,5 @@
 from celery import task
-from decorators import memoize_query, query, cache_results
+from decorators import memoize_query, query
 from mixpanel.mixpanel import EventTracker
 import logging
 from celery.task import periodic_task
@@ -28,7 +28,7 @@ def foo2():
 @periodic_task(run_every=5*60*60)
 @query(name = 'active_students', category = 'global')
 def active_course_enrollment_query(fs, db, params):
-    r = cache_results(common.query_results, 5*60*60, 60*15, query="SELECT course_id,COUNT(DISTINCT student_id) FROM `courseware_studentmodule` WHERE DATE(modified) >= DATE(DATE_ADD(NOW(), INTERVAL -7 DAY)) GROUP BY course_id;")
+    r = common.query_results("SELECT course_id,COUNT(DISTINCT student_id) FROM `courseware_studentmodule` WHERE DATE(modified) >= DATE(DATE_ADD(NOW(), INTERVAL -7 DAY)) GROUP BY course_id;")
     return r
 
 def get_db_and_fs_cron(f):

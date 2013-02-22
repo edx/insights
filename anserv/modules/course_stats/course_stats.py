@@ -54,7 +54,7 @@ def users_per_course_count_query():
 @view('global', 'users_per_course')
 def users_per_course_count_view():
     query_data = users_per_course_count_query()
-    return render_query_as_table(query_data)
+    return common.render_query_as_table(query_data)
 
 @query('global', 'new_students')
 @memoize_query(cache_time=15*60)
@@ -63,15 +63,7 @@ def new_course_enrollment_query(fs, db, params):
     return r
 
 @view('global', 'new_students')
-def new_course_enrollment_query(fs, db, params):
-    r = new_course_enrollment_query
-    return render_query_as_table(r)
-
-def render_query_as_table(query_dict):
-    html_string="<table><tr><td>Course ID</td><td>Count</td></tr>"
-    for i in xrange(0,len(query_data['course_id'])):
-        html_string+="<tr><td>{0}</td><td>{1}</td></tr>".format(query_data['course_id'][i],query_data['count'][i])
-    html_string+="</table>"
-    return html_string
-
+def new_course_enrollment_view(fs, db, params):
+    r = new_course_enrollment_query(fs,db,params)
+    return common.render_query_as_table(r)
 
