@@ -34,7 +34,7 @@ class Command(NoArgsCommand):
                     file_size = log_file_sizes[l_file]
                 file_size = handle_single_log_file_serial(l_file,file_size,i)
                 log_file_sizes[l_file] = file_size
-            if i%10000 == 0:
+            if i%1000 == 0:
                 log.debug("Epoch {0}".format(i))
                 log.debug(log_file_sizes)
             i+=1
@@ -126,7 +126,7 @@ def handle_single_log_file_serial(filename, filesize=0, run_number=0):
             lines=[]
     file.close()
     if len(lines)>0:
-        response_text = post_async(settings.LOG_POST_URL,json.dumps(lines))
+        response_text = _http_post(settings.LOG_POST_URL,json.dumps(lines))
     return last_size
 
 def post_async(url,json_info):
