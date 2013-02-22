@@ -13,13 +13,13 @@ def track_event_mixpanel_batch(event_list):
         event_tracker.track(event_list[list_start:(list_start+50)],event_list=True)
 
 @memoize_query
-@periodic_task(run_every=2)
+#@periodic_task(run_every=2)
 def foo():
     fs,db = get_db_and_fs_cron(foo)
     print "Test"
 
 @memoize_query
-@periodic_task(run_every=2)
+#@periodic_task(run_every=10)
 def foo2():
     fs,db = get_db_and_fs_cron(foo2)
     print "Another Test"
