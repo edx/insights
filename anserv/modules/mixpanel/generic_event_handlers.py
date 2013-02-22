@@ -1,4 +1,4 @@
-from modules.mixpanel.mixpanel import track_event_mixpanel
+from modules.mixpanel.mixpanel import track_event_mixpanel, track_event_mixpanel_async
 from modules.decorators import view, query, event_handler
 import re
 import logging
@@ -13,18 +13,15 @@ BOOK_EVENTS_TO_TRACK = ['book']
 
 @event_handler()
 def single_page_track_event(fs, db, response):
-    events_to_post=[]
     for resp in response:
         if resp['event_type'] in  SINGLE_PAGES_TO_TRACK + BOOK_EVENTS_TO_TRACK + PROBLEM_EVENTS_TO_TRACK + VIDEO_EVENTS_TO_TRACK:
             user = resp["username"]
             host = resp['host']
             agent = resp['agent']
-            events_to_post.append([resp['event_type'],{'user' : user, 'distinct_id' : user, 'host' : host, 'agent' : agent}])
-    run_posts_async(events_to_post)
+            track_event_mixpanel_async(resp['event_type'],{'user' : user, 'distinct_id' : user, 'host' : host, 'agent' : agent})
 
 @event_handler()
 def course_track_event(fs,db,response):
-    events_to_post=[]
     for resp in response:
         for regex in COURSE_PAGES_TO_TRACK:
             match = re.search(regex, resp['event_type'])
@@ -35,8 +32,7 @@ def course_track_event(fs,db,response):
                 course = split_url[3]
                 host = resp['host']
                 agent = resp['agent']
-                events_to_post.append([regex,{'user' : user, 'distinct_id' : user, 'full_url' : resp['event_type'], 'course' : course, 'org' : org, 'host' : host, 'agent' : agent}])
-    run_posts_async(events_to_post)
+                track_event_mixpanel_async(regex,{'user' : user, 'distinct_id' : user, 'full_url' : resp['event_type'], 'course' : course, 'org' : org, 'host' : host, 'agent' : agent})
 
 def run_posts_async(data):
     num_to_post = len(data)

@@ -102,9 +102,8 @@ def track_event_mixpanel(event,properties):
     event_tracker = EventTracker()
     event_tracker.track(event,properties)
 
-def track_event_mixpanel_async(args):
-    event,properties = args
+def track_event_mixpanel_async(event,properties):
     event_tracker = EventTracker()
-    event_tracker.track(event,properties)
+    event_tracker.track_async(event,properties)
 
 
