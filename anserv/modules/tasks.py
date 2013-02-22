@@ -3,7 +3,6 @@ from decorators import memoize_query
 from mixpanel.mixpanel import EventTracker
 import logging
 from celery.task import periodic_task
-import inspect
 
 log=logging.getLogger(__name__)
 
@@ -26,7 +25,6 @@ def foo2():
     print "Another Test"
 
 def get_db_and_fs_cron(f):
-    print f
     import an_evt.views
     db = an_evt.views.get_database(f)
     fs = an_evt.views.get_filesystem(f)

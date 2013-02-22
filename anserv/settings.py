@@ -170,7 +170,6 @@ INSTALLED_APPS = (
     'modules.page_count',
     'modules.user_stats',
     'mitxmako',
-    'cronjobs',
     'djcelery',
     'south'
 )

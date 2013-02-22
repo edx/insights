@@ -4,7 +4,6 @@ from django.core.cache import cache
 import time
 from decorator import decorator
 import logging
-import cronjobs
 from celery.task import PeriodicTask, periodic_task
 from datetime import timedelta
 
@@ -157,9 +156,6 @@ def memoize_query(cache_time = 60*4, timeout = 60*15):
             return results
         return decorator(wrap_function,f)
     return view_factory
-
-def cron(f=None, time = 5 * 60 * 60, lock=True, params={}):
-    return cronjobs.register(f, time, lock, params)
 
 if False:
     # Test case. Should be made into a proper test case.
