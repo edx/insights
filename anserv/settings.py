@@ -224,7 +224,7 @@ DIRECTORIES_TO_READ = []
 
 BROKER_URL = 'redis://localhost:6379/0'
 BROKER_TRANSPORT_OPTIONS = {'visibility_timeout': 3600}
-
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
 
 override_settings = os.path.join(BASE_DIR, "override_settings.py")
 if os.path.isfile(override_settings):

@@ -1,5 +1,6 @@
-from modules.mixpanel.mixpanel import track_event_mixpanel, track_event_mixpanel_async, track_event_mixpanel_batch
+from modules.mixpanel.mixpanel import track_event_mixpanel, track_event_mixpanel_async
 from modules.decorators import view, query, event_handler
+from modules.tasks import track_event_mixpanel_batch
 import re
 import logging
 log=logging.getLogger(__name__)
@@ -24,7 +25,7 @@ def single_page_track_event(fs, db, response):
             host = resp['host']
             agent = resp['agent']
             mixpanel_data.append({'event' : resp['event_type'],'properties' : {'user' : user, 'distinct_id' : user, 'host' : host, 'agent' : agent}})
-    track_event_mixpanel_batch(mixpanel_data)
+    track_event_mixpanel_batch.delay(mixpanel_data)
 
 @event_handler()
 def course_track_event(fs,db,response):
@@ -40,7 +41,7 @@ def course_track_event(fs,db,response):
                 host = resp['host']
                 agent = resp['agent']
                 mixpanel_data.append({'event': regex,'properties' : {'user' : user, 'distinct_id' : user, 'full_url' : resp['event_type'], 'course' : course, 'org' : org, 'host' : host, 'agent' : agent}})
-    track_event_mixpanel_batch(mixpanel_data)
+    track_event_mixpanel_batch.delay(mixpanel_data)
 
 def run_posts_async(data):
     num_to_post = len(data)
