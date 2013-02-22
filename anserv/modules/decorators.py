@@ -39,7 +39,9 @@ def event_handler(batch=True, per_user=False, per_resource=False,
 
 funcskips = ['fs','db','params']
 funcspecs = [ ([], 'global'),
-              (['user'], 'user') ]
+              (['user'], 'user'),
+              (['course'], 'course'),
+            ]
 
 def register_handler(cls, category, name, description, f, args):
     print "Register", cls, category, name, f
