@@ -1,5 +1,4 @@
 from modules.decorators import view, query, event_handler, memoize_query, cron
-from modules.tasks import cron_new
 #from an_evt.models import StudentBookAccesses
 from django.contrib.auth.models import User
 from courseware.models import StudentModule

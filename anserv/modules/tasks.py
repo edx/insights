@@ -1,7 +1,9 @@
 from celery import task
-from decorators import cron_new, memoize_query
+from decorators import memoize_query
 from mixpanel.mixpanel import EventTracker
 import logging
+from celery.task import periodic_task
+import inspect
 
 log=logging.getLogger(__name__)
 
@@ -12,13 +14,22 @@ def track_event_mixpanel_batch(event_list):
         event_tracker.track(event_list[list_start:(list_start+50)],event_list=True)
 
 @memoize_query
-@cron_new(2)
-def foo(fs, db,params):
+@periodic_task(run_every=2)
+def foo():
+    fs,db = get_db_and_fs_cron(foo)
     print "Test"
 
 @memoize_query
-@cron_new(2)
-def foo2(fs, db,params):
+@periodic_task(run_every=2)
+def foo2():
+    fs,db = get_db_and_fs_cron(foo2)
     print "Another Test"
+
+def get_db_and_fs_cron(f):
+    print f
+    import an_evt.views
+    db = an_evt.views.get_database(f)
+    fs = an_evt.views.get_filesystem(f)
+    return fs,db
 
 
