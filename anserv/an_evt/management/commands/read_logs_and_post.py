@@ -101,7 +101,7 @@ def handle_single_log_file_serial(filename, filesize=0, run_number=0):
     if filesize>0 and filesize <= st_size:
         file.seek(min(st_size,filesize))
     elif run_number==0:
-        file.seek(filesize)
+        file.seek(st_size)
 
     lines_processed = 0
     last_size=0
