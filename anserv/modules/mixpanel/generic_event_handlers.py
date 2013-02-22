@@ -2,6 +2,8 @@ from modules.mixpanel.mixpanel import track_event_mixpanel
 from modules.decorators import view, query, event_handler
 import re
 import logging
+log=logging.getLogger(__name__)
+
 SINGLE_PAGES_TO_TRACK = ['/', '/dashboard', '/create_account', 'page_close']
 COURSE_PAGES_TO_TRACK = ['/courses', '/about']
 VIDEO_EVENTS_TO_TRACK = ['play_video', 'pause_video']

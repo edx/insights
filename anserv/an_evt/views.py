@@ -4,6 +4,7 @@ import os
 
 from django.http import HttpResponse
 from django.utils.datastructures import MultiValueDictKeyError
+from django.views.decorators.csrf import csrf_exempt
 
 from django.conf import settings
 
@@ -116,13 +117,29 @@ def handle_query(request, category, name, **kwargs):
     '''
     return HttpResponse(json.dumps(handle_request(request, 'query', category, name, **kwargs)))
 
+@csrf_exempt
 def handle_event(request):
-    try: # Not sure why this is necessary, but on some systems it is 'msg', and on others, 'message'
-        response = json.loads(request.GET['message'])
-    except MultiValueDictKeyError:
-        response = json.loads(request.GET['msg'])
+    if request.GET:
+        try: # Not sure why this is necessary, but on some systems it is 'msg', and on others, 'message'
+            response = json.loads(request.GET['message'])
+        except MultiValueDictKeyError:
+            response = json.loads(request.GET['msg'])
+    else:
+        try:
+            response = json.loads(request.POST['message'])
+        except:
+            response = json.loads(request.POST['msg'])
 
-    log.debug(event_handlers)
+    if isinstance(response,list):
+        for i in xrange(0,len(response)):
+            try:
+                response[i] = json.loads(response[i])
+            except:
+                pass
+
+    log.debug(type(response[0]))
+    log.debug(response[0])
+
     for e in event_handlers:
         event_func = e['function']
         batch = e['batch']
