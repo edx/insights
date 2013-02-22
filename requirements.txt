@@ -12,3 +12,4 @@ path.py
 decorator
 MySQL-python
 simplejson
+grequests
