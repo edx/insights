@@ -15,6 +15,7 @@ http_handler = logging.handlers.HTTPHandler('127.0.0.1:9022', '/event', method='
 logger.addHandler(http_handler)
 
 from django.core.management.base import NoArgsCommand
+from multiprocessing import Process
 
 class Command(NoArgsCommand):
     """
@@ -117,13 +118,27 @@ def handle_single_log_file_serial(filename, filesize=0, run_number=0):
             lines.append(json_dict)
             lines_processed+=1
         if lines_processed > 100:
-            response_text = _http_post(settings.LOG_POST_URL,json.dumps(lines))
+            response_text = post_async(settings.LOG_POST_URL,json.dumps(lines))
             lines_processed=0
             lines=[]
     file.close()
     if len(lines)>0:
-        response_text = _http_post(settings.LOG_POST_URL,json.dumps(lines))
+        response_text = post_async(settings.LOG_POST_URL,json.dumps(lines))
     return last_size
+
+def post_async(url,json_info):
+    p = Process(
+        target=_http_post,
+        kwargs={
+            'url' : url,
+            'data' : json_info,
+            'timeout' : 500,
+        }
+    )
+    p.daemon = True
+    p.start()
+    return True
+
 
 def _http_post(url, data, timeout=10):
     '''

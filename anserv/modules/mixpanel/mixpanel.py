@@ -15,6 +15,7 @@ import requests
 log=logging.getLogger(__name__)
 
 TOKEN = getattr(settings, 'MIXPANEL_KEY', None)
+from multiprocessing import Process
 
 class EventTracker(object):
     """Simple Event Tracker
@@ -90,13 +91,14 @@ class EventTracker(object):
         :rtype: :class:`threading.Thread`
         """
         from threading import Thread
-        t = Thread(target=self.track, kwargs={
+        p = Process(target=self.track, kwargs={
             'event': event,
             'properties': properties,
             'callback': callback
         })
-        t.start()
-        return t
+        p.daemon = True
+        p.start()
+        return True
 
 def track_event_mixpanel(event,properties):
     event_tracker = EventTracker()

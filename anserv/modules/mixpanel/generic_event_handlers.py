@@ -11,6 +11,7 @@ VIDEO_EVENTS_TO_TRACK = ['play_video', 'pause_video']
 PROBLEM_EVENTS_TO_TRACK = ['problem_check', 'problem_show', 'show_answer', 'save_problem_check', 'reset_problem']
 BOOK_EVENTS_TO_TRACK = ['book']
 
+
 @event_handler()
 def single_page_track_event(fs, db, response):
     for resp in response:
@@ -18,7 +19,7 @@ def single_page_track_event(fs, db, response):
             user = resp["username"]
             host = resp['host']
             agent = resp['agent']
-            track_event_mixpanel(resp['event_type'],{'user' : user, 'distinct_id' : user, 'host' : host, 'agent' : agent})
+            track_event_mixpanel_async(resp['event_type'],{'user' : user, 'distinct_id' : user, 'host' : host, 'agent' : agent})
 
 @event_handler()
 def course_track_event(fs,db,response):
