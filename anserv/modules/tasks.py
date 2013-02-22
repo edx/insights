@@ -21,3 +21,9 @@ def test():
 def foo(fs, db,params):
     print "Test"
 
+@memoize_query
+@cron_new(2)
+def foo2(fs, db,params):
+    print "Another Test"
+
+
