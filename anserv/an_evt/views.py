@@ -137,9 +137,6 @@ def handle_event(request):
             except:
                 pass
 
-    log.debug(type(response[0]))
-    log.debug(response[0])
-
     for e in event_handlers:
         event_func = e['function']
         batch = e['batch']

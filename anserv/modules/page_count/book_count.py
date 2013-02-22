@@ -71,6 +71,3 @@ def book_page_count_event(fs, db, response):
         else:
             collection.insert({'user':user,'pages':1})
 
-
-        track_event_mixpanel('book_page_count_event',{'user' : user, 'distinct_id' : user})
-

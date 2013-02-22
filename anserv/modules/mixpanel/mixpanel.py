@@ -32,7 +32,7 @@ class EventTracker(object):
             self.token = TOKEN
         self.api_key = api_key
 
-    def track(self, event, properties=None, callback=None):
+    def track(self, event, properties=None, callback=None, event_list=False):
         """Track a single event
         :param event: The name of the event to track
         :type event: str
@@ -52,9 +52,13 @@ class EventTracker(object):
         if not properties.has_key("time"):
             properties['time'] = int(time.time())
 
-        assert(properties.has_key("distinct_id")), "Must specify a distinct ID"
+        if not event_list:
+            assert(properties.has_key("distinct_id")), "Must specify a distinct ID"
 
-        params = {"event": event, "properties": properties}
+            params = {"event": event, "properties": properties}
+        else:
+            params = event
+
         data = base64.b64encode(json.dumps(params))
         post_data = {
             'data' : params,
@@ -107,5 +111,11 @@ def track_event_mixpanel(event,properties):
 def track_event_mixpanel_async(event,properties):
     event_tracker = EventTracker()
     event_tracker.track_async(event,properties)
+
+def track_event_mixpanel_batch(event_list):
+    for list_start in xrange(0,len(event_list),50):
+        event_tracker = EventTracker()
+        event_tracker.track(event_list[list_start:(list_start+50)],event_list=True)
+
 
 
