@@ -59,6 +59,7 @@ class EventTracker(object):
 
             try:
                 properties['distinct_id'] = hashlib.sha224(properties['distinct_id'].encode('ascii','ignore')).hexdigest()
+                properties['user'] = hashlib.sha224(properties['user'].encode('ascii','ignore')).hexdigest()
             except:
                 log.exception("Could not hash for some reason: {0}".format(properties['distinct_id']))
 
@@ -73,6 +74,7 @@ class EventTracker(object):
                     event[i]['properties']['time'] = int(time.time())
                 try:
                     event[i]['properties']['distinct_id'] = hashlib.sha224(event[i]['properties']['distinct_id'].encode('ascii','ignore')).hexdigest()
+                    event[i]['properties']['user'] = hashlib.sha224(event[i]['properties']['user'].encode('ascii','ignore')).hexdigest()
                 except:
                     log.exception("Could not hash for some reason: {0}".format(event[i]['properties']['distinct_id']))
             params = event
