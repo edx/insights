@@ -22,29 +22,35 @@ OPEN_ENDED_EVENTS_TO_TRACK = ['rubric_select', 'oe_staff_grading_show_problem', 
 def single_page_track_event(fs, db, response):
     mixpanel_data = []
     for resp in response:
-        if resp['event_type'] in  SINGLE_PAGES_TO_TRACK + BOOK_EVENTS_TO_TRACK + PROBLEM_EVENTS_TO_TRACK + VIDEO_EVENTS_TO_TRACK + OPEN_ENDED_EVENTS_TO_TRACK:
-            user = resp["username"]
-            host = resp['host']
-            agent = resp['agent']
-            time_data = extract_time(resp)
-            mixpanel_data.append({'event' : resp['event_type'],'properties' : {'user' : user, 'distinct_id' : user, 'host' : host, 'agent' : agent, 'time' : time_data}})
+        try:
+            if resp['event_type'] in  SINGLE_PAGES_TO_TRACK + BOOK_EVENTS_TO_TRACK + PROBLEM_EVENTS_TO_TRACK + VIDEO_EVENTS_TO_TRACK + OPEN_ENDED_EVENTS_TO_TRACK:
+                user = resp["username"]
+                host = resp['host']
+                agent = resp['agent']
+                time_data = extract_time(resp)
+                mixpanel_data.append({'event' : resp['event_type'],'properties' : {'user' : user, 'distinct_id' : user, 'host' : host, 'agent' : agent, 'time' : time_data}})
+        except:
+            log.exception("Mixpanel single page track failed")
     track_event_mixpanel_batch.delay(mixpanel_data)
 
 @event_handler()
 def course_track_event(fs,db,response):
     mixpanel_data =[]
     for resp in response:
-        for regex in COURSE_PAGES_TO_TRACK:
-            match = re.search(regex, resp['event_type'])
-            user = resp["username"]
-            if match is not None:
-                split_url = resp['event_type'].split("/")
-                org = split_url[2]
-                course = split_url[3]
-                host = resp['host']
-                agent = resp['agent']
-                time_data = extract_time(resp)
-                mixpanel_data.append({'event': regex,'properties' : {'user' : user, 'distinct_id' : user, 'full_url' : resp['event_type'], 'course' : course, 'org' : org, 'host' : host, 'agent' : agent, 'time' : time_data}})
+        try:
+            for regex in COURSE_PAGES_TO_TRACK:
+                match = re.search(regex, resp['event_type'])
+                user = resp["username"]
+                if match is not None:
+                    split_url = resp['event_type'].split("/")
+                    org = split_url[2]
+                    course = split_url[3]
+                    host = resp['host']
+                    agent = resp['agent']
+                    time_data = extract_time(resp)
+                    mixpanel_data.append({'event': regex,'properties' : {'user' : user, 'distinct_id' : user, 'full_url' : resp['event_type'], 'course' : course, 'org' : org, 'host' : host, 'agent' : agent, 'time' : time_data}})
+        except:
+            log.exception("Mixpanel course track failed.")
     track_event_mixpanel_batch.delay(mixpanel_data)
 
 def run_posts_async(data):
