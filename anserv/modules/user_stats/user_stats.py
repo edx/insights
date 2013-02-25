@@ -63,7 +63,7 @@ def total_course_enrollment_query(fs, db, params):
 
 @query(name = 'active_students', category = 'global')
 def active_course_enrollment_query(fs, db, params):
-    r = common.query_results("SELECT course_id,COUNT(DISTINCT student_id) FROM `courseware_studentmodule` WHERE DATE(modified) >= DATE(DATE_ADD(NOW(), INTERVAL -7 DAY)) GROUP BY course_id;")
+    r = query_results("SELECT course_id,COUNT(DISTINCT student_id) FROM `courseware_studentmodule` WHERE DATE(modified) >= DATE(DATE_ADD(NOW(), INTERVAL -7 DAY)) GROUP BY course_id;")
     return r
 
 @view(name = 'active_students')
