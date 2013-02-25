@@ -63,7 +63,6 @@ def extract_time(resp):
         time_data = int(time.time())
         log.error("Could not parse time {0}".format(resp['time']))
 
-    log.debug(time_data)
     return time_data
 
 
