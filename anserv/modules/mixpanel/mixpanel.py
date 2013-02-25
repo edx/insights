@@ -12,6 +12,7 @@ import time
 from django.conf import settings
 import logging
 import requests
+import hashlib
 
 log=logging.getLogger(__name__)
 
@@ -55,6 +56,11 @@ class EventTracker(object):
             if not properties.has_key("time"):
                 properties['time'] = int(time.time())
             assert(properties.has_key("distinct_id")), "Must specify a distinct ID"
+
+            try:
+                properties['distinct_id'] = hashlib.sha224(properties['distinct_id'].encode('ascii','ignore')).hexdigest()
+            except:
+                log.exception("Could not hash for some reason: {0}".format(properties['distinct_id']))
 
             params = {"event": event, "properties": properties}
         else:
