@@ -9,7 +9,7 @@ import time
 from dateutil import parser
 
 SINGLE_PAGES_TO_TRACK = ['/', '/dashboard', '/create_account', 'page_close']
-COURSE_PAGES_TO_TRACK = ['/courses', '/about']
+COURSE_PAGES_TO_TRACK = ['/about']  #'/courses', Dont track courses because it is an insane amount of hits
 VIDEO_EVENTS_TO_TRACK = ['play_video', 'pause_video']
 PROBLEM_EVENTS_TO_TRACK = ['problem_check', 'problem_show', 'show_answer', 'save_problem_check', 'reset_problem']
 BOOK_EVENTS_TO_TRACK = ['book']
