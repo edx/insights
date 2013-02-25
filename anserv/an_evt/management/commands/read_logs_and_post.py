@@ -29,7 +29,7 @@ class Command(NoArgsCommand):
         while True:
             log_files = self.get_log_files()
             length = len(log_files)
-            np=8
+            np=4
             p = Pool(processes=np)
             file_sizes = p.map(run_single_worker,[(log_files[z],log_file_sizes,i) for z in xrange(0,length)])
             for log_file_size in file_sizes:
@@ -133,7 +133,7 @@ def handle_single_log_file_serial(filename, filesize=0, run_number=0):
                 json_dict= line
                 lines.append(json_dict)
                 lines_processed+=1
-            if lines_processed > 100:
+            if lines_processed > 200:
                 response_text = _http_post(settings.LOG_POST_URL,json.dumps(lines))
                 lines_processed=0
                 lines=[]
@@ -159,7 +159,7 @@ def post_async(url,json_info):
     return True
 
 
-def _http_post(url, data, timeout=10):
+def _http_post(url, data, timeout=100):
     '''
     Contact grading controller, but fail gently.
     Takes following arguments:
