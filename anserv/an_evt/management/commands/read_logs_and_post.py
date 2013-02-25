@@ -96,37 +96,41 @@ def handle_single_log_file(args):
     file.close()
 
 def handle_single_log_file_serial(filename, filesize=0, run_number=0):
-    file = open(filename,'r')
+    last_size = 0
+    try:
+        file = open(filename,'r')
 
-    #Find the size of the file and move to the end
-    st_results = os.stat(filename)
-    st_size = st_results[6]
-    if filesize>0 and filesize <= st_size:
-        file.seek(min(st_size,filesize))
-    elif run_number==0:
-        file.seek(st_size)
+        #Find the size of the file and move to the end
+        st_results = os.stat(filename)
+        st_size = st_results[6]
+        if filesize>0 and filesize <= st_size:
+            file.seek(min(st_size,filesize))
+        elif run_number==0:
+            file.seek(st_size)
 
-    lines_processed = 0
-    last_size=0
-    lines = []
-    while True:
-        where = file.tell()
-        line = file.readline()
-        if not line:
-            time.sleep(1)
-            last_size = where
-            break
-        else:
-            json_dict= line
-            lines.append(json_dict)
-            lines_processed+=1
-        if lines_processed > 100:
-            response_text = post_async(settings.LOG_POST_URL,json.dumps(lines))
-            lines_processed=0
-            lines=[]
-    file.close()
-    if len(lines)>0:
-        response_text = _http_post(settings.LOG_POST_URL,json.dumps(lines))
+        lines_processed = 0
+        last_size=0
+        lines = []
+        while True:
+            where = file.tell()
+            line = file.readline()
+            if not line:
+                time.sleep(1)
+                last_size = where
+                break
+            else:
+                json_dict= line
+                lines.append(json_dict)
+                lines_processed+=1
+            if lines_processed > 100:
+                response_text = post_async(settings.LOG_POST_URL,json.dumps(lines))
+                lines_processed=0
+                lines=[]
+        file.close()
+        if len(lines)>0:
+            response_text = _http_post(settings.LOG_POST_URL,json.dumps(lines))
+    except:
+        log.error("Could not find filename {0}".format(filename))
     return last_size
 
 def post_async(url,json_info):
