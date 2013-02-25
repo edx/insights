@@ -5,6 +5,8 @@ import re
 import logging
 log=logging.getLogger(__name__)
 from multiprocessing import Pool
+import time
+from dateutil import parser
 
 SINGLE_PAGES_TO_TRACK = ['/', '/dashboard', '/create_account', 'page_close']
 COURSE_PAGES_TO_TRACK = ['/courses', '/about']
@@ -24,7 +26,8 @@ def single_page_track_event(fs, db, response):
             user = resp["username"]
             host = resp['host']
             agent = resp['agent']
-            mixpanel_data.append({'event' : resp['event_type'],'properties' : {'user' : user, 'distinct_id' : user, 'host' : host, 'agent' : agent}})
+            time_data = extract_time(resp)
+            mixpanel_data.append({'event' : resp['event_type'],'properties' : {'user' : user, 'distinct_id' : user, 'host' : host, 'agent' : agent, 'time' : time_data}})
     track_event_mixpanel_batch.delay(mixpanel_data)
 
 @event_handler()
@@ -40,7 +43,8 @@ def course_track_event(fs,db,response):
                 course = split_url[3]
                 host = resp['host']
                 agent = resp['agent']
-                mixpanel_data.append({'event': regex,'properties' : {'user' : user, 'distinct_id' : user, 'full_url' : resp['event_type'], 'course' : course, 'org' : org, 'host' : host, 'agent' : agent}})
+                time_data = extract_time(resp)
+                mixpanel_data.append({'event': regex,'properties' : {'user' : user, 'distinct_id' : user, 'full_url' : resp['event_type'], 'course' : course, 'org' : org, 'host' : host, 'agent' : agent, 'time' : time_data}})
     track_event_mixpanel_batch.delay(mixpanel_data)
 
 def run_posts_async(data):
@@ -49,5 +53,17 @@ def run_posts_async(data):
     p = Pool(processes=num_processes)
     p.map_async(track_event_mixpanel_async,[(data[i][0],data[i][1]) for i in xrange(0,num_to_post)]).get(9999999)
     log.debug("{0} posted to mixpanel.".format(num_to_post))
+
+def extract_time(resp):
+    try:
+        time_data = resp['time']
+        time_data = parser.parse(time_data)
+        time_data = time.mktime(time_data.timetuple())
+    except:
+        time_data = int(time.time())
+        log.error("Could not parse time {0}".format(resp['time']))
+
+    log.debug(time_data)
+    return time_data
 
 

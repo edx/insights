@@ -32,7 +32,6 @@ class Command(NoArgsCommand):
                 file_size = 0
                 if l_file in log_file_sizes:
                     file_size = log_file_sizes[l_file]
-                file_size = 0
                 try:
                     file_size = handle_single_log_file_serial(l_file,file_size,i)
                 except:
@@ -110,7 +109,7 @@ def handle_single_log_file_serial(filename, filesize=0, run_number=0):
         if filesize>0 and filesize <= st_size:
             file.seek(min(st_size,filesize))
         elif run_number==0:
-            file.seek(st_size)
+            file.seek(filesize)
 
         lines_processed = 0
         last_size=0
@@ -119,7 +118,6 @@ def handle_single_log_file_serial(filename, filesize=0, run_number=0):
             where = file.tell()
             line = file.readline()
             if not line:
-                time.sleep(1)
                 last_size = where
                 break
             else:
@@ -127,7 +125,7 @@ def handle_single_log_file_serial(filename, filesize=0, run_number=0):
                 lines.append(json_dict)
                 lines_processed+=1
             if lines_processed > 100:
-                response_text = post_async(settings.LOG_POST_URL,json.dumps(lines))
+                response_text = _http_post(settings.LOG_POST_URL,json.dumps(lines))
                 lines_processed=0
                 lines=[]
         file.close()
@@ -135,6 +133,7 @@ def handle_single_log_file_serial(filename, filesize=0, run_number=0):
             response_text = _http_post(settings.LOG_POST_URL,json.dumps(lines))
     except:
         log.error("Could not find filename {0}".format(filename))
+
     return last_size
 
 def post_async(url,json_info):
