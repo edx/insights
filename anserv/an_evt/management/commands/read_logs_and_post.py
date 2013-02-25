@@ -7,6 +7,7 @@ import logging
 import json
 import logging, logging.handlers
 import sys
+from multiprocessing import Pool
 
 log=logging.getLogger(__name__)
 
@@ -28,15 +29,12 @@ class Command(NoArgsCommand):
         while True:
             log_files = self.get_log_files()
             length = len(log_files)
-            for l_file in log_files:
-                file_size = 0
-                if l_file in log_file_sizes:
-                    file_size = log_file_sizes[l_file]
-                try:
-                    file_size = handle_single_log_file_serial(l_file,file_size,i)
-                except:
-                    log.error("Could not handle file {0} at all".format(l_file))
-                log_file_sizes[l_file] = file_size
+            np=8
+            p = Pool(processes=np)
+            file_sizes = p.map(run_single_worker,[(log_files[z],log_file_sizes,i) for z in xrange(0,length)])
+            for log_file_size in file_sizes:
+                log_file_sizes.update(log_file_size)
+
             if i%1000 == 0:
                 log.debug("Epoch {0}".format(i))
                 log.debug(log_file_sizes)
@@ -63,6 +61,17 @@ class Command(NoArgsCommand):
             all_files = all_files + log_files
 
         return all_files
+
+def run_single_worker(args):
+    l_file,log_file_sizes,i = args
+    file_size = 0
+    if l_file in log_file_sizes:
+        file_size = log_file_sizes[l_file]
+    try:
+        file_size = handle_single_log_file_serial(l_file,file_size,i)
+    except:
+        log.exception("Could not handle file {0} at all".format(l_file))
+    return {l_file : file_size}
 
 def handle_single_log_file(args):
 
