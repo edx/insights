@@ -32,7 +32,11 @@ class Command(NoArgsCommand):
                 file_size = 0
                 if l_file in log_file_sizes:
                     file_size = log_file_sizes[l_file]
-                file_size = handle_single_log_file_serial(l_file,file_size,i)
+                file_size = 0
+                try:
+                    file_size = handle_single_log_file_serial(l_file,file_size,i)
+                except:
+                    log.error("Could not handle file {0} at all".format(l_file))
                 log_file_sizes[l_file] = file_size
             if i%1000 == 0:
                 log.debug("Epoch {0}".format(i))
