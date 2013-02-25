@@ -62,6 +62,9 @@ def book_page_count_query_course(fs, db, user, course, params):
 @event_handler()
 def book_page_count_event(fs, db, response):
     for resp in response:
+        #NOTE: IF this is uncommented, mongo has INSANE cpu usage.  Do not uncomment without fixing indexes on Mongo
+        #TODO: resolve issue above
+        """
         collection = db['page_count']
         user = resp["username"]
         sba = list(collection.find({'user':user}))
@@ -69,4 +72,6 @@ def book_page_count_event(fs, db, response):
             collection.update({'user':user}, {'$inc':{'pages':1}}, True);
         else:
             collection.insert({'user':user,'pages':1})
+        """
+        pass
 
