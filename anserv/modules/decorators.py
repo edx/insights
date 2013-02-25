@@ -153,6 +153,7 @@ def memoize_query(cache_time = 60*4, timeout = 60*15):
                 else:
                     results = f()
                 cache.set(key, results, cache_time)
+
             return results
         return decorator(wrap_function,f)
     return view_factory

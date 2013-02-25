@@ -7,7 +7,6 @@ from django.conf import settings
 import dummy_values
 import logging
 from django.utils import timezone
-from modules import tasks
 from modules.common import query_results
 
 log=logging.getLogger(__name__)
@@ -62,12 +61,17 @@ def total_course_enrollment_query(fs, db, params):
     r = query_results("SELECT course_id,COUNT(DISTINCT user_id) AS students FROM student_courseenrollment GROUP BY course_id;")
     return r
 
+@query(name = 'active_students', category = 'global')
+def active_course_enrollment_query(fs, db, params):
+    r = common.query_results("SELECT course_id,COUNT(DISTINCT student_id) FROM `courseware_studentmodule` WHERE DATE(modified) >= DATE(DATE_ADD(NOW(), INTERVAL -7 DAY)) GROUP BY course_id;")
+    return r
+
 @view(name = 'active_students')
 def active_course_enrollment_view(fs, db,params):
     ''' Student who were active in the course in the past week
     '''
     ''' UNTESTED '''
-    return json.dumps(tasks.active_course_enrollment_query(fs, db, params), indent=2)
+    return json.dumps(active_course_enrollment_query(fs, db, params), indent=2)
 
 @view(name = 'active_plot')
 def active_user_plot(fs, db, params):
