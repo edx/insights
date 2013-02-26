@@ -8,6 +8,7 @@ import json
 import logging, logging.handlers
 import sys
 from multiprocessing import Pool
+import time
 
 log=logging.getLogger(__name__)
 
@@ -17,6 +18,9 @@ logger.addHandler(http_handler)
 
 from django.core.management.base import NoArgsCommand
 from multiprocessing import Process
+from datetime import timedelta
+
+MIXPANEL_EXPIRE_AFTER = timedelta(days=5).total_seconds()
 
 class Command(NoArgsCommand):
     """
@@ -60,7 +64,18 @@ class Command(NoArgsCommand):
                         log_files.append(joined_filename)
             all_files = all_files + log_files
 
-        return all_files
+        new_files=[]
+        for file in all_files:
+            cur_time = time.time()
+            min_time = cur_time - MIXPANEL_EXPIRE_AFTER
+            try:
+                file_time = os.path.getmtime(file)
+                if file_time > min_time:
+                    new_files.append(file)
+            except:
+                log.error("Could not get accurate time from file {0}".format(file))
+
+        return new_files
 
 def run_single_worker(args):
     l_file,log_file_sizes,i = args
