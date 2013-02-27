@@ -60,7 +60,7 @@ class Command(NoArgsCommand):
                 joined_filename = os.path.join(directory,dir_file)
                 if os.path.isfile(joined_filename):
                     #or
-                    if joined_filename.endswith(".log") or (".log" in joined_filename and not ".gz" in joined_filename):
+                    if (".log" in joined_filename and not ".gz" in joined_filename and not joined_filename.endswith(".log")):
                         log_files.append(joined_filename)
             all_files = all_files + log_files
 
