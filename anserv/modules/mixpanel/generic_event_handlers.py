@@ -18,6 +18,23 @@ OPEN_ENDED_EVENTS_TO_TRACK = ['rubric_select', 'oe_staff_grading_show_problem', 
                               'oe_show_respond_to_feedback', 'oe_feedback_response_selected'
                               ]
 
+def extract_course_and_org(event_data):
+    org = None
+    course = None
+    name = None
+    if 'problem_id' in event_data:
+        split_data = event_data['problem_id'].split('/')
+        org = split_data[2]
+        course = split_data[3]
+        name = split_data[5]
+    elif 'id' in event_data:
+        split_data = event_data['problem_id'].split('-')
+        org = split_data[1]
+        course = split_data[2]
+        name = split_data[4]
+
+    return org,course,name
+
 @event_handler()
 def single_page_track_event(fs, db, response):
     mixpanel_data = []
@@ -28,7 +45,15 @@ def single_page_track_event(fs, db, response):
                 host = resp['host']
                 agent = resp['agent']
                 time_data = extract_time(resp)
-                mixpanel_data.append({'event' : resp['event_type'],'properties' : {'user' : user, 'distinct_id' : user, 'host' : host, 'agent' : agent, 'time' : time_data}})
+                org, course, name = extract_course_and_org(resp)
+                event_data = {'event' : resp['event_type'],'properties' : {'user' : user, 'distinct_id' : user, 'host' : host, 'agent' : agent, 'time' : time_data}}
+                if org is not None:
+                    event_data.update({
+                        'org' : org,
+                        'course' : course,
+                        'name' : name,
+                    })
+                mixpanel_data.append(event_data)
         except:
             log.exception("Mixpanel single page track failed")
     track_event_mixpanel_batch.delay(mixpanel_data)

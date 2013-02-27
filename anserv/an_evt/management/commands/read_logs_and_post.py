@@ -41,7 +41,7 @@ class Command(NoArgsCommand):
 
             if i%1000 == 0:
                 log.debug("Epoch {0}".format(i))
-                log.debug(log_file_sizes)
+            log.debug(log_file_sizes)
             i+=1
 
     def get_log_files(self):
