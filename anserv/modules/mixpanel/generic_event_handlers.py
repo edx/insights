@@ -41,8 +41,8 @@ def extract_course_and_org(event_data):
                     org = split_data[1]
                     course = split_data[2]
                     name = split_data[4]
-            elif isinstance(ev_data,string):
-                split_data = ev_data['problem_id'].split('/')
+            elif isinstance(ev_data,basestring):
+                split_data = ev_data.split('-')
                 org = split_data[2]
                 course = split_data[3]
                 name = split_data[5]
@@ -63,13 +63,9 @@ def single_page_track_event(fs, db, response):
                 agent = resp['agent']
                 time_data = extract_time(resp)
                 org, course, name = extract_course_and_org(resp)
-                log.debug(org)
-                log.debug(course)
-                log.debug(name)
-                log.debug(resp)
                 event_data = {'event' : resp['event_type'],'properties' : {'user' : user, 'distinct_id' : user, 'host' : host, 'agent' : agent, 'time' : time_data}}
                 if org is not None:
-                    event_data.update({
+                    event_data['properties'].update({
                         'org' : org,
                         'course' : course,
                         'name' : name,
