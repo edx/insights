@@ -7,6 +7,7 @@ log=logging.getLogger(__name__)
 from multiprocessing import Pool
 import time
 from dateutil import parser
+import json
 
 SINGLE_PAGES_TO_TRACK = ['/', '/dashboard', '/create_account', 'page_close']
 COURSE_PAGES_TO_TRACK = ['/about']  #'/courses', Dont track courses because it is an insane amount of hits
@@ -22,16 +23,32 @@ def extract_course_and_org(event_data):
     org = None
     course = None
     name = None
-    if 'problem_id' in event_data:
-        split_data = event_data['problem_id'].split('/')
-        org = split_data[2]
-        course = split_data[3]
-        name = split_data[5]
-    elif 'id' in event_data:
-        split_data = event_data['problem_id'].split('-')
-        org = split_data[1]
-        course = split_data[2]
-        name = split_data[4]
+    if 'event' in event_data:
+        try:
+            ev_data = event_data['event']
+            try:
+                ev_data = json.loads(ev_data)
+            except:
+                pass
+            if isinstance(ev_data, dict):
+                if 'problem_id' in ev_data:
+                    split_data = ev_data['problem_id'].split('/')
+                    org = split_data[2]
+                    course = split_data[3]
+                    name = split_data[5]
+                elif 'id' in ev_data:
+                    split_data = ev_data['id'].split('-')
+                    org = split_data[1]
+                    course = split_data[2]
+                    name = split_data[4]
+            elif isinstance(ev_data,string):
+                split_data = ev_data['problem_id'].split('/')
+                org = split_data[2]
+                course = split_data[3]
+                name = split_data[5]
+        except:
+            log.exception("Could not parse json.")
+            pass
 
     return org,course,name
 
@@ -46,6 +63,10 @@ def single_page_track_event(fs, db, response):
                 agent = resp['agent']
                 time_data = extract_time(resp)
                 org, course, name = extract_course_and_org(resp)
+                log.debug(org)
+                log.debug(course)
+                log.debug(name)
+                log.debug(resp)
                 event_data = {'event' : resp['event_type'],'properties' : {'user' : user, 'distinct_id' : user, 'host' : host, 'agent' : agent, 'time' : time_data}}
                 if org is not None:
                     event_data.update({
