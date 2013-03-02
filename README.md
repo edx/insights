@@ -42,7 +42,7 @@ decorators. Final place is for the main views and dashboard.
 Installing
 ----------
 
-    apt-get install python-pip python-matplotlib python-scipy emacs mongodb apache2-utils python-mysqldb subversion ipython nginx git 
+    apt-get install python-pip python-matplotlib python-scipy emacs mongodb apache2-utils python-mysqldb subversion ipython nginx git redis-server
     pip install -r requirements.txt
     
     git clone git@github.com:MITx/analytics-experiments.git
