@@ -4,7 +4,8 @@ from django.core.cache import cache
 import time
 from decorator import decorator
 import logging
-import cronjobs
+from celery.task import PeriodicTask, periodic_task
+from datetime import timedelta
 
 log=logging.getLogger(__name__)
 
@@ -38,7 +39,9 @@ def event_handler(batch=True, per_user=False, per_resource=False,
 
 funcskips = ['fs','db','params']
 funcspecs = [ ([], 'global'),
-              (['user'], 'user') ]
+              (['user'], 'user'),
+              (['course'], 'course'),
+            ]
 
 def register_handler(cls, category, name, description, f, args):
     print "Register", cls, category, name, f
@@ -103,7 +106,6 @@ def isuseful(a):
         return False
     return True
 
-
 def memoize_query(cache_time = 60*4, timeout = 60*15):
     ''' Call function only if we do not have the results for it's execution already
     '''
@@ -132,7 +134,7 @@ def memoize_query(cache_time = 60*4, timeout = 60*15):
                 while cached == 'Processing':
                     cached = cache.get(key)
                     time.sleep(0.1)
-                # At this point, cached should be the result of the
+                    # At this point, cached should be the result of the
                 # cache line, unless we had a failure/timeout, in
                 # which case, it is false
                 results = cached
@@ -156,8 +158,20 @@ def memoize_query(cache_time = 60*4, timeout = 60*15):
         return decorator(wrap_function,f)
     return view_factory
 
-def cron(f=None, time = 5 * 60 * 60, lock=True, params={}):
-    return cronjobs.register(f, time, lock, params)
+def cron_new(period, params=None):
+    ''' Run command periodically
+    Command takes database and
+
+    '''
+    def factory(f):
+        @periodic_task(run_every=period, name=f.__name__)
+        def run():
+            import an_evt.views
+            db = an_evt.views.get_database(f)
+            fs = an_evt.views.get_filesystem(f)
+            f(fs, db, params)
+        return decorator(run,f)
+    return factory
 
 if False:
     # Test case. Should be made into a proper test case.

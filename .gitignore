@@ -42,3 +42,5 @@ db.sql
 
 #Random files
 .idea/
+*.log
+*.orig

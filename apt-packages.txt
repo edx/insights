@@ -1,0 +1,13 @@
+python-pip
+python-matplotlib
+python-scipy
+emacs
+mongodb
+apache2-utils
+python-mysqldb
+subversion
+ipython
+nginx
+git
+redis-server
+libmysqlclient-dev

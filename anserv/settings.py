@@ -2,8 +2,17 @@
 
 import os
 import sys
+from path import path
+
+#Initialize celery
+import djcelery
+djcelery.setup_loader()
 
 BASE_DIR = os.path.abspath(os.path.join(__file__, "..", "..", ".."))
+
+ROOT_PATH = path(__file__).dirname()
+REPO_PATH = ROOT_PATH.dirname()
+ENV_ROOT = REPO_PATH.dirname()
 
 DUMMY_MODE = False
 
@@ -46,6 +55,9 @@ CACHES = {
         'LOCATION': 'unique-snowflake'
     }
 }
+
+LOG_READ_DIRECTORY = "../../analytics-logs/"
+LOG_POST_URL = "http://127.0.0.1:9022/event"
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -158,7 +170,8 @@ INSTALLED_APPS = (
     'modules.page_count',
     'modules.user_stats',
     'mitxmako',
-    'cronjobs'
+    'djcelery',
+    'south'
 )
 
 # A sample logging configuration. The only tangible logging
@@ -205,6 +218,12 @@ LOGGING = {
     }
 }
 MITX_ROOT_URL = ''
+
+DIRECTORIES_TO_READ = []
+
+BROKER_URL = 'redis://localhost:6379/0'
+BROKER_TRANSPORT_OPTIONS = {'visibility_timeout': 3600}
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
 
 override_settings = os.path.join(BASE_DIR, "override_settings.py")
 if os.path.isfile(override_settings):

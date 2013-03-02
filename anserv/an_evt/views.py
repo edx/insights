@@ -4,6 +4,7 @@ import os
 
 from django.http import HttpResponse
 from django.utils.datastructures import MultiValueDictKeyError
+from django.views.decorators.csrf import csrf_exempt
 
 from django.conf import settings
 
@@ -17,11 +18,18 @@ from modules.decorators import event_handlers, request_handlers
 import modules.page_count.book_count
 import modules.user_stats.user_stats
 import modules.user_stats.logins
+import modules.mixpanel.generic_event_handlers
+import modules.course_stats.course_stats
+import modules.tasks
 ### END HACK ###
 
 from pymongo import MongoClient
 connection = MongoClient()
 #db = connection['analytic_store']
+
+import logging
+
+log=logging.getLogger(__name__)
 
 def get_database(f):
     ''' Given a function in a module, return the Mongo DB associated
@@ -111,25 +119,50 @@ def handle_query(request, category, name, **kwargs):
     '''
     return HttpResponse(json.dumps(handle_request(request, 'query', category, name, **kwargs)))
 
+@csrf_exempt
 def handle_event(request):
-    try: # Not sure why this is necessary, but on some systems it is 'msg', and on others, 'message'
-        response = json.loads(request.GET['message'])
-    except MultiValueDictKeyError: 
-        response = json.loads(request.GET['msg'])
+    if request.GET:
+        try: # Not sure why this is necessary, but on some systems it is 'msg', and on others, 'message'
+            response = json.loads(request.GET['message'])
+        except MultiValueDictKeyError:
+            response = json.loads(request.GET['msg'])
+    else:
+        try:
+            response = json.loads(request.POST['message'])
+        except:
+            response = json.loads(request.POST['msg'])
 
-    print event_handlers
+    if isinstance(response,list):
+        for i in xrange(0,len(response)):
+            try:
+                response[i] = json.loads(response[i])
+            except:
+                pass
+
     for e in event_handlers:
         event_func = e['function']
         batch = e['batch']
         fs = get_filesystem(event_func)
         database = get_database(event_func)
         if not isinstance(response,list):
-            event_func(fs, database, [response])
+            try:
+                event_func(fs, database, [response])
+            except:
+                handle_event_exception(e['function'])
         elif not batch:
             for event in response:
-                event_func(fs, database, [event])
+                try:
+                    event_func(fs, database, [event])
+                except:
+                    handle_event_exception(e['function'])
         else:
-            event_func(fs, database, response)
+            try:
+                event_func(fs, database, response)
+            except:
+                handle_event_exception(e['function'])
 
     return HttpResponse( "Success" )
+
+def handle_event_exception(function):
+    log.exception("Handler {0} failed".format(function))
 

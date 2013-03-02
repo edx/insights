@@ -5,3 +5,13 @@ flup
 fs
 # mysql-client
 mako
+requests
+multiprocessing
+gunicorn
+path.py
+decorator
+MySQL-python
+simplejson
+south
+django-celery
+celery-with-redis

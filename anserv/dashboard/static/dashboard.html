@@ -338,7 +338,7 @@
     }
     function load_user_rcontent(node)
     {
-        $('#rcontent').load("/view/user/"+node+"/"+$('#username_text').val());
+        $('#rcontent').load("/view/user/"+node+"?user="+$('#username_text').val());
     }
     function tidy_str(str)
     {
