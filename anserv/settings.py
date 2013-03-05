@@ -231,6 +231,10 @@ HTSQL_CONFIG = {
     'tweak.shell.default': {},
     # Enable meta-data queries.
     'tweak.meta': {},
+    'tweak.override' : {
+        'included-tables': ['*'],
+        'excluded-tables': []
+    }
     }
 
 MITX_ROOT_URL = ''
