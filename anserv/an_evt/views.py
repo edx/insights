@@ -2,9 +2,10 @@ import inspect
 import json
 import os
 
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.utils.datastructures import MultiValueDictKeyError
 from django.views.decorators.csrf import csrf_exempt
+from django.core.urlresolvers import reverse
 
 from django.conf import settings
 
@@ -110,6 +111,9 @@ def handle_view(request, category, name, **kwargs):
         Category is where this should be place (per student, per problem, etc.)
         Name is specific 
     '''
+    if not request.user.is_authenticated():
+        return HttpResponseRedirect(reverse('django.contrib.auth.views.login'))
+
     return HttpResponse(handle_request(request, 'view', category, name, **kwargs))
 
 def handle_query(request, category, name, **kwargs):
@@ -117,6 +121,9 @@ def handle_query(request, category, name, **kwargs):
         Category is where this should be place (per student, per problem, etc.)
         Name is specific 
     '''
+    if not request.user.is_authenticated():
+        return HttpResponseRedirect(reverse('django.contrib.auth.views.login'))
+
     return HttpResponse(json.dumps(handle_request(request, 'query', category, name, **kwargs)))
 
 @csrf_exempt

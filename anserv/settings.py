@@ -28,6 +28,8 @@ ADMINS = (
 
 MANAGERS = ADMINS
 
+LOGIN_REDIRECT_URL = "/"
+
 DATABASES = {
     'default': { ## Main analytics read replica
         'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
@@ -148,7 +150,9 @@ TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
-    BASE_DIR
+    BASE_DIR,
+    str(os.path.abspath(REPO_PATH / 'templates/')),
+    str(os.path.abspath(REPO_PATH / 'anserv/templates/')),
 )
 
 INSTALLED_APPS = (
@@ -171,7 +175,9 @@ INSTALLED_APPS = (
     'modules.user_stats',
     'mitxmako',
     'djcelery',
-    'south'
+    'south',
+    'htsql_django',
+    'frontend'
 )
 
 # A sample logging configuration. The only tangible logging
@@ -217,6 +223,16 @@ LOGGING = {
         },
     }
 }
+
+HTSQL_CONFIG = {
+    # Set the maximum number of output rows.
+    'tweak.autolimit': { 'limit': 10000 },
+    # Enable the web-based query editor.
+    'tweak.shell.default': {},
+    # Enable meta-data queries.
+    'tweak.meta': {},
+    }
+
 MITX_ROOT_URL = ''
 
 DIRECTORIES_TO_READ = []

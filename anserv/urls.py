@@ -27,6 +27,8 @@ urlpatterns = patterns('',
 
     # Uncomment the next line to enable the admin:
     # url(r'^admin/', include(admin.site.urls)),
+    url(r'^htsql/', include('htsql_django.urls')),
+    url(r'^frontend/', include('frontend.urls')),
 )
 
 handler404 = 'error_templates.render_404'

@@ -3,9 +3,9 @@ class DatabaseRouter(object):
     accesses to local DB. 
     '''
     def db_for_read(self, model, **hints):
-        if model._meta.app_label in ['student','courseware','auth', 'contenttypes']: 
+        if model._meta.app_label in ['student','courseware','auth', 'contenttypes', 'sessions']:
             return 'default'
-        elif model._meta.app_label in ['an_evt','modules', 'cronjobs', 'celery']:
+        elif model._meta.app_label in ['an_evt','modules', 'cronjobs', 'celery', 'sites']:
             return 'local'
         else: 
             print "ERROR. We need to explicitly route: ", model._meta.app_label
