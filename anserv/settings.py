@@ -14,6 +14,8 @@ ROOT_PATH = path(__file__).dirname()
 REPO_PATH = ROOT_PATH.dirname()
 ENV_ROOT = REPO_PATH.dirname()
 
+MITX_PATH = os.path.abspath("../../mitx/")
+
 DUMMY_MODE = False
 
 MAKO_TEMPLATES = {'main': 'templates'}
@@ -177,7 +179,10 @@ INSTALLED_APPS = (
     'djcelery',
     'south',
     'htsql_django',
-    'frontend'
+    'frontend',
+    'pipeline',
+    'staticfiles',
+    'static_replace',
 )
 
 # A sample logging configuration. The only tangible logging

@@ -1,16 +1,30 @@
 from modules.decorators import view, query, event_handler, memoize_query
 #from an_evt.models import StudentBookAccesses
 from django.contrib.auth.models import User
-from courseware.models import StudentModule
+
 import json
 from django.conf import settings
 import logging
 from django.utils import timezone
 import datetime
 from modules import common
+import sys
 
 log=logging.getLogger(__name__)
 import re
+
+log.debug(settings.MITX_PATH)
+LMS_PATH = "{0}/{1}".format(settings.MITX_PATH, "lms")
+DJANGOAPPS_PATH = "{0}/{1}/{2}".format(settings.MITX_PATH, "lms", "djangoapps")
+
+sys.path.append(LMS_PATH)
+sys.path.append(DJANGOAPPS_PATH)
+
+import djangoapps.courseware.access
+import djangoapps.courseware.grades
+from djangoapps.courseware.models import StudentModule
+
+log.debug(djangoapps.courseware.grades)
 
 from mitxmako.shortcuts import render_to_response, render_to_string
 
