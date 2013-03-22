@@ -7,6 +7,8 @@ from modules import common
 from django.conf import settings
 import sys
 import io
+log = logging.getLogger(__name__)
+log.error(settings._wrapped.__dict__)
 
 sys.path.append(settings.DJANGOAPPS_PATH)
 sys.path.append(settings.COMMON_PATH)
@@ -55,18 +57,16 @@ def get_student_course_stats(request, course):
     course_obj = get_course_with_access(request.user, course, 'load', depth=None)
     users_in_course = StudentModule.objects.filter(course_id=course).values('student').distinct()
     users_in_course_ids = [u['student'] for u in users_in_course]
-    log.debug("Users in course {0}".format(users_in_course))
+    log.error("Users in course {0}".format(users_in_course))
     courseware_summaries = []
     rows = []
     for user in users_in_course_ids:
-        student = User.objects.get(id=int(user))
-        log.debug(student)
         # NOTE: To make sure impersonation by instructor works, use
         # student instead of request.user in the rest of the function.
 
         # The pre-fetching of groups is done to make auth checks not require an
         # additional DB lookup (this kills the Progress page in particular).
-        student = User.objects.prefetch_related("groups").get(id=student.id)
+        student = User.objects.using('default').prefetch_related("groups").get(id=int(user))
 
         model_data_cache = None
 
@@ -74,7 +74,7 @@ def get_student_course_stats(request, course):
         grade_summary = grades.grade(student, request, course_obj, model_data_cache)
         courseware_summaries.append(grade_summary)
     for z in xrange(0,len(courseware_summaries)):
-        log.debug(courseware_summaries[z])
+        log.error(courseware_summaries[z])
         row = {'student' : users_in_course_ids[z], 'overall_percent' : courseware_summaries[z]["percent"]}
         row.update({c['category'] : c['percent'] for c in courseware_summaries[z]["grade_breakdown"]})
         rows.append(row)

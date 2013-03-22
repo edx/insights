@@ -1,3 +1,6 @@
+import logging
+log = logging.getLogger(__name__)
+log.error("BLAH")
 from modules.decorators import view, query, event_handler, memoize_query
 #from an_evt.models import StudentBookAccesses
 from django.contrib.auth.models import User
@@ -21,6 +24,7 @@ sys.path.append(settings.DJANGOAPPS_PATH)
 sys.path.append(settings.COMMON_PATH)
 sys.path.append(settings.LMS_LIB_PATH)
 
+log.error("BLAH")
 import courseware
 from courseware import grades
 from courseware.models import StudentModule
