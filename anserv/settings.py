@@ -188,7 +188,6 @@ INSTALLED_APPS = (
     'mitxmako',
     'djcelery',
     'south',
-    'htsql_django',
     'frontend',
     'pipeline',
     'staticfiles',
