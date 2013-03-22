@@ -1,3 +1,8 @@
+import sys
+import os
+
+from path import path
+
 XQUEUE_INTERFACE = {
     "url": "http://127.0.0.1:3032",
     "django_auth": {
@@ -60,3 +65,21 @@ MITX_FEATURES = {
     # Staff Debug tool.
     'ENABLE_STUDENT_HISTORY_VIEW': True
 }
+
+############################# SET PATH INFORMATION #############################
+REPO_ROOT = path(__file__).abspath().dirname().dirname()  # /mitx/lms
+ENV_ROOT = REPO_ROOT.dirname()  # virtualenv dir /mitx is in
+COURSES_ROOT = ENV_ROOT / "data"
+
+DATA_DIR = COURSES_ROOT
+
+MODULESTORE = {
+    'default': {
+        'ENGINE': 'xmodule.modulestore.xml.XMLModuleStore',
+        'OPTIONS': {
+            'data_dir': DATA_DIR,
+            'default_class': 'xmodule.hidden_module.HiddenDescriptor',
+            }
+    }
+}
+

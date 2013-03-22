@@ -9,6 +9,7 @@ from django.utils import timezone
 import datetime
 from modules import common
 import sys
+from django.contrib.auth.models import User
 
 log=logging.getLogger(__name__)
 import re
@@ -22,14 +23,20 @@ sys.path.append(settings.LMS_LIB_PATH)
 
 #os.environ.setdefault("DJANGO_SETTINGS_MODULE", "lms.ens.dev")
 import courseware
-from courseware.grades import grade
+from courseware import grades
 from courseware.models import StudentModule
+from courseware.courses import get_course_with_access
+from courseware.model_data import ModelDataCache, LmsKeyValueStore
 
 from mitxmako.shortcuts import render_to_response, render_to_string
 
 @query('course', 'total_user_count')
 def users_in_course_count_query(fs, db, course,params):
-    return StudentModule.objects.filter(course_id=course).values('student').distinct().count()
+    return users_in_course_query(fs,db,course,params).count()
+
+@query('course', 'all_users')
+def users_in_course_query(fs, db, course,params):
+    return StudentModule.objects.filter(course_id=course).values('student').distinct()
 
 @query('course', 'modules_accessed_count')
 def modules_accessed_in_course_count_query(fs, db, course, params):
@@ -79,4 +86,29 @@ def new_course_enrollment_query(fs, db, params):
 def new_course_enrollment_view(fs, db, params):
     r = new_course_enrollment_query(fs,db,params)
     return common.render_query_as_table(r)
+
+@query('course', 'student_grades')
+def course_grades_query(fs,db,course, params):
+    request = params['request']
+    course = get_course_with_access(request.user, course, 'load', depth=None)
+    users_in_course = users_in_course_query(fs,db,course,params)
+    courseware_summaries = []
+    for user in users_in_course:
+        student = User.objects.get(id=int(user))
+
+        # NOTE: To make sure impersonation by instructor works, use
+        # student instead of request.user in the rest of the function.
+
+        # The pre-fetching of groups is done to make auth checks not require an
+        # additional DB lookup (this kills the Progress page in particular).
+        student = User.objects.prefetch_related("groups").get(id=student.id)
+
+        model_data_cache = ModelDataCache.cache_for_descriptor_descendents(
+            course, student, course, depth=None)
+
+        courseware_summary = grades.progress_summary(student, request, course,
+                                                     model_data_cache)
+        #grade_summary = grades.grade(student, request, course, model_data_cache)
+        courseware_summaries.append(courseware_summary)
+    return courseware_summaries
 

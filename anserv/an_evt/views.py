@@ -89,6 +89,7 @@ def handle_request(request, cls, category, name, **kwargs):
     params = {}
     params.update(request.GET)
     params.update(request.POST)
+    params.update({'request' : request})
     for arg in arglist:
         if arg == 'db':
             args[arg] = get_database(handler)
