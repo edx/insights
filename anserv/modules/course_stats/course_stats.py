@@ -15,13 +15,10 @@ import re
 import os
 
 log.debug(settings.MITX_PATH)
-DJANGOAPPS_PATH = "{0}/{1}/{2}".format(settings.MITX_PATH, "lms", "djangoapps")
-LMS_LIB_PATH = "{0}/{1}/{2}".format(settings.MITX_PATH, "lms", "lib")
-COMMON_PATH = "{0}/{1}/{2}".format(settings.MITX_PATH, "common", "djangoapps")
 
-sys.path.append(DJANGOAPPS_PATH)
-sys.path.append(COMMON_PATH)
-sys.path.append(LMS_LIB_PATH)
+sys.path.append(settings.DJANGOAPPS_PATH)
+sys.path.append(settings.COMMON_PATH)
+sys.path.append(settings.LMS_LIB_PATH)
 
 #os.environ.setdefault("DJANGO_SETTINGS_MODULE", "lms.ens.dev")
 import courseware

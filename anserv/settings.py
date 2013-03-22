@@ -4,6 +4,16 @@ import os
 import sys
 from path import path
 
+MITX_PATH = os.path.abspath("../../mitx/")
+DJANGOAPPS_PATH = "{0}/{1}/{2}".format(MITX_PATH, "lms", "djangoapps")
+LMS_LIB_PATH = "{0}/{1}/{2}".format(MITX_PATH, "lms", "lib")
+COMMON_PATH = "{0}/{1}/{2}".format(MITX_PATH, "common", "djangoapps")
+
+sys.path.append(MITX_PATH)
+sys.path.append(DJANGOAPPS_PATH)
+sys.path.append(LMS_LIB_PATH)
+sys.path.append(COMMON_PATH)
+
 #Initialize celery
 import djcelery
 djcelery.setup_loader()
@@ -13,6 +23,8 @@ BASE_DIR = os.path.abspath(os.path.join(__file__, "..", "..", ".."))
 ROOT_PATH = path(__file__).dirname()
 REPO_PATH = ROOT_PATH.dirname()
 ENV_ROOT = REPO_PATH.dirname()
+
+
 
 DUMMY_MODE = False
 
@@ -177,7 +189,10 @@ INSTALLED_APPS = (
     'djcelery',
     'south',
     'htsql_django',
-    'frontend'
+    'frontend',
+    'pipeline',
+    'staticfiles',
+    'static_replace',
 )
 
 # A sample logging configuration. The only tangible logging
@@ -244,6 +259,10 @@ DIRECTORIES_TO_READ = []
 BROKER_URL = 'redis://localhost:6379/0'
 BROKER_TRANSPORT_OPTIONS = {'visibility_timeout': 3600}
 CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+
+
+#Needed for MITX imports to work
+from mitx_settings import *
 
 override_settings = os.path.join(BASE_DIR, "override_settings.py")
 if os.path.isfile(override_settings):
