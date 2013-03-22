@@ -91,7 +91,7 @@ def course_grades_query(fs,db,course, params):
     request = params['request']
     request_dict = RequestDict(request)
     task = tasks.get_student_course_stats.delay(request_dict,course)
-    return task.task_id
+    return {'task_id' : task.task_id, 'message' : 'Task queued.  Check back later for results', 'result_url' : "tasks/{0}/status".format(task.task_id)}
 
 class RequestDict(object):
     def __init__(self, request):
