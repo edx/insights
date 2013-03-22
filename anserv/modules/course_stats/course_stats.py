@@ -10,10 +10,12 @@ import datetime
 from modules import common
 import sys
 from django.contrib.auth.models import User
+import csv
 
 log=logging.getLogger(__name__)
 import re
 import os
+from django.http import HttpResponse
 
 log.debug(settings.MITX_PATH)
 
@@ -95,6 +97,7 @@ def course_grades_query(fs,db,course, params):
     users_in_course_ids = [u['student'] for u in users_in_course]
     log.debug("Users in course {0}".format(users_in_course))
     courseware_summaries = []
+    writer, response = set_up_csv_writer(course)
     for user in users_in_course_ids:
         student = User.objects.get(id=int(user))
         log.debug(student)
@@ -110,5 +113,18 @@ def course_grades_query(fs,db,course, params):
         #courseware_summary = grades.progress_summary(student, request, course_obj, model_data_cache)
         grade_summary = grades.grade(student, request, course_obj, model_data_cache)
         courseware_summaries.append(grade_summary)
-    return courseware_summaries
+    for z in xrange(0,len(courseware_summaries)):
+        log.debug(courseware_summaries[z])
+        if z==0:
+            writer.writerow(["Student ID"] + [c['category'] for c in courseware_summaries[z]["grade_breakdown"]] + ["Overall Percentage"])
+        writer.writerow([users_in_course_ids[z]] + [c['percent'] for c in courseware_summaries[z]["grade_breakdown"]] + [courseware_summaries[z]["percent"]])
+    return response
+
+def set_up_csv_writer(name):
+    name = re.sub("[/:]","_",name)
+    response = HttpResponse(mimetype='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="{0}.csv"'.format(name)
+    writer = csv.writer(response)
+
+    return writer, response
 

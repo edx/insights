@@ -123,8 +123,11 @@ def handle_query(request, category, name, **kwargs):
     '''
     if not request.user.is_authenticated():
         return HttpResponseRedirect(reverse('django.contrib.auth.views.login'))
-
-    return HttpResponse(json.dumps(handle_request(request, 'query', category, name, **kwargs)))
+    request_data = handle_request(request, 'query', category, name, **kwargs)
+    try:
+        return HttpResponse(json.dumps(request_data))
+    except:
+        return request_data
 
 @csrf_exempt
 def handle_event(request):
