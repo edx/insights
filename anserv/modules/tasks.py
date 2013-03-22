@@ -10,6 +10,9 @@ import io
 log = logging.getLogger(__name__)
 log.error(settings._wrapped.__dict__)
 
+log=logging.getLogger(__name__)
+
+log.error(settings)
 sys.path.append(settings.DJANGOAPPS_PATH)
 sys.path.append(settings.COMMON_PATH)
 sys.path.append(settings.LMS_LIB_PATH)
@@ -26,7 +29,6 @@ from django.http import HttpResponse
 import json
 
 
-log=logging.getLogger(__name__)
 
 @task()
 def track_event_mixpanel_batch(event_list):
@@ -61,11 +63,6 @@ def get_student_course_stats(request, course):
     courseware_summaries = []
     rows = []
     for user in users_in_course_ids:
-        # NOTE: To make sure impersonation by instructor works, use
-        # student instead of request.user in the rest of the function.
-
-        # The pre-fetching of groups is done to make auth checks not require an
-        # additional DB lookup (this kills the Progress page in particular).
         student = User.objects.using('default').prefetch_related("groups").get(id=int(user))
 
         model_data_cache = None
