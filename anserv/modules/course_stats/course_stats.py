@@ -90,12 +90,14 @@ def new_course_enrollment_view(fs, db, params):
 @query('course', 'student_grades')
 def course_grades_query(fs,db,course, params):
     request = params['request']
-    course = get_course_with_access(request.user, course, 'load', depth=None)
+    course_obj = get_course_with_access(request.user, course, 'load', depth=None)
     users_in_course = users_in_course_query(fs,db,course,params)
+    users_in_course_ids = [u['student'] for u in users_in_course]
+    log.debug("Users in course {0}".format(users_in_course))
     courseware_summaries = []
-    for user in users_in_course:
+    for user in users_in_course_ids:
         student = User.objects.get(id=int(user))
-
+        log.debug(student)
         # NOTE: To make sure impersonation by instructor works, use
         # student instead of request.user in the rest of the function.
 
@@ -103,12 +105,10 @@ def course_grades_query(fs,db,course, params):
         # additional DB lookup (this kills the Progress page in particular).
         student = User.objects.prefetch_related("groups").get(id=student.id)
 
-        model_data_cache = ModelDataCache.cache_for_descriptor_descendents(
-            course, student, course, depth=None)
+        model_data_cache = None
 
-        courseware_summary = grades.progress_summary(student, request, course,
-                                                     model_data_cache)
-        #grade_summary = grades.grade(student, request, course, model_data_cache)
-        courseware_summaries.append(courseware_summary)
+        #courseware_summary = grades.progress_summary(student, request, course_obj, model_data_cache)
+        grade_summary = grades.grade(student, request, course_obj, model_data_cache)
+        courseware_summaries.append(grade_summary)
     return courseware_summaries
 

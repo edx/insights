@@ -83,3 +83,5 @@ MODULESTORE = {
     }
 }
 
+GENERATE_PROFILE_SCORES = False
+

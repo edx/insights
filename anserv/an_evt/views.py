@@ -78,7 +78,6 @@ def handle_probe(request, cls=None, category=None, details = None):
 def handle_request(request, cls, category, name, **kwargs):
     ''' Generic code from handle_view and handle_query '''
     args = dict()
-    print cls
     handler_dict = request_handlers[cls][category][name]
     handler = handler_dict['function']
     if 'args' in handler_dict:
