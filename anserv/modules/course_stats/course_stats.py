@@ -12,19 +12,21 @@ import sys
 
 log=logging.getLogger(__name__)
 import re
+import os
 
 log.debug(settings.MITX_PATH)
-LMS_PATH = "{0}/{1}".format(settings.MITX_PATH, "lms")
 DJANGOAPPS_PATH = "{0}/{1}/{2}".format(settings.MITX_PATH, "lms", "djangoapps")
+LMS_LIB_PATH = "{0}/{1}/{2}".format(settings.MITX_PATH, "lms", "lib")
+COMMON_PATH = "{0}/{1}/{2}".format(settings.MITX_PATH, "common", "djangoapps")
 
-sys.path.append(LMS_PATH)
 sys.path.append(DJANGOAPPS_PATH)
+sys.path.append(COMMON_PATH)
+sys.path.append(LMS_LIB_PATH)
 
-import djangoapps.courseware.access
-import djangoapps.courseware.grades
-from djangoapps.courseware.models import StudentModule
-
-log.debug(djangoapps.courseware.grades)
+#os.environ.setdefault("DJANGO_SETTINGS_MODULE", "lms.ens.dev")
+import courseware
+from courseware.grades import grade
+from courseware.models import StudentModule
 
 from mitxmako.shortcuts import render_to_response, render_to_string
 
