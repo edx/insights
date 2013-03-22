@@ -256,6 +256,7 @@ DIRECTORIES_TO_READ = []
 BROKER_URL = 'redis://localhost:6379/0'
 BROKER_TRANSPORT_OPTIONS = {'visibility_timeout': 3600}
 CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+CELERY_TASK_RESULT_EXPIRES = 60 * 60 #1 hour
 
 
 #Needed for MITX imports to work
