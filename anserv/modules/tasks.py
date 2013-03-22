@@ -53,6 +53,8 @@ def get_db_and_fs_cron(f):
 
 @task
 def get_student_course_stats(request, course):
+    fs, db = get_db_and_fs_cron(get_student_course_stats)
+    course_name = re.sub("[/:]","_",course)
     course_obj = get_course_with_access(request.user, course, 'load', depth=None)
     users_in_course = StudentModule.objects.filter(course_id=course).values('student').distinct()
     users_in_course_ids = [u['student'] for u in users_in_course]
@@ -73,5 +75,26 @@ def get_student_course_stats(request, course):
         row = {'student' : users_in_course_ids[z], 'overall_percent' : courseware_summaries[z]["percent"]}
         row.update({c['category'] : c['percent'] for c in courseware_summaries[z]["grade_breakdown"]})
         rows.append(row)
-    return json.dumps(rows)
+
+    file_name = "student_grades_{0}.csv".format(course_name)
+    try:
+        return_csv(fs,file_name, rows)
+    except:
+        log.exception("Could not generate csv file.")
+        file_name = "no_file_generated"
+
+    return json.dumps({'result_data' : rows, 'result_file' : file_name})
+
+def return_csv(fs, filename, results):
+    output = fs.open(filename, 'w')
+    writer = csv.writer(output, dialect='excel', quotechar='"', quoting=csv.QUOTE_ALL)
+    row_keys = results[0].keys()
+    writer.writerow(row_keys)
+    for datarow in results:
+        encoded_row = []
+        for key in row_keys:
+            encoded_row+=[unicode(datarow[key]).encode('utf-8')]
+        writer.writerow(encoded_row)
+    output.close()
+    return True
 
