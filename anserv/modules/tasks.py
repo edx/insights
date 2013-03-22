@@ -68,7 +68,7 @@ def get_student_course_stats(request, course):
         log.exception("Could not generate csv file.")
         file_name = "no_file_generated"
 
-    return json.dumps({'result_data' : rows, 'result_file' : file_name})
+    return json.dumps({'result_data' : rows, 'result_file' : "{0}/{1}".format(settings.STATIC_URL, file_name)})
 
 @task
 def get_student_problem_stats(request,course):
@@ -89,7 +89,7 @@ def get_student_problem_stats(request,course):
         log.exception("Could not generate csv file.")
         file_name = "no_file_generated"
 
-    return json.dumps({'result_data' : rows, 'result_file' : file_name})
+    return json.dumps({'result_data' : rows, 'result_file' : "{0}/{1}".format(settings.STATIC_URL, file_name)})
 
 def get_student_course_stats_base(request,course,type="grades"):
     fs, db = get_db_and_fs_cron(get_student_course_stats)
