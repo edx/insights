@@ -18,3 +18,4 @@ celery-with-redis
 HTSQL
 HTSQL-MYSQL
 HTSQL-DJANGO
+django-pipeline

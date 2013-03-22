@@ -11,3 +11,4 @@ nginx
 git
 redis-server
 libmysqlclient-dev
+yui-compressor
