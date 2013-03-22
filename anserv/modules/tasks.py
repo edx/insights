@@ -70,7 +70,6 @@ def get_student_course_stats(request, course):
         grade_summary = grades.grade(student, request, course_obj, model_data_cache)
         courseware_summaries.append(grade_summary)
     for z in xrange(0,len(courseware_summaries)):
-        log.debug(courseware_summaries[z])
         row = {'student' : users_in_course_ids[z], 'overall_percent' : courseware_summaries[z]["percent"]}
         row.update({c['category'] : c['percent'] for c in courseware_summaries[z]["grade_breakdown"]})
         rows.append(row)
