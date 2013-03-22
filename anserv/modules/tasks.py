@@ -54,23 +54,8 @@ def get_db_and_fs_cron(f):
 @task
 def get_student_course_stats(request, course):
     fs, db = get_db_and_fs_cron(get_student_course_stats)
-    course_name = re.sub("[/:]","_",course)
-    course_obj = get_course_with_access(request.user, course, 'load', depth=None)
-    users_in_course = StudentModule.objects.filter(course_id=course).values('student').distinct()
-    users_in_course_ids = [u['student'] for u in users_in_course]
-    log.debug("Users in course count: {0}".format(len(users_in_course_ids)))
-    courseware_summaries = []
+    courseware_summaries, users_in_course_ids, course_name = get_student_course_stats_base(request,course,"grades")
     rows = []
-    for i in xrange(0,len(users_in_course_ids)):
-        user = users_in_course_ids[i]
-        current_task.update_state(state='PROGRESS', meta={'current': i, 'total': len(users_in_course_ids)})
-        student = User.objects.using('default').prefetch_related("groups").get(id=int(user))
-
-        model_data_cache = None
-
-        #courseware_summary = grades.progress_summary(student, request, course_obj, model_data_cache)
-        grade_summary = grades.grade(student, request, course_obj, model_data_cache)
-        courseware_summaries.append(grade_summary)
     for z in xrange(0,len(courseware_summaries)):
         row = {'student' : users_in_course_ids[z], 'overall_percent' : courseware_summaries[z]["percent"]}
         row.update({c['category'] : c['percent'] for c in courseware_summaries[z]["grade_breakdown"]})
@@ -84,6 +69,50 @@ def get_student_course_stats(request, course):
         file_name = "no_file_generated"
 
     return json.dumps({'result_data' : rows, 'result_file' : file_name})
+
+@task
+def get_student_problem_stats(request,course):
+    fs, db = get_db_and_fs_cron(get_student_course_stats)
+    courseware_summaries, users_in_course_ids, course_name = get_student_course_stats_base(request,course,"grades")
+    rows = []
+    for z in xrange(0,len(courseware_summaries)):
+        log.info(courseware_summaries[z])
+        row = {'student' : users_in_course_ids[z]}
+        #row.update({'problem_data' : courseware_summaries[z]})
+        row.update({c['label'] : c['percent'] for c in courseware_summaries[z]["section_breakdown"]})
+        rows.append(row)
+
+    file_name = "student_problem_grades_{0}.csv".format(course_name)
+    try:
+        return_csv(fs,file_name, rows)
+    except:
+        log.exception("Could not generate csv file.")
+        file_name = "no_file_generated"
+
+    return json.dumps({'result_data' : rows, 'result_file' : file_name})
+
+def get_student_course_stats_base(request,course,type="grades"):
+    fs, db = get_db_and_fs_cron(get_student_course_stats)
+    course_name = re.sub("[/:]","_",course)
+    course_obj = get_course_with_access(request.user, course, 'load', depth=None)
+    users_in_course = StudentModule.objects.filter(course_id=course).values('student').distinct()
+    users_in_course_ids = [u['student'] for u in users_in_course]
+    log.debug("Users in course count: {0}".format(len(users_in_course_ids)))
+    courseware_summaries = []
+    for i in xrange(0,len(users_in_course_ids)):
+        user = users_in_course_ids[i]
+        current_task.update_state(state='PROGRESS', meta={'current': i, 'total': len(users_in_course_ids)})
+        student = User.objects.using('default').prefetch_related("groups").get(id=int(user))
+
+        model_data_cache = None
+
+        if type=="grades":
+            grade_summary = grades.grade(student, request, course_obj, model_data_cache)
+        else:
+            grade_summary = grades.progress_summary(student, request, course_obj, model_data_cache)
+        courseware_summaries.append(grade_summary)
+    return courseware_summaries, users_in_course_ids, course_name
+
 
 def return_csv(fs, filename, results):
     output = fs.open(filename, 'w')
