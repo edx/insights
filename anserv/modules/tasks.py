@@ -25,8 +25,7 @@ import re
 import csv
 from django.http import HttpResponse
 import json
-
-
+from celery import current_task
 
 @task()
 def track_event_mixpanel_batch(event_list):
@@ -57,10 +56,12 @@ def get_student_course_stats(request, course):
     course_obj = get_course_with_access(request.user, course, 'load', depth=None)
     users_in_course = StudentModule.objects.filter(course_id=course).values('student').distinct()
     users_in_course_ids = [u['student'] for u in users_in_course]
-    log.debug("Users in course {0}".format(users_in_course))
+    log.debug("Users in course count: {0}".format(len(users_in_course_ids)))
     courseware_summaries = []
     rows = []
-    for user in users_in_course_ids:
+    for i in xrange(0,len(users_in_course_ids)):
+        user = users_in_course_ids[i]
+        current_task.update_state(state='PROGRESS', meta={'current': i, 'total': len(users_in_course_ids)})
         student = User.objects.using('default').prefetch_related("groups").get(id=int(user))
 
         model_data_cache = None
