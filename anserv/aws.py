@@ -1,4 +1,5 @@
 from settings import *
+from mitx_aws import *
 import json
 
 with open(ENV_ROOT / "env.json") as env_file:
