@@ -44,3 +44,4 @@ db.sql
 .idea/
 *.log
 *.orig
+staticfiles/

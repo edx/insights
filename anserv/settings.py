@@ -130,9 +130,8 @@ STATICFILES_DIRS = (
 # List of finder classes that know how to find static files in
 # various locations.
 STATICFILES_FINDERS = (
-    'django.contrib.staticfiles.finders.FileSystemFinder',
-    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-#    'django.contrib.staticfiles.finders.DefaultStorageFinder',
+    'staticfiles.finders.FileSystemFinder',
+    'staticfiles.finders.AppDirectoriesFinder',
 )
 
 # Make this unique, and don't share it with anybody.
@@ -173,7 +172,6 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.sites',
     'django.contrib.messages',
-    'django.contrib.staticfiles',
     # Uncomment the next line to enable the admin:
     # 'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
@@ -190,6 +188,7 @@ INSTALLED_APPS = (
     'pipeline',
     'staticfiles',
     'static_replace',
+    'pipeline',
 )
 
 # A sample logging configuration. The only tangible logging
@@ -258,6 +257,47 @@ BROKER_TRANSPORT_OPTIONS = {'visibility_timeout': 3600}
 CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
 CELERY_TASK_RESULT_EXPIRES = 60 * 60 #1 hour
 
+STATIC_ROOT = os.path.abspath(REPO_PATH / "staticfiles")
+
+# URL prefix for static files.
+# Example: "http://media.lawrence.com/static/"
+STATIC_URL = '/static/'
+
+# Additional locations of static files
+STATICFILES_DIRS = (
+    # Put strings here, like "/home/html/static" or "C:/www/django/static".
+    # Always use forward slashes, even on Windows.
+    # Don't forget to use absolute paths, not relative paths.
+    os.path.abspath(REPO_PATH / 'css_js_src/'),
+)
+
+STATICFILES_STORAGE = 'pipeline.storage.PipelineCachedStorage'
+
+PIPELINE_JS = {
+    'util' : {
+        'source_filenames': [
+            'js/jquery-1.9.1.js',
+            'js/json2.js',
+            'js/underscore.js',
+            'js/backbone.js',
+            'js/backbone.validations.js'
+            'js/jquery.cookie.js',
+            ],
+        'output_filename': 'js/util.js',
+        }
+}
+
+PIPELINE_CSS = {
+    }
+
+PIPELINE_DISABLE_WRAPPER = True
+PIPELINE_YUI_BINARY = "yui-compressor"
+
+PIPELINE_CSS_COMPRESSOR = None
+PIPELINE_JS_COMPRESSOR = None
+
+PIPELINE_COMPILE_INPLACE = True
+PIPELINE = True
 
 #Needed for MITX imports to work
 from mitx_settings import *
