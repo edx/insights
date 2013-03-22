@@ -24,8 +24,6 @@ ROOT_PATH = path(__file__).dirname()
 REPO_PATH = ROOT_PATH.dirname()
 ENV_ROOT = REPO_PATH.dirname()
 
-
-
 DUMMY_MODE = False
 
 MAKO_TEMPLATES = {'main': 'templates'}
