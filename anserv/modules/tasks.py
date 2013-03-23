@@ -65,7 +65,7 @@ def get_db_and_fs_cron(f):
     fs = an_evt.views.get_filesystem(f)
     return fs,db
 
-@periodic_task(run_every=datetime.timedelta(seconds=10))
+@periodic_task(run_every=datetime.timedelta(hours=1))
 def regenerate_student_course_data():
     log.debug("Regenerating course data.")
     user = User.objects.all()[0]
