@@ -14,6 +14,8 @@ from modules import common, tasks
 import sys
 from django.contrib.auth.models import User
 import csv
+from pymongo import MongoClient
+connection = MongoClient()
 
 log=logging.getLogger(__name__)
 import re
@@ -92,23 +94,19 @@ def new_course_enrollment_view(fs, db, params):
 
 @query('course', 'student_grades')
 def course_grades_query(fs,db,course, params):
-    request = params['request']
-    request_dict = RequestDict(request)
-    task = tasks.get_student_course_stats.delay(request_dict,course)
-    return {'task_id' : task.task_id, 'message' : 'Task queued.  Check back later for results', 'result_url' : "tasks/{0}/status".format(task.task_id)}
+    collection = connection['modules_tasks']['student_problem_stats']
+    course_name = re.sub("[/:]","_",course)
+    json_data = list(collection.find({'course' : course}))[0]
+    json_data = {k:json_data[k] for k in json_data if k in ["course", "updated", "results"]}
+    csv_file = "{0}/{1}_{2}.csv".format(settings.STATIC_URL,"student_grades",course_name)
+    return {'csv' : csv_file, 'json' : json_data}
 
 @query('course', 'student_problem_grades')
-def course_grades_query(fs,db,course, params):
-    request = params['request']
-    request_dict = RequestDict(request)
-    task = tasks.get_student_problem_stats.delay(request_dict,course)
-    return {'task_id' : task.task_id, 'message' : 'Task queued.  Check back later for results', 'result_url' : "tasks/{0}/status".format(task.task_id)}
-
-class RequestDict(object):
-    def __init__(self, request):
-        self.META = {}
-        self.POST = request.POST
-        self.GET = request.GET
-        self.user = request.user
-        self.path = request.path
+def problem_grades_query(fs,db,course, params):
+    collection = connection['modules_tasks']['student_course_stats']
+    course_name = re.sub("[/:]","_",course)
+    json_data = list(collection.find({'course' : course}))[0]
+    json_data = {k:json_data[k] for k in json_data if k in ["course", "updated", "results"]}
+    csv_file = "{0}/{1}_{2}.csv".format(settings.STATIC_URL,"student_problem_grades",course_name)
+    return {'csv' : csv_file, 'json' : json_data}
 

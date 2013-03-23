@@ -125,8 +125,14 @@ def handle_query(request, category, name, **kwargs):
     if not request.user.is_authenticated():
         return HttpResponseRedirect(reverse('django.contrib.auth.views.login'))
     request_data = handle_request(request, 'query', category, name, **kwargs)
+    log.debug(request_data)
     try:
-        return HttpResponse(json.dumps(request_data))
+        request_data = json.dumps(request_data)
+    except:
+        pass
+
+    try:
+        return HttpResponse(request_data)
     except:
         return request_data
 

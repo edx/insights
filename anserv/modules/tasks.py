@@ -168,7 +168,7 @@ def write_to_collection(collection, results, course):
     mongo_results = {'updated' : now_string, 'course' : course, 'results' : results}
     sba = list(collection.find({'course' : course}))
     if len(sba)>0:
-        collection.update({'course':course}, {'results' : results, 'updated' : now_string}, True);
+        collection.update({'course':course}, mongo_results, True);
     else:
         collection.insert(mongo_results)
 
