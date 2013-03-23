@@ -8,7 +8,7 @@ class DatabaseRouter(object):
     def db_for_read(self, model, **hints):
         if model._meta.app_label in ['student','courseware','sites', 'contenttypes']:
             return 'default'
-        elif model._meta.app_label in ['an_evt','modules', 'cronjobs', 'celery', 'sessions', 'auth']:
+        elif model._meta.app_label in ['an_evt','modules', 'cronjobs', 'celery', 'sessions', 'auth', 'cache']:
             return 'local'
         else: 
             log.error("ERROR. We need to explicitly route: {0}".format(model._meta.app_label))

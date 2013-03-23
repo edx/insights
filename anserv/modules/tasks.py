@@ -7,6 +7,7 @@ from modules import common
 from django.conf import settings
 import sys
 import io
+from dateutil import parser
 
 log=logging.getLogger(__name__)
 
@@ -26,6 +27,19 @@ import csv
 from django.http import HttpResponse
 import json
 from celery import current_task
+import datetime
+from django.utils.timezone import utc
+from django.core.cache import cache
+
+LOCK_EXPIRE = 24 * 60 * 60 # 1 day
+
+class RequestDict(object):
+    def __init__(self, user):
+        self.META = {}
+        self.POST = {}
+        self.GET = {}
+        self.user = user
+        self.path = None
 
 @task()
 def track_event_mixpanel_batch(event_list):
@@ -51,9 +65,29 @@ def get_db_and_fs_cron(f):
     fs = an_evt.views.get_filesystem(f)
     return fs,db
 
+@periodic_task(run_every=datetime.timedelta(minutes=1))
+def regenerate_student_course_data():
+    log.debug("Regenerating course data.")
+    user = User.objects.all()[0]
+    request = RequestDict(user)
+    all_courses = StudentModule.objects.values('course_id').distinct()
+    for course in all_courses:
+        for type in ['course', 'problem']:
+            lock_id = "regenerate_student_course_data-lock-{0}-{1}".format(course,type)
+            acquire_lock = lambda: cache.add(lock_id, "true", LOCK_EXPIRE)
+            release_lock = lambda: cache.delete(lock_id)
+            if acquire_lock():
+                try:
+                    log.debug(lock_id)
+                    STUDENT_TASK_TYPES[type].delay(request,course)
+                finally:
+                    release_lock()
+    return
+
 @task
 def get_student_course_stats(request, course):
     fs, db = get_db_and_fs_cron(get_student_course_stats)
+    collection = db['student_course_stats']
     courseware_summaries, users_in_course_ids, course_name = get_student_course_stats_base(request,course,"grades")
     rows = []
     for z in xrange(0,len(courseware_summaries)):
@@ -67,12 +101,13 @@ def get_student_course_stats(request, course):
     except:
         log.exception("Could not generate csv file.")
         file_name = "no_file_generated"
-
+    write_to_collection(collection, rows, course)
     return json.dumps({'result_data' : rows, 'result_file' : "{0}/{1}".format(settings.STATIC_URL, file_name)})
 
 @task
 def get_student_problem_stats(request,course):
     fs, db = get_db_and_fs_cron(get_student_course_stats)
+    collection = db['student_problem_stats']
     courseware_summaries, users_in_course_ids, course_name = get_student_course_stats_base(request,course,"grades")
     rows = []
     for z in xrange(0,len(courseware_summaries)):
@@ -88,7 +123,7 @@ def get_student_problem_stats(request,course):
     except:
         log.exception("Could not generate csv file.")
         file_name = "no_file_generated"
-
+    write_to_collection(collection, rows, course)
     return json.dumps({'result_data' : rows, 'result_file' : "{0}/{1}".format(settings.STATIC_URL, file_name)})
 
 def get_student_course_stats_base(request,course,type="grades"):
@@ -113,7 +148,6 @@ def get_student_course_stats_base(request,course,type="grades"):
         courseware_summaries.append(grade_summary)
     return courseware_summaries, users_in_course_ids, course_name
 
-
 def return_csv(fs, filename, results):
     output = fs.open(filename, 'w')
     writer = csv.writer(output, dialect='excel', quotechar='"', quoting=csv.QUOTE_ALL)
@@ -126,4 +160,20 @@ def return_csv(fs, filename, results):
         writer.writerow(encoded_row)
     output.close()
     return True
+
+def write_to_collection(collection, results, course):
+    now = datetime.datetime.utcnow().replace(tzinfo=utc)
+    now_string = str(now)
+    mongo_results = {'updated' : now_string, 'course' : course, 'results' : results}
+    sba = list(collection.find({'course' : course}))
+    if len(sba):
+        collection.update({'course':course}, {'results' : results, 'updated' : now_string}, True);
+    else:
+        collection.insert(mongo_results)
+
+STUDENT_TASK_TYPES = {
+    'course' : get_student_course_stats,
+    'problem' : get_student_problem_stats
+}
+
 
