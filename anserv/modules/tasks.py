@@ -30,6 +30,7 @@ from celery import current_task
 import datetime
 from django.utils.timezone import utc
 from django.core.cache import cache
+import time
 
 LOCK_EXPIRE = 24 * 60 * 60 # 1 day
 
@@ -65,7 +66,7 @@ def get_db_and_fs_cron(f):
     fs = an_evt.views.get_filesystem(f)
     return fs,db
 
-@periodic_task(run_every=datetime.timedelta(hours=1))
+@periodic_task(run_every=datetime.timedelta(minutes=15))
 def regenerate_student_course_data():
     log.debug("Regenerating course data.")
     user = User.objects.all()[0]
@@ -74,62 +75,74 @@ def regenerate_student_course_data():
     log.debug(all_courses)
     for course in all_courses:
         for type in ['course', 'problem']:
-            lock_id = "regenerate_student_course_data-lock-{0}-{1}".format(course,type)
-            acquire_lock = lambda: cache.add(lock_id, "true", LOCK_EXPIRE)
-            release_lock = lambda: cache.delete(lock_id)
-            if acquire_lock():
-                try:
-                    log.debug(lock_id)
-                    STUDENT_TASK_TYPES[type].delay(request,course)
-                finally:
-                    release_lock()
-    return
+            STUDENT_TASK_TYPES[type].delay(request,course)
 
 @task
 def get_student_course_stats(request, course):
-    fs, db = get_db_and_fs_cron(get_student_course_stats)
-    collection = db['student_course_stats']
-    courseware_summaries, users_in_course_ids, course_name = get_student_course_stats_base(request,course,"grades")
-    rows = []
-    for z in xrange(0,len(courseware_summaries)):
-        row = {'student' : users_in_course_ids[z], 'overall_percent' : courseware_summaries[z]["percent"]}
-        row.update({c['category'] : c['percent'] for c in courseware_summaries[z]["grade_breakdown"]})
-        rows.append(row)
+    course_name = re.sub("[/:]","_",course)
+    lock_id = "regenerate_student_course_data-lock-{0}-{1}-{2}".format(course,"student_course_grades", course_name)
+    acquire_lock = lambda: cache.add(lock_id, "true", LOCK_EXPIRE)
+    release_lock = lambda: cache.delete(lock_id)
+    if acquire_lock():
+        try:
+            time.sleep(11)
+            log.debug(lock_id)
+            fs, db = get_db_and_fs_cron(get_student_course_stats)
+            collection = db['student_course_stats']
+            courseware_summaries, users_in_course_ids = get_student_course_stats_base(request,course,course_name, "grades")
+            rows = []
+            for z in xrange(0,len(courseware_summaries)):
+                row = {'student' : users_in_course_ids[z], 'overall_percent' : courseware_summaries[z]["percent"]}
+                row.update({c['category'] : c['percent'] for c in courseware_summaries[z]["grade_breakdown"]})
+                rows.append(row)
 
-    file_name = "student_grades_{0}.csv".format(course_name)
-    try:
-        return_csv(fs,file_name, rows)
-    except:
-        log.exception("Could not generate csv file.")
-        file_name = "no_file_generated"
-    write_to_collection(collection, rows, course)
-    return json.dumps({'result_data' : rows, 'result_file' : "{0}/{1}".format(settings.STATIC_URL, file_name)})
+            file_name = "student_grades_{0}.csv".format(course_name)
+            try:
+                return_csv(fs,file_name, rows)
+            except:
+                log.exception("Could not generate csv file.")
+                file_name = "no_file_generated"
+            write_to_collection(collection, rows, course)
+        finally:
+            release_lock()
+        return json.dumps({'result_data' : rows, 'result_file' : "{0}/{1}".format(settings.STATIC_URL, file_name)})
+    return {}
 
 @task
 def get_student_problem_stats(request,course):
-    fs, db = get_db_and_fs_cron(get_student_course_stats)
-    collection = db['student_problem_stats']
-    courseware_summaries, users_in_course_ids, course_name = get_student_course_stats_base(request,course,"grades")
-    rows = []
-    for z in xrange(0,len(courseware_summaries)):
-        log.info(courseware_summaries[z])
-        row = {'student' : users_in_course_ids[z]}
-        #row.update({'problem_data' : courseware_summaries[z]})
-        row.update({c['label'] : c['percent'] for c in courseware_summaries[z]["section_breakdown"]})
-        rows.append(row)
-
-    file_name = "student_problem_grades_{0}.csv".format(course_name)
-    try:
-        return_csv(fs,file_name, rows)
-    except:
-        log.exception("Could not generate csv file.")
-        file_name = "no_file_generated"
-    write_to_collection(collection, rows, course)
-    return json.dumps({'result_data' : rows, 'result_file' : "{0}/{1}".format(settings.STATIC_URL, file_name)})
-
-def get_student_course_stats_base(request,course,type="grades"):
-    fs, db = get_db_and_fs_cron(get_student_course_stats)
     course_name = re.sub("[/:]","_",course)
+    lock_id = "regenerate_student_course_data-lock-{0}-{1}-{2}".format(course,"student_problem_grades", course_name)
+    acquire_lock = lambda: cache.add(lock_id, "true", LOCK_EXPIRE)
+    release_lock = lambda: cache.delete(lock_id)
+    if acquire_lock():
+        try:
+            time.sleep(11)
+            log.debug(lock_id)
+            fs, db = get_db_and_fs_cron(get_student_course_stats)
+            collection = db['student_problem_stats']
+            courseware_summaries, users_in_course_ids = get_student_course_stats_base(request,course,course_name, "grades")
+            rows = []
+            for z in xrange(0,len(courseware_summaries)):
+                log.info(courseware_summaries[z])
+                row = {'student' : users_in_course_ids[z]}
+                #row.update({'problem_data' : courseware_summaries[z]})
+                row.update({c['label'] : c['percent'] for c in courseware_summaries[z]["section_breakdown"]})
+                rows.append(row)
+
+            file_name = "student_problem_grades_{0}.csv".format(course_name)
+            try:
+                return_csv(fs,file_name, rows)
+            except:
+                log.exception("Could not generate csv file.")
+                file_name = "no_file_generated"
+            write_to_collection(collection, rows, course)
+        finally:
+            release_lock()
+        return json.dumps({'result_data' : rows, 'result_file' : "{0}/{1}".format(settings.STATIC_URL, file_name)})
+    return {}
+
+def get_student_course_stats_base(request,course,course_name, type="grades"):
+    fs, db = get_db_and_fs_cron(get_student_course_stats)
     course_obj = get_course_with_access(request.user, course, 'load', depth=None)
     users_in_course = StudentModule.objects.filter(course_id=course).values('student').distinct()
     users_in_course_ids = [u['student'] for u in users_in_course]
@@ -147,7 +160,7 @@ def get_student_course_stats_base(request,course,type="grades"):
         else:
             grade_summary = grades.progress_summary(student, request, course_obj, model_data_cache)
         courseware_summaries.append(grade_summary)
-    return courseware_summaries, users_in_course_ids, course_name
+    return courseware_summaries, users_in_course_ids
 
 def return_csv(fs, filename, results):
     output = fs.open(filename, 'w')
