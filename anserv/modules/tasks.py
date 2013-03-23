@@ -65,12 +65,13 @@ def get_db_and_fs_cron(f):
     fs = an_evt.views.get_filesystem(f)
     return fs,db
 
-@periodic_task(run_every=datetime.timedelta(minutes=1))
+@periodic_task(run_every=datetime.timedelta(seconds=10))
 def regenerate_student_course_data():
     log.debug("Regenerating course data.")
     user = User.objects.all()[0]
     request = RequestDict(user)
-    all_courses = StudentModule.objects.values('course_id').distinct()
+    all_courses = [c['course_id'] for c in StudentModule.objects.values('course_id').distinct()]
+    log.debug(all_courses)
     for course in all_courses:
         for type in ['course', 'problem']:
             lock_id = "regenerate_student_course_data-lock-{0}-{1}".format(course,type)
@@ -166,7 +167,7 @@ def write_to_collection(collection, results, course):
     now_string = str(now)
     mongo_results = {'updated' : now_string, 'course' : course, 'results' : results}
     sba = list(collection.find({'course' : course}))
-    if len(sba):
+    if len(sba)>0:
         collection.update({'course':course}, {'results' : results, 'updated' : now_string}, True);
     else:
         collection.insert(mongo_results)
