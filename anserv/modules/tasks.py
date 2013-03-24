@@ -66,7 +66,7 @@ def get_db_and_fs_cron(f):
     fs = an_evt.views.get_filesystem(f)
     return fs,db
 
-@periodic_task(run_every=datetime.timedelta(minutes=15))
+@periodic_task(run_every=datetime.timedelta(days=1))
 def regenerate_student_course_data():
     log.debug("Regenerating course data.")
     user = User.objects.all()[0]
@@ -147,17 +147,20 @@ def get_student_course_stats_base(request,course,course_name, type="grades"):
     log.debug("Users in course count: {0}".format(len(users_in_course_ids)))
     courseware_summaries = []
     for i in xrange(0,len(users_in_course_ids)):
-        user = users_in_course_ids[i]
-        current_task.update_state(state='PROGRESS', meta={'current': i, 'total': len(users_in_course_ids)})
-        student = User.objects.using('default').prefetch_related("groups").get(id=int(user))
+        try:
+            user = users_in_course_ids[i]
+            current_task.update_state(state='PROGRESS', meta={'current': i, 'total': len(users_in_course_ids)})
+            student = User.objects.using('default').prefetch_related("groups").get(id=int(user))
 
-        model_data_cache = None
+            model_data_cache = None
 
-        if type=="grades":
-            grade_summary = grades.grade(student, request, course_obj, model_data_cache)
-        else:
-            grade_summary = grades.progress_summary(student, request, course_obj, model_data_cache)
-        courseware_summaries.append(grade_summary)
+            if type=="grades":
+                grade_summary = grades.grade(student, request, course_obj, model_data_cache)
+            else:
+                grade_summary = grades.progress_summary(student, request, course_obj, model_data_cache)
+            courseware_summaries.append(grade_summary)
+        except:
+            log.exception("Could not generate data for {0}".format(users_in_course_ids[i]))
     return courseware_summaries, users_in_course_ids
 
 def return_csv(fs, filename, results):
