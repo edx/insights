@@ -72,6 +72,7 @@ def regenerate_student_course_data():
     user = User.objects.all()[0]
     request = RequestDict(user)
     all_courses = [c['course_id'] for c in StudentModule.objects.values('course_id').distinct()]
+    all_courses = list(set(all_courses))
     log.debug(all_courses)
     for course in all_courses:
         for type in ['course', 'problem']:
@@ -182,7 +183,7 @@ def write_to_collection(collection, results, course):
     mongo_results = {'updated' : now_string, 'course' : course, 'results' : results}
     sba = list(collection.find({'course' : course}))
     if len(sba)>0:
-        collection.update({'course':course}, mongo_results, True);
+        collection.update({'course':course}, mongo_results, True)
     else:
         collection.insert(mongo_results)
 
