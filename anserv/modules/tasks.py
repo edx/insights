@@ -85,7 +85,6 @@ def get_student_course_stats(request, course):
     release_lock = lambda: cache.delete(lock_id)
     if acquire_lock():
         try:
-            time.sleep(11)
             log.debug(lock_id)
             fs, db = get_db_and_fs_cron(get_student_course_stats)
             collection = db['student_course_stats']
@@ -116,7 +115,6 @@ def get_student_problem_stats(request,course):
     release_lock = lambda: cache.delete(lock_id)
     if acquire_lock():
         try:
-            time.sleep(11)
             log.debug(lock_id)
             fs, db = get_db_and_fs_cron(get_student_course_stats)
             collection = db['student_problem_stats']
