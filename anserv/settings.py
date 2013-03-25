@@ -248,6 +248,7 @@ CELERY_TASK_RESULT_EXPIRES = 60 * 60 #1 hour
 
 STATIC_ROOT = os.path.abspath(REPO_PATH / "staticfiles")
 PROTECTED_DATA_ROOT = os.path.abspath(REPO_PATH / "protected_data")
+NGINX_PROTECTED_DATA_URL = "/protected_data/"
 
 # URL prefix for static files.
 # Example: "http://media.lawrence.com/static/"
