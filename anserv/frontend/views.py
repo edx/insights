@@ -28,12 +28,9 @@ def protected_data(request, **params):
     if path is None:
         path = request.GET.get('path', None)
     response = HttpResponse()
-    path = params.get("path", None)
-    if path is None:
-        path = request.GET.get('path', None)
-    response = HttpResponse()
     filename_suffix = path.split('.')[-1]
     response['Content-Type']="text/{0}".format(filename_suffix)
+    response['Content-Disposition'] = 'attachment; filename={0}'.format(path)
     log.debug("{0}{1}".format(settings.NGINX_PROTECTED_DATA_URL, path))
     response['X-Accel-Redirect'] = "{0}{1}".format(settings.NGINX_PROTECTED_DATA_URL, path)
     return response
