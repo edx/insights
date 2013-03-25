@@ -229,19 +229,6 @@ LOGGING = {
     }
 }
 
-HTSQL_CONFIG = {
-    # Set the maximum number of output rows.
-    'tweak.autolimit': { 'limit': 10000 },
-    # Enable the web-based query editor.
-    'tweak.shell.default': {},
-    # Enable meta-data queries.
-    'tweak.meta': {},
-    'tweak.override' : {
-        'included-tables': ['*'],
-        'excluded-tables': []
-    }
-    }
-
 MITX_ROOT_URL = ''
 
 DIRECTORIES_TO_READ = []

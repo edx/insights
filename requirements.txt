@@ -15,8 +15,5 @@ simplejson
 south
 django-celery
 celery-with-redis
-HTSQL
-HTSQL-MYSQL
-HTSQL-DJANGO
 django-pipeline
 requests
