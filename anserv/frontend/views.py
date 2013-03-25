@@ -33,8 +33,7 @@ def protected_data(request, **params):
         path = request.GET.get('path', None)
     response = HttpResponse()
     filename_suffix = path.split('.')[-1]
-    response['Content-Type']=""
-    response['Content-Disposition'] = 'attachment; filename={0}'.format(path)
+    response['Content-Type']="text/{0}".format(filename_suffix)
     log.debug("{0}{1}".format(settings.NGINX_PROTECTED_DATA_URL, path))
     response['X-Accel-Redirect'] = "{0}{1}".format(settings.NGINX_PROTECTED_DATA_URL, path)
     return response
