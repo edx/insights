@@ -1,8 +1,10 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render_to_response
 from django.template import RequestContext
+from django.contrib.auth.decorators import login_required
+from django.conf import settings
 
 def register(request):
     if request.method == 'POST':
@@ -15,4 +17,16 @@ def register(request):
     return render_to_response("registration/register.html", RequestContext(request,{
         'form': form,
         }))
+
+@login_required
+def protected_data(request, **params):
+    path = params.get("path", None)
+    if path is None:
+        path = request.GET.get('path', None)
+    response = HttpResponse()
+    filename_suffix = path.split('.')[-1]
+    response['Content-Type'] = 'application/{0}'.format(filename_suffix)
+    response['Content-Disposition'] = 'attachment; filename={0}'.format(path)
+    response['X-Accel-Redirect'] = '/{0}/{1}'.format(settings.PROTECTED_DATA_ROOT, path)
+    return response
 

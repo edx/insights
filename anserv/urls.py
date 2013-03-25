@@ -45,6 +45,10 @@ if settings.DEBUG:
                                'show_indexes' : True,
                                }),
                            )
+else:
+    urlpatterns+= patterns('frontend.views',
+                           url(r'^data/(?P<path>.*)$', 'protected_data')
+    )
 
 handler404 = 'error_templates.render_404'
 handler500 = 'error_templates.render_500'
