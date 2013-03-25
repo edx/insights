@@ -69,7 +69,7 @@ def get_db_and_fs_cron(f):
     fs = an_evt.views.get_filesystem(f)
     return fs,db
 
-@periodic_task(run_every=datetime.timedelta(days=1))
+@periodic_task(run_every=datetime.timedelta(minutes=1))
 def regenerate_student_course_data():
     if not settings.IMPORT_MITX_MODULES:
         log.error("Cannot import mitx modules and thus cannot regenerate student course data.")
@@ -111,7 +111,7 @@ def get_student_course_stats(request, course):
             write_to_collection(collection, rows, course)
         finally:
             release_lock()
-        return json.dumps({'result_data' : rows, 'result_file' : "{0}/{1}".format(settings.STATIC_URL, file_name)})
+        return json.dumps({'result_data' : rows, 'result_file' : "{0}/{1}".format(settings.PROTECTED_DATA_URL, file_name)})
     return {}
 
 @task
@@ -143,7 +143,7 @@ def get_student_problem_stats(request,course):
             write_to_collection(collection, rows, course)
         finally:
             release_lock()
-        return json.dumps({'result_data' : rows, 'result_file' : "{0}/{1}".format(settings.STATIC_URL, file_name)})
+        return json.dumps({'result_data' : rows, 'result_file' : "{0}/{1}".format(settings.PROTECTED_DATA_URL, file_name)})
     return {}
 
 def get_student_course_stats_base(request,course,course_name, type="grades"):

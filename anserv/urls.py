@@ -40,6 +40,10 @@ if settings.DEBUG:
                                'document_root': settings.STATIC_ROOT,
                                'show_indexes' : True,
                                }),
+                           url(r'^data/(?P<path>.*)$', 'django.views.static.serve', {
+                               'document_root': settings.PROTECTED_DATA_ROOT,
+                               'show_indexes' : True,
+                               }),
                            )
 
 handler404 = 'error_templates.render_404'

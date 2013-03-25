@@ -1,4 +1,4 @@
-from settings import *
+from settings_xml import *
 from mitx_aws_xml import *
 import json
 
@@ -18,9 +18,6 @@ DATABASES['default'] = DEFAULT_DATABASE['default']
 DEBUG = False
 
 ROOT_URLCONF = 'urls'
-
-BROKER_URL = 'redis://localhost:6379/1'
-CELERY_RESULT_BACKEND = 'redis://localhost:6379/1'
 
 
 

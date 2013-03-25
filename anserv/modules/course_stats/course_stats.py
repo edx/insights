@@ -105,7 +105,7 @@ def course_grades_query(fs,db,course, params):
     json_data = json_data[0]
 
     json_data = {k:json_data[k] for k in json_data if k in ["course", "updated", "results"]}
-    csv_file = "{0}/{1}_{2}.csv".format(settings.STATIC_URL,"student_grades",course_name)
+    csv_file = "{0}/{1}_{2}.csv".format(settings.PROTECTED_DATA_URL,"student_grades",course_name)
     return {'csv' : csv_file, 'json' : json_data, 'success' : True}
 
 @query('course', 'student_problem_grades')
@@ -119,6 +119,6 @@ def problem_grades_query(fs,db,course, params):
     json_data = json_data[0]
 
     json_data = {k:json_data[k] for k in json_data if k in ["course", "updated", "results"]}
-    csv_file = "{0}/{1}_{2}.csv".format(settings.STATIC_URL,"student_problem_grades",course_name)
+    csv_file = "{0}/{1}_{2}.csv".format(settings.PROTECTED_DATA_URL,"student_problem_grades",course_name)
     return {'csv' : csv_file, 'json' : json_data}
 

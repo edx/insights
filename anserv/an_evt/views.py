@@ -44,7 +44,7 @@ def get_filesystem(f):
     Mongo gridfs or S3 or similar (both of which are supported by 
     pyfs).
     '''
-    directory = settings.STATIC_ROOT
+    directory = settings.PROTECTED_DATA_ROOT
     #+ '/' + str(f.__module__).replace(".","_")
     if not os.path.exists(directory):
         os.mkdir(directory)
