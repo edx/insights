@@ -32,6 +32,8 @@ MAKO_MODULE_DIR = 'compiled_templates'
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
+SNS_SUBSCRIPTIONS = []
+
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
 )

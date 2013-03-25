@@ -21,6 +21,7 @@ urlpatterns = patterns('',
     url(r'^probe/([A-Za-z_+]+)/([A-Za-z_+]+)/([A-Za-z_+]+)$', 'an_evt.views.handle_probe'),
     url(r'^probe/([A-Za-z_+]+)/([A-Za-z_+]+)/([A-Za-z_+]+)/([A-Za-z_+]+)$', 'an_evt.views.handle_probe'),
     url(r'^dashboard$', 'dashboard.views.dashboard'),
+    url(r'^sns', 'sns.views.sns'),
     # url(r'^anserv/', include('anserv.foo.urls')),
 
     # Uncomment the admin/doc line below to enable admin documentation:

@@ -19,3 +19,4 @@ HTSQL
 HTSQL-MYSQL
 HTSQL-DJANGO
 django-pipeline
+requests
