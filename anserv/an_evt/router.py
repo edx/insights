@@ -6,7 +6,7 @@ class DatabaseRouter(object):
     accesses to local DB. 
     '''
     def db_for_read(self, model, **hints):
-        if model._meta.app_label in ['student','courseware','sites', 'contenttypes', 'courseware_old', 'student_old']:
+        if model._meta.app_label in ['student','courseware','sites', 'contenttypes']:
             return 'default'
         elif model._meta.app_label in ['an_evt','modules', 'cronjobs', 'celery', 'sessions', 'auth', 'django_cache']:
             return 'local'

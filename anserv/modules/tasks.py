@@ -73,6 +73,7 @@ def get_db_and_fs_cron(f):
 def regenerate_student_course_data():
     if not settings.IMPORT_MITX_MODULES:
         log.error("Cannot import mitx modules and thus cannot regenerate student course data.")
+        return
     log.debug("Regenerating course data.")
     user = User.objects.all()[0]
     request = RequestDict(user)
