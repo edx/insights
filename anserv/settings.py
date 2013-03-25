@@ -3,6 +3,7 @@
 import os
 import sys
 from path import path
+import datetime
 
 IMPORT_MITX_MODULES = True
 MITX_PATH = os.path.abspath("../../mitx/")
@@ -14,6 +15,8 @@ sys.path.append(MITX_PATH)
 sys.path.append(DJANGOAPPS_PATH)
 sys.path.append(LMS_LIB_PATH)
 sys.path.append(COMMON_PATH)
+
+TIME_BETWEEN_DATA_REGENERATION = datetime.timedelta(minutes=1)
 
 #Initialize celery
 import djcelery

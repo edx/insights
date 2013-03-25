@@ -69,7 +69,7 @@ def get_db_and_fs_cron(f):
     fs = an_evt.views.get_filesystem(f)
     return fs,db
 
-@periodic_task(run_every=datetime.timedelta(minutes=1))
+@periodic_task(run_every=settings.TIME_BETWEEN_DATA_REGENERATION)
 def regenerate_student_course_data():
     if not settings.IMPORT_MITX_MODULES:
         log.error("Cannot import mitx modules and thus cannot regenerate student course data.")
