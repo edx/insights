@@ -22,16 +22,13 @@ import re
 import os
 from django.http import HttpResponse
 
-sys.path.append(settings.DJANGOAPPS_PATH)
-sys.path.append(settings.COMMON_PATH)
-sys.path.append(settings.LMS_LIB_PATH)
+if settings.IMPORT_MITX_MODULES:
+    LMS_PATH = "{0}/{1}/{2}".format(settings.MITX_PATH, "lms", "djangoapps")
+    sys.path.append(LMS_PATH)
 
-log.error("BLAH")
-import courseware
-from courseware import grades
-from courseware.models import StudentModule
-from courseware.courses import get_course_with_access
-from courseware.model_data import ModelDataCache, LmsKeyValueStore
+    from courseware.models import StudentModule
+else:
+    from courseware_old.models import StudentModule
 
 from mitxmako.shortcuts import render_to_response, render_to_string
 
@@ -96,16 +93,26 @@ def new_course_enrollment_view(fs, db, params):
 def course_grades_query(fs,db,course, params):
     collection = connection['modules_tasks']['student_problem_stats']
     course_name = re.sub("[/:]","_",course)
-    json_data = list(collection.find({'course' : course}))[0]
+    json_data = list(collection.find({'course' : course}))
+
+    if len(json_data)<1:
+        return {'success' : False, 'message' : "Cannot find the course in the list."}
+    json_data = json_data[0]
+
     json_data = {k:json_data[k] for k in json_data if k in ["course", "updated", "results"]}
     csv_file = "{0}/{1}_{2}.csv".format(settings.STATIC_URL,"student_grades",course_name)
-    return {'csv' : csv_file, 'json' : json_data}
+    return {'csv' : csv_file, 'json' : json_data, 'success' : True}
 
 @query('course', 'student_problem_grades')
 def problem_grades_query(fs,db,course, params):
     collection = connection['modules_tasks']['student_course_stats']
     course_name = re.sub("[/:]","_",course)
-    json_data = list(collection.find({'course' : course}))[0]
+    json_data = list(collection.find({'course' : course}))
+
+    if len(json_data)<1:
+        return {'success' : False, 'message' : "Cannot find the course in the list."}
+    json_data = json_data[0]
+
     json_data = {k:json_data[k] for k in json_data if k in ["course", "updated", "results"]}
     csv_file = "{0}/{1}_{2}.csv".format(settings.STATIC_URL,"student_problem_grades",course_name)
     return {'csv' : csv_file, 'json' : json_data}

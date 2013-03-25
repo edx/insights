@@ -11,16 +11,18 @@ from dateutil import parser
 
 log=logging.getLogger(__name__)
 
-log.error(settings)
-sys.path.append(settings.DJANGOAPPS_PATH)
-sys.path.append(settings.COMMON_PATH)
-sys.path.append(settings.LMS_LIB_PATH)
+if settings.IMPORT_MITX_MODULES:
+    sys.path.append(settings.DJANGOAPPS_PATH)
+    sys.path.append(settings.COMMON_PATH)
+    sys.path.append(settings.LMS_LIB_PATH)
 
-import courseware
-from courseware import grades
-from courseware.models import StudentModule
-from courseware.courses import get_course_with_access
-from courseware.model_data import ModelDataCache, LmsKeyValueStore
+    from courseware import grades
+    from courseware.models import StudentModule
+    from courseware.courses import get_course_with_access
+    from courseware.model_data import ModelDataCache, LmsKeyValueStore
+else:
+    from courseware_old.models import StudentModule
+
 from django.contrib.auth.models import User
 import re
 import csv
@@ -68,6 +70,8 @@ def get_db_and_fs_cron(f):
 
 @periodic_task(run_every=datetime.timedelta(days=1))
 def regenerate_student_course_data():
+    if not settings.IMPORT_MITX_MODULES:
+        log.error("Cannot import mitx modules and thus cannot regenerate student course data.")
     log.debug("Regenerating course data.")
     user = User.objects.all()[0]
     request = RequestDict(user)

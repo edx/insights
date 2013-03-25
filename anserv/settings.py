@@ -4,6 +4,7 @@ import os
 import sys
 from path import path
 
+IMPORT_MITX_MODULES = True
 MITX_PATH = os.path.abspath("../../mitx/")
 DJANGOAPPS_PATH = "{0}/{1}/{2}".format(MITX_PATH, "lms", "djangoapps")
 LMS_LIB_PATH = "{0}/{1}/{2}".format(MITX_PATH, "lms", "lib")
