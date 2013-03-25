@@ -89,6 +89,11 @@ def new_course_enrollment_view(fs, db, params):
     r = new_course_enrollment_query(fs,db,params)
     return common.render_query_as_table(r)
 
+@query('global', 'available_courses')
+def courses_available_query(fs, db, params):
+    r = [c['course_id'] for c in StudentModule.objects.all().values('course_id').distinct()]
+    return r
+
 @query('course', 'student_grades')
 def course_grades_query(fs,db,course, params):
     collection = connection['modules_tasks']['student_problem_stats']
@@ -96,7 +101,7 @@ def course_grades_query(fs,db,course, params):
     json_data = list(collection.find({'course' : course}))
 
     if len(json_data)<1:
-        return {'success' : False, 'message' : "Cannot find the course in the list."}
+        return {'success' : False, 'message' : "Cannot find the course in the list or data not available.", 'courses' : courses_available_query(fs,db,params)}
     json_data = json_data[0]
 
     json_data = {k:json_data[k] for k in json_data if k in ["course", "updated", "results"]}
@@ -110,7 +115,7 @@ def problem_grades_query(fs,db,course, params):
     json_data = list(collection.find({'course' : course}))
 
     if len(json_data)<1:
-        return {'success' : False, 'message' : "Cannot find the course in the list."}
+        return {'success' : False, 'message' : "Cannot find the course in the list or data not available." , 'courses' : courses_available_query(fs,db,params)}
     json_data = json_data[0]
 
     json_data = {k:json_data[k] for k in json_data if k in ["course", "updated", "results"]}
