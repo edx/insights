@@ -6,6 +6,9 @@ from django.template import RequestContext
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
 import os
+import logging
+
+log=logging.getLogger(__name__)
 
 def register(request):
     if request.method == 'POST':
@@ -26,6 +29,7 @@ def protected_data(request, **params):
         path = request.GET.get('path', None)
     response = HttpResponse()
     del response['content-type']
+    log.debug(str(os.path.join(settings.PROTECTED_DATA_ROOT, path)))
     response['X-Sendfile'] = str(os.path.join(settings.PROTECTED_DATA_ROOT, path))
     return response
 
