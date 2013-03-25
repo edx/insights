@@ -171,6 +171,8 @@ def get_student_course_stats_base(request,course,course_name, type="grades"):
     return courseware_summaries, users_in_course_ids
 
 def return_csv(fs, filename, results):
+    if len(results)<1:
+        return
     output = fs.open(filename, 'w')
     writer = csv.writer(output, dialect='excel', quotechar='"', quoting=csv.QUOTE_ALL)
     row_keys = results[0].keys()
@@ -184,6 +186,8 @@ def return_csv(fs, filename, results):
     return True
 
 def write_to_collection(collection, results, course):
+    if len(results)<1:
+        return
     now = datetime.datetime.utcnow().replace(tzinfo=utc)
     now_string = str(now)
     mongo_results = {'updated' : now_string, 'course' : course, 'results' : results}
