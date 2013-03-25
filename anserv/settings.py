@@ -28,6 +28,11 @@ ROOT_PATH = path(__file__).dirname()
 REPO_PATH = ROOT_PATH.dirname()
 ENV_ROOT = REPO_PATH.dirname()
 
+IMPORT_GIT_MODULES = False
+GIT_CLONE_URL = "git@github.com:MITx/{0}.git"
+COURSE_FILE_PATH = os.path.abspath(os.path.join(ENV_ROOT, "data"))
+COURSE_CONFIG_PATH = os.path.abspath(os.path.join(REPO_PATH, "course_listings.json"))
+
 DUMMY_MODE = False
 
 MAKO_TEMPLATES = {'main': 'templates'}
