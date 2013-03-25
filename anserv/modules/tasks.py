@@ -21,7 +21,8 @@ if settings.IMPORT_MITX_MODULES:
     from courseware.courses import get_course_with_access
     from courseware.model_data import ModelDataCache, LmsKeyValueStore
 else:
-    from courseware_old.models import StudentModule
+    import courseware_old as courseware
+    from courseware.models import StudentModule
 
 from django.contrib.auth.models import User
 import re
