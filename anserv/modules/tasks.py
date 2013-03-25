@@ -87,12 +87,13 @@ def regenerate_student_course_data():
 @task
 def get_student_course_stats(request, course):
     course_name = re.sub("[/:]","_",course)
+    log.info(course_name)
     lock_id = "regenerate_student_course_data-lock-{0}-{1}-{2}".format(course,"student_course_grades", course_name)
+    log.info(lock_id)
     acquire_lock = lambda: cache.add(lock_id, "true", LOCK_EXPIRE)
     release_lock = lambda: cache.delete(lock_id)
     if acquire_lock():
         try:
-            log.debug(lock_id)
             fs, db = get_db_and_fs_cron(get_student_course_stats)
             collection = db['student_course_stats']
             courseware_summaries, users_in_course_ids = get_student_course_stats_base(request,course,course_name, "grades")
@@ -117,12 +118,13 @@ def get_student_course_stats(request, course):
 @task
 def get_student_problem_stats(request,course):
     course_name = re.sub("[/:]","_",course)
+    log.info(course_name)
     lock_id = "regenerate_student_course_data-lock-{0}-{1}-{2}".format(course,"student_problem_grades", course_name)
+    log.info(lock_id)
     acquire_lock = lambda: cache.add(lock_id, "true", LOCK_EXPIRE)
     release_lock = lambda: cache.delete(lock_id)
     if acquire_lock():
         try:
-            log.debug(lock_id)
             fs, db = get_db_and_fs_cron(get_student_course_stats)
             collection = db['student_problem_stats']
             courseware_summaries, users_in_course_ids = get_student_course_stats_base(request,course,course_name, "grades")
