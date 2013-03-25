@@ -30,6 +30,6 @@ def protected_data(request, **params):
     response = HttpResponse()
     del response['content-type']
     log.debug(str(os.path.join(settings.PROTECTED_DATA_ROOT, path)))
-    response['X-Sendfile'] = str(os.path.join(settings.PROTECTED_DATA_ROOT, path))
+    response['X-Accel-Redirect'] = str(os.path.join(settings.PROTECTED_DATA_ROOT, path))
     return response
 
