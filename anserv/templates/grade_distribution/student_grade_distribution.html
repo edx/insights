@@ -21,7 +21,7 @@ function render{{graph_name}}()
             data: chart_data,
             bars: {
                 show: true,
-                barWidth: 1.0/chart_data.length,
+                barWidth: 1.0/((chart_data.length)/10),
                 align: "center"
             }
         }],
