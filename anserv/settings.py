@@ -282,7 +282,7 @@ PIPELINE_JS = {
         },
     'new_dashboard' : {
         'source_filenames': [
-            'js/api-framework.js'
+            'js/new_dashboard/load_analytics.js'
             ],
         'output_filename': 'js/new_dashboard.js',
         },

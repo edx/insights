@@ -5,11 +5,39 @@
 {% endblock %}
 {% block content %}
 
+    <script>
+        function scrape_courses()
+        {
+            $.getJSON('/query/global/available_courses', function(data){
+                var i;
+                var course_dropdown_tag = "#dropdown_select_course";
+                $(course_dropdown_tag).empty();
+                for(i = 0 ; i< data.length; i++){
+                    $(course_dropdown_tag).append('<li><a href="#" course_name="'+ data[i] +'" >' + data[i] +'</a></li>');
+                }
+            });
+        }
 
+        $(function() {
+            $("#course_tab").click(function(){
+                scrape_courses();
+                $('#course_name_box')[0].style.display = "none";
+                $('#course_name_dropdown')[0].style.display = "block";
+            });
+
+            $('#course_tab').click();
+        });
+
+    </script>
     <div class="container-fluid">
         <ul class="nav nav-tabs">
             <li class="active"><a href="#" id="course_tab">Course</a></li>
-            <li><form class="navbar-search pull-left">
+            <li class="course_select_link dropdown" id="course_name_dropdown">
+                <a class="dropdown-toggle" data-toggle="dropdown" href="#">Select Course</a>
+                <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel" id="dropdown_select_course">
+                </ul>
+            </li>
+            <li class="param_textbox" id="course_name_box"><form class="navbar-search pull-left">
                 <input type="text" id="coursename_text" class="search-query" placeholder="Course name">
             </form></li>
         </ul>
