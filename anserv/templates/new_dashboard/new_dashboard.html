@@ -4,8 +4,33 @@
     {% compressed_js 'new_dashboard' %}
 {% endblock %}
 {% block content %}
-    <section class="analytics-select">
-    </section>
-    <section class="analytics-container">
-    </section>
+
+
+    <div class="container-fluid">
+        <ul class="nav nav-tabs">
+            <li class="active"><a href="#" id="course_tab">Course</a></li>
+            <li><form class="navbar-search pull-left">
+                <input type="text" id="coursename_text" class="search-query" placeholder="Course name">
+            </form></li>
+        </ul>
+
+        <div class="row-fluid">
+            <div class="span3">
+                <div class="well sidebar-nav">
+                    <ul class="nav nav-list" id="sidebar_ul">
+                    </ul>
+                </div><!--/.well -->
+            </div><!--/span-->
+
+            <div class="span9" id="rcontent">
+
+
+            </div><!--/span-->
+        </div><!--/row-->
+
+        <section class="analytics-select">
+        </section>
+        <section class="analytics-container">
+        </section>
+    </div>
 {% endblock %}

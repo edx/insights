@@ -375,6 +375,7 @@
                 for(i = 0 ; i< split_data.length; i++){
 	                $("#sidebar_ul").append('<li><a href="#" onclick="load_global_rcontent(\'' + split_data[i] + '\');">'+tidy_str(split_data[i])+'</li>');
                 }
+                $("#username_text").attr('placeholder', "")
             });
         });
          
@@ -388,6 +389,7 @@
                 for(i = 0 ; i< split_data.length; i++){
 	                $("#sidebar_ul").append('<li><a href="#" onclick="load_user_rcontent(\'' + split_data[i] + '\');">'+tidy_str(split_data[i])+'</li>');
                 }
+                $("#username_text").attr('placeholder', "Username")
             });
         });
         
@@ -403,7 +405,7 @@
             <li class="active"><a href="#" id="global_tab">Global</a></li>
             <li><a href="#" id="user_tab">User</a></li>
             <li><form class="navbar-search pull-left">
-    <input type="text" id="username_text" class="search-query" placeholder="Username">
+    <input type="text" id="username_text" class="search-query" placeholder="">
     </form></li>
         </ul>
     

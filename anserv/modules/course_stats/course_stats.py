@@ -91,7 +91,9 @@ def new_course_enrollment_view(fs, db, params):
 
 @query('global', 'available_courses')
 def courses_available_query(fs, db, params):
-    r = [c['course_id'] for c in StudentModule.objects.all().values('course_id').distinct()]
+    collection = connection['modules_tasks']['student_course_stats']
+    course_data = collection.find({}, {'course' : 1})
+    r = [c['course'] for c in course_data]
     return r
 
 @query('course', 'student_grades')

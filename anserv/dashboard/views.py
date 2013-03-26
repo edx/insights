@@ -10,3 +10,9 @@ def dashboard(request):
     else:
        return HttpResponseRedirect(reverse("django.contrib.auth.views.login"))
 
+def new_dashboard(request):
+    if request.user.is_authenticated():
+        return render(request, 'new_dashboard/new_dashboard.html')
+    else:
+        return HttpResponseRedirect(reverse("django.contrib.auth.views.login"))
+
