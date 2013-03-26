@@ -140,7 +140,11 @@ def course_grades_view_base(fs, db, course, type,params):
         counter_keys = counter.keys()
         counter_keys.sort()
         counter_list = [[float(c),int(counter[c])] for c in counter_keys]
-        rendered_data = django.template.loader.render_to_string("grade_distribution/student_grade_distribution.html",{'graph_name' : fixed_name, 'chart_data' : counter_list, 'graph_title' : header})
+        tick_data = [float(c) for c in counter_keys]
+        min_val = min(tick_data + [0])
+        max_val = max(tick_data + [1])
+        context_dict = {'graph_name' : fixed_name, 'chart_data' : counter_list, 'graph_title' : header, 'tick_data' : tick_data, 'x_min' : min_val, 'x_max' : max_val}
+        rendered_data = django.template.loader.render_to_string("grade_distribution/student_grade_distribution.html",context_dict)
         charts.append(rendered_data)
     chart_string = " ".join(charts)
     return HttpResponse(chart_string)

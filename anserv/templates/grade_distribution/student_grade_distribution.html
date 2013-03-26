@@ -15,13 +15,14 @@ function render{{graph_name}}()
 {
     var graph_name = "{{graph_name}}";
     var chart_data = {{chart_data}};
+    var ticks = {{tick_data}};
 
     $.plot($("#" + graph_name), [
         {
             data: chart_data,
             bars: {
                 show: true,
-                barWidth: 1.0/((chart_data.length)/10),
+                barWidth: 1.0/((chart_data.length)/2),
                 align: "center"
             }
         }],
@@ -31,7 +32,10 @@ function render{{graph_name}}()
                 hoverable: true
             },
             xaxis: {
-                axisLabel: 'Score'
+                axisLabel: 'Score',
+                ticks: ticks,
+                min: {{x_min}},
+                max: {{x_max}}
             },
             yaxis: {
                 axisLabel: 'Count'
