@@ -138,7 +138,7 @@ def course_grades_view_base(fs, db, course, type,params):
     charts = []
     for header in headers:
         fixed_name = re.sub(" ","_",header).lower()
-        header_data = [round(float(j[header]),1) for j in results]
+        header_data = [round(float(j[header]),2) for j in results]
         counter = Counter(header_data)
         counter_keys = counter.keys()
         counter_keys.sort()
