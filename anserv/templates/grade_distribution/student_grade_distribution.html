@@ -27,11 +27,13 @@ function render{{graph_name}}()
                 hoverable: true
             },
             xaxis: {
+                mode: null,
                 axisLabel: "{{x_label}}",
                 min: {{x_min}},
                 max: {{x_max}}
             },
             yaxis: {
+                mode: null,
                 axisLabel: "{{y_label}}"
             },
             series: {
@@ -42,7 +44,7 @@ function render{{graph_name}}()
                     fill: true
                 }
             },
-            tooltip: false,
+            tooltip: true,
             tooltipOpts: {
                 content: "Score: %x  Count: %y",
                 shifts: {

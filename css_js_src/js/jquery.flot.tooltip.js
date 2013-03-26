@@ -190,7 +190,7 @@
 
     // helpers just for readability
     FlotTooltip.prototype.isTimeMode = function(axisName, item) {
-        return (typeof item.series[axisName].options.mode !== 'undefined' && item.series[axisName].options.mode === 'time');
+        return false;
     };
 
     FlotTooltip.prototype.isXDateFormat = function(item) {
