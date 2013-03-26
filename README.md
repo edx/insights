@@ -25,6 +25,7 @@ as, in the future, course definition database, and read-replicas of
 auxilliary databases, such as discussion forums. 
 
 A block diagram of the overall system is: 
+
 ![System structure](system_structure.png)
 
 Each module in the analytics framework has its own Mongo database. In
