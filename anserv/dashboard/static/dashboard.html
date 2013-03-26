@@ -1,14 +1,10 @@
-<!doctype html>
- 
-<html lang="en">
-<head>
-    <meta charset="utf-8" />
+{% extends "base.html" %}
+{% block title %}
     <title>Dashboard - edX</title>
+{% endblock %}
+{% block additional_js %}
+    <meta charset="utf-8" />
     <link rel="stylesheet" href="http://code.jquery.com/ui/1.9.2/themes/base/jquery-ui.css" />
-    <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.2.2/css/bootstrap-combined.min.css" rel="stylesheet">
-    <script src="http://code.jquery.com/jquery-1.8.3.js"></script>
-    <script src="http://code.jquery.com/ui/1.9.2/jquery-ui.js"></script>
-    <script src="http://demo.presinet.com/jscript/jquery.flot.patched-multi.js"></script>
     <script>
         /* this is the contents of the multi plugin */
 // You can yank the plugin and patches from here: http://code.google.com/p/flot/issues/detail?id=159
@@ -398,8 +394,8 @@
         $('#global_tab').click();
     });
     </script>
-</head>
-<body>
+{% endblock %}
+{% block content %}
 
 
     <div class="container-fluid"><br /><br />
@@ -435,29 +431,28 @@
       </footer>
 
     </div><!--/.fluid-container-->
- <!--
-<div id="tabs">
-    <ul>
-        <li><a href="#global_tab2">Global</a></li>
-        <li><a href="#user_tab2">User</a></li>
-    </ul>
-    <div id="global_tab">
-      <table>
-	<tr>
-<td>
- <select id="globalselect" name="globalselect" size=10 width=150 style="width:150px">
- </select>
-</td><td><div id="global_data"></div></td></tr>
-      </table>
+     <!--
+    <div id="tabs">
+        <ul>
+            <li><a href="#global_tab2">Global</a></li>
+            <li><a href="#user_tab2">User</a></li>
+        </ul>
+        <div id="global_tab">
+          <table>
+        <tr>
+    <td>
+     <select id="globalselect" name="globalselect" size=10 width=150 style="width:150px">
+     </select>
+    </td><td><div id="global_data"></div></td></tr>
+          </table>
+        </div>
+        <div id="user_tab">
+          <table>
+        <tr><td> <select id="userselect" name="userselect" size=10 width=150 style="width:150px"> </select> <br><input id="user_input" style="width:150px">
+    </td><td><div id="user_data"></div></td></tr>
+          </table>
+        </div>
     </div>
-    <div id="user_tab">
-      <table>
-	<tr><td> <select id="userselect" name="userselect" size=10 width=150 style="width:150px"> </select> <br><input id="user_input" style="width:150px">
-</td><td><div id="user_data"></div></td></tr>
-      </table>
-    </div>
-</div>
- 
- -->
-</body>
-</html>
+
+     -->
+{% endblock %}

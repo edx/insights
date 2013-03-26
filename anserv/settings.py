@@ -275,6 +275,8 @@ PIPELINE_JS = {
             'js/backbone.validations.js'
             'js/jquery.cookie.js',
             'js/bootstrap.js',
+            'js/jquery-ui-1.10.2.custom.js',
+            'js/jquery.flot.patched-multi.js',
             ],
         'output_filename': 'js/util.js',
         },
@@ -295,7 +297,13 @@ PIPELINE_CSS = {
             ],
         'output_filename': 'css/bootstrap.css',
         },
+    'util_css' : {
+        'source_filenames': [
+            'css/jquery-ui-1.10.2.custom.css',
+            ],
+        'output_filename': 'css/util_css.css',
     }
+}
 
 PIPELINE_DISABLE_WRAPPER = True
 PIPELINE_YUI_BINARY = "yui-compressor"

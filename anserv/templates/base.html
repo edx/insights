@@ -5,9 +5,12 @@
     {% load compressed %}
     {% compressed_js 'util' %}
     {% compressed_css 'bootstrap' %}
+    {% compressed_css 'util_css' %}
     {% block additional_js %}
     {% endblock %}
-    <title>Analytics</title>
+    {% block title %}
+        <title>Analytics</title>
+    {% endblock %}
     <meta name="csrf-token" content="{{csrf_token}}">
 </head>
 <body>
