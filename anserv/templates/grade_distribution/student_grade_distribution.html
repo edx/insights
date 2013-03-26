@@ -20,10 +20,24 @@ function render{{graph_name}}()
         {
             data: chart_data,
             bars: {
-                show: true
+                show: true,
+                barWidth: 1.0/chart_data.length,
+                align: "center"
+            }
+        }],
+        {
+
+            grid: {
+                hoverable: true
+            },
+            xaxis: {
+                axisLabel: 'Score'
+            },
+            yaxis: {
+                axisLabel: 'Count'
             }
         }
-    ]);
+);
 }
 
 render{{graph_name}}();
