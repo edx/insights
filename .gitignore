@@ -44,3 +44,8 @@ db.sql
 .idea/
 *.log
 *.orig
+staticfiles/
+protected_data/
+compiled_templates/
+celerybeat-schedule
+*~

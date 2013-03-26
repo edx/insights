@@ -44,10 +44,9 @@ funcspecs = [ ([], 'global'),
             ]
 
 def register_handler(cls, category, name, description, f, args):
-    print "Register", cls, category, name, f
+    log.debug("Register {0} {1} {2} {3}".format(cls, category, name, f))
     if args == None:
         args = inspect.getargspec(f).args
-    print args
 #    traceback.print_stack()
     if cls not in ['view', 'query']:
         raise ValueError("We can only register views and queries")
@@ -81,7 +80,7 @@ def register_handler(cls, category, name, description, f, args):
     if name in request_handlers[cls][category]:
         # We used to have this be an error.
         # We changed to a warning for the way we handle dummy values.
-        print "WARNING WARNING WARNING", name, "already in", category  # raise KeyError(name+" already in "+category)
+        log.warn("WARNING WARNING WARNING {0} already in {1}".format(name, category))  # raise KeyError(name+" already in "+category)
     request_handlers[cls][category][name] = {'function': f, 'name': name, 'doc': description}
 
 def view(category = None, name = None, description = None, args = None):

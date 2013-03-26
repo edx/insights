@@ -2,9 +2,10 @@ import inspect
 import json
 import os
 
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.utils.datastructures import MultiValueDictKeyError
 from django.views.decorators.csrf import csrf_exempt
+from django.core.urlresolvers import reverse
 
 from django.conf import settings
 
@@ -43,7 +44,8 @@ def get_filesystem(f):
     Mongo gridfs or S3 or similar (both of which are supported by 
     pyfs).
     '''
-    directory = settings.MODULE_RESOURCE_STATIC + '/' + str(f.__module__).replace(".","_")
+    directory = settings.PROTECTED_DATA_ROOT
+    #+ '/' + str(f.__module__).replace(".","_")
     if not os.path.exists(directory):
         os.mkdir(directory)
     
@@ -77,7 +79,6 @@ def handle_probe(request, cls=None, category=None, details = None):
 def handle_request(request, cls, category, name, **kwargs):
     ''' Generic code from handle_view and handle_query '''
     args = dict()
-    print cls
     handler_dict = request_handlers[cls][category][name]
     handler = handler_dict['function']
     if 'args' in handler_dict:
@@ -88,6 +89,7 @@ def handle_request(request, cls, category, name, **kwargs):
     params = {}
     params.update(request.GET)
     params.update(request.POST)
+    params.update({'request' : request})
     for arg in arglist:
         if arg == 'db':
             args[arg] = get_database(handler)
@@ -110,6 +112,9 @@ def handle_view(request, category, name, **kwargs):
         Category is where this should be place (per student, per problem, etc.)
         Name is specific 
     '''
+    if not request.user.is_authenticated():
+        return HttpResponseRedirect(reverse('django.contrib.auth.views.login'))
+
     return HttpResponse(handle_request(request, 'view', category, name, **kwargs))
 
 def handle_query(request, category, name, **kwargs):
@@ -117,7 +122,19 @@ def handle_query(request, category, name, **kwargs):
         Category is where this should be place (per student, per problem, etc.)
         Name is specific 
     '''
-    return HttpResponse(json.dumps(handle_request(request, 'query', category, name, **kwargs)))
+    if not request.user.is_authenticated():
+        return HttpResponseRedirect(reverse('django.contrib.auth.views.login'))
+    request_data = handle_request(request, 'query', category, name, **kwargs)
+    log.debug(request_data)
+    try:
+        request_data = json.dumps(request_data)
+    except:
+        pass
+
+    try:
+        return HttpResponse(request_data)
+    except:
+        return request_data
 
 @csrf_exempt
 def handle_event(request):

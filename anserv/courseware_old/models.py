@@ -30,7 +30,7 @@ class StudentModule(models.Model):
     MODULE_TYPES = (('problem', 'problem'),
                     ('video', 'video'),
                     ('html', 'html'),
-                    )
+    )
     ## These three are the key for the object
     module_type = models.CharField(max_length=32, choices=MODULE_TYPES, default='problem', db_index=True)
 
@@ -52,9 +52,9 @@ class StudentModule(models.Model):
     grade = models.FloatField(null=True, blank=True, db_index=True)
     max_grade = models.FloatField(null=True, blank=True)
     DONE_TYPES = (('na', 'NOT_APPLICABLE'),
-                    ('f', 'FINISHED'),
-                    ('i', 'INCOMPLETE'),
-                    )
+                  ('f', 'FINISHED'),
+                  ('i', 'INCOMPLETE'),
+    )
     done = models.CharField(max_length=8, choices=DONE_TYPES, default='na', db_index=True)
 
     created = models.DateTimeField(auto_now_add=True, db_index=True)
@@ -170,8 +170,8 @@ class StudentModuleCache(object):
         '''
         for o in self.cache:
             if (o.course_id == course_id and
-                o.module_type == module_type and
-                o.module_state_key == module_state_key):
+                        o.module_type == module_type and
+                        o.module_state_key == module_state_key):
                 return o
         return None
 

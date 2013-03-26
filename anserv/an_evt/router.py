@@ -1,14 +1,17 @@
+import logging
+log=logging.getLogger(__name__)
+
 class DatabaseRouter(object):
     ''' Route reads from MITx models to main DB. Route all other
     accesses to local DB. 
     '''
     def db_for_read(self, model, **hints):
-        if model._meta.app_label in ['student','courseware','auth', 'contenttypes']: 
+        if model._meta.app_label in ['student','courseware','sites', 'contenttypes']:
             return 'default'
-        elif model._meta.app_label in ['an_evt','modules', 'cronjobs', 'celery']:
+        elif model._meta.app_label in ['an_evt','modules', 'cronjobs', 'celery', 'sessions', 'auth', 'django_cache']:
             return 'local'
         else: 
-            print "ERROR. We need to explicitly route: ", model._meta.app_label
+            log.error("ERROR. We need to explicitly route: {0}".format(model._meta.app_label))
             return 'error'
     def db_for_write(self, model, **hints):
         return self.db_for_read(model, **hints)

@@ -1,5 +1,5 @@
-from settings import *
-from mitx_aws import *
+from settings_xml import *
+from mitx_aws_xml import *
 import json
 
 with open(ENV_ROOT / "env.json") as env_file:
@@ -20,3 +20,7 @@ DEBUG = False
 TIME_BETWEEN_DATA_REGENERATION = datetime.timedelta(days=1)
 
 ROOT_URLCONF = 'urls'
+
+
+
+

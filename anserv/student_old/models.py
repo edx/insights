@@ -104,9 +104,9 @@ class UserProfile(models.Model):
                                   ('none', "None"),
                                   ('other', "Other"))
     level_of_education = models.CharField(
-                            blank=True, null=True, max_length=6, db_index=True,
-                            choices=LEVEL_OF_EDUCATION_CHOICES
-                         )
+        blank=True, null=True, max_length=6, db_index=True,
+        choices=LEVEL_OF_EDUCATION_CHOICES
+    )
     mailing_address = models.TextField(blank=True, null=True)
     goals = models.TextField(blank=True, null=True)
 
@@ -405,10 +405,10 @@ def replicate_user(portal_user, course_db_name):
     try:
         course_user = User.objects.using(course_db_name).get(id=portal_user.id)
         log.debug("User {0} found in Course DB, replicating fields to {1}"
-                  .format(course_user, course_db_name))
+        .format(course_user, course_db_name))
     except User.DoesNotExist:
         log.debug("User {0} not found in Course DB, creating copy in {1}"
-                  .format(portal_user, course_db_name))
+        .format(portal_user, course_db_name))
         course_user = User()
 
     for field in USER_FIELDS_TO_COPY:
@@ -429,7 +429,7 @@ def replicate_model(model_method, instance, user_id):
 
     course_db_names = db_names_to_replicate_to(user_id)
     log.debug("Replicating {0} for user {1} to DBs: {2}"
-              .format(model_method, user_id, course_db_names))
+    .format(model_method, user_id, course_db_names))
 
     mark_handled(instance)
     for db_name in course_db_names:
@@ -494,10 +494,10 @@ def should_replicate(instance):
     if marked_handled(instance):
         # Basically, avoid an infinite loop. You should
         log.debug("{0} should not be replicated because it's been marked"
-                  .format(instance))
+        .format(instance))
         return False
     if not is_portal():
         log.debug("{0} should not be replicated because we're not a portal."
-                  .format(instance))
+        .format(instance))
         return False
     return True
