@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block additional_js %}
+    {% load compressed %}
+    {% compressed_js 'new_dashboard' %}
+{% endblock %}
+{% block content %}
+    <section class="analytics-select">
+    </section>
+    <section class="analytics-container">
+    </section>
+{% endblock %}

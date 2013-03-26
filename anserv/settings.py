@@ -274,12 +274,27 @@ PIPELINE_JS = {
             'js/backbone.js',
             'js/backbone.validations.js'
             'js/jquery.cookie.js',
+            'js/bootstrap.js',
             ],
         'output_filename': 'js/util.js',
-        }
+        },
+    'new_dashboard' : {
+        'source_filenames': [
+            'js/api-framework.js'
+            ],
+        'output_filename': 'js/new_dashboard.js',
+        },
 }
 
 PIPELINE_CSS = {
+    'bootstrap': {
+        'source_filenames': [
+            'css/bootstrap.css',
+            'css/bootstrap-responsive.css',
+            'css/bootstrap-extensions.css',
+            ],
+        'output_filename': 'css/bootstrap.css',
+        },
     }
 
 PIPELINE_DISABLE_WRAPPER = True
