@@ -123,10 +123,13 @@ def problem_grades_view(fs, db, course, params):
     return course_grades_view_base(fs, db, course, type,params)
 
 def course_grades_view_base(fs, db, course, type,params):
+    y_label = "Count"
     if type=="course_grades":
         query_data = course_grades_query(fs,db,course, params)
+        x_label = "Weighted Score"
     else:
         query_data = problem_grades_query(fs,db,course, params)
+        x_label = "Unweighted Score"
     json_data = query_data['json']
     results = json_data['results']
     headers = results[0].keys()
@@ -143,7 +146,7 @@ def course_grades_view_base(fs, db, course, type,params):
         tick_data = [float(c) for c in counter_keys]
         min_val = min(tick_data + [0])
         max_val = max(tick_data + [1])
-        context_dict = {'graph_name' : fixed_name, 'chart_data' : counter_list, 'graph_title' : header, 'tick_data' : tick_data, 'x_min' : min_val, 'x_max' : max_val}
+        context_dict = {'graph_name' : fixed_name, 'chart_data' : counter_list, 'graph_title' : header, 'tick_data' : tick_data, 'x_min' : min_val, 'x_max' : max_val, 'x_label' : x_label, 'y_label' : y_label}
         rendered_data = django.template.loader.render_to_string("grade_distribution/student_grade_distribution.html",context_dict)
         charts.append(rendered_data)
     chart_string = " ".join(charts)

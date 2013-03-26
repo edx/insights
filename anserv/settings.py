@@ -277,6 +277,8 @@ PIPELINE_JS = {
             'js/bootstrap.js',
             'js/jquery-ui-1.10.2.custom.js',
             'js/jquery.flot.patched-multi.js',
+            'js/jquery.flot.tooltip.js',
+            'js/jquery.flot.axislabels.js',
             ],
         'output_filename': 'js/util.js',
         },

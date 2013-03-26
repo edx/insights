@@ -20,11 +20,6 @@ function render{{graph_name}}()
     $.plot($("#" + graph_name), [
         {
             data: chart_data,
-            bars: {
-                show: true,
-                barWidth: 1.0/((chart_data.length)/2),
-                align: "center"
-            }
         }],
         {
 
@@ -32,13 +27,29 @@ function render{{graph_name}}()
                 hoverable: true
             },
             xaxis: {
-                axisLabel: 'Score',
+                axisLabel: "{{x_label}}",
                 ticks: ticks,
                 min: {{x_min}},
                 max: {{x_max}}
             },
             yaxis: {
-                axisLabel: 'Count'
+                axisLabel: "{{y_label}}"
+            },
+            series: {
+                lines: { show: true },
+                points: {
+                    radius: 3,
+                    show: true,
+                    fill: true
+                }
+            },
+            tooltip: false,
+            tooltipOpts: {
+                content: "Score: %x  Count: %y",
+                shifts: {
+                    x: -60,
+                    y: 25
+                }
             }
         }
 );
