@@ -43,7 +43,7 @@
                 analytic_name = target.attr('analytic_name')
                 var content_tag = '#rcontent';
                 $(content_tag).empty();
-                query_url = '/query/course/' + analytic_name + '?course=' + course_name
+                query_url = '/view/course/' + analytic_name + '?course=' + course_name
                 $.get(query_url, function(data){
                     $(content_tag).append(data)
                 });
@@ -61,7 +61,7 @@
         $(function() {
             $("#course_tab").click(function(){
                 scrape_courses();
-                load_analytics('/probe/query/course');
+                load_analytics('/probe/view/course');
                 $('#course_name_box')[0].style.display = "none";
                 $('#course_name_dropdown')[0].style.display = "block";
             });

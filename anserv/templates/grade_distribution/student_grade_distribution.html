@@ -1,0 +1,30 @@
+<div class="chart-wrapper">
+
+    <div class="chart-title">
+        {{ graph_title }}
+    </div>
+
+    <div class="chart">
+        <div id="{{graph_name}}" style="width:600px;height:300px"></div>
+    </div>
+
+</div>
+
+<script>
+function render{{graph_name}}()
+{
+    var graph_name = "{{graph_name}}";
+    var chart_data = {{chart_data}};
+
+    $.plot($("#" + graph_name), [
+        {
+            data: chart_data,
+            bars: {
+                show: true
+            }
+        }
+    ]);
+}
+
+render{{graph_name}}();
+</script>

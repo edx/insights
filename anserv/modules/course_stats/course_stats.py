@@ -4,6 +4,7 @@ log.error("BLAH")
 from modules.decorators import view, query, event_handler, memoize_query
 #from an_evt.models import StudentBookAccesses
 from django.contrib.auth.models import User
+from collections import Counter
 
 import json
 from django.conf import settings
@@ -16,6 +17,7 @@ from django.contrib.auth.models import User
 import csv
 from pymongo import MongoClient
 connection = MongoClient()
+import django.template.loader
 
 log=logging.getLogger(__name__)
 import re
@@ -109,6 +111,39 @@ def course_grades_query(fs,db,course, params):
     json_data = {k:json_data[k] for k in json_data if k in ["course", "updated", "results"]}
     csv_file = "{0}/{1}_{2}.csv".format(settings.PROTECTED_DATA_URL,"student_grades",course_name)
     return {'csv' : csv_file, 'json' : json_data, 'success' : True}
+
+@view('course', 'student_grades')
+def course_grades_view(fs, db, course, params):
+    type="course_grades"
+    return course_grades_view_base(fs, db, course, type,params)
+
+@view('course', 'student_problem_grades')
+def problem_grades_view(fs, db, course, params):
+    type="problem_grades"
+    return course_grades_view_base(fs, db, course, type,params)
+
+def course_grades_view_base(fs, db, course, type,params):
+    if type=="course_grades":
+        query_data = course_grades_query(fs,db,course, params)
+    else:
+        query_data = problem_grades_query(fs,db,course, params)
+    json_data = query_data['json']
+    results = json_data['results']
+    headers = results[0].keys()
+    excluded_keys = ['student']
+    headers = [h for h in headers if h not in excluded_keys]
+    charts = []
+    for header in headers:
+        fixed_name = re.sub(" ","_",header).lower()
+        header_data = [round(float(j[header]),1) for j in results]
+        counter = Counter(header_data)
+        counter_keys = counter.keys()
+        counter_keys.sort()
+        counter_list = [[float(c),int(counter[c])] for c in counter_keys]
+        rendered_data = django.template.loader.render_to_string("grade_distribution/student_grade_distribution.html",{'graph_name' : fixed_name, 'chart_data' : counter_list, 'graph_title' : header})
+        charts.append(rendered_data)
+    chart_string = " ".join(charts)
+    return HttpResponse(chart_string)
 
 @query('course', 'student_problem_grades')
 def problem_grades_query(fs,db,course, params):
