@@ -11,11 +11,6 @@ DJANGOAPPS_PATH = "{0}/{1}/{2}".format(MITX_PATH, "lms", "djangoapps")
 LMS_LIB_PATH = "{0}/{1}/{2}".format(MITX_PATH, "lms", "lib")
 COMMON_PATH = "{0}/{1}/{2}".format(MITX_PATH, "common", "djangoapps")
 
-sys.path.append(MITX_PATH)
-sys.path.append(DJANGOAPPS_PATH)
-sys.path.append(LMS_LIB_PATH)
-sys.path.append(COMMON_PATH)
-
 TIME_BETWEEN_DATA_REGENERATION = datetime.timedelta(minutes=1)
 
 #Initialize celery
