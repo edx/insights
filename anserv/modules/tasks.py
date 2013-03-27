@@ -12,17 +12,11 @@ from dateutil import parser
 log=logging.getLogger(__name__)
 
 if settings.IMPORT_MITX_MODULES:
-    sys.path.append(settings.DJANGOAPPS_PATH)
-    sys.path.append(settings.COMMON_PATH)
-    sys.path.append(settings.LMS_LIB_PATH)
-
     from courseware import grades
-    from courseware.models import StudentModule
     from courseware.courses import get_course_with_access
     from courseware.model_data import ModelDataCache, LmsKeyValueStore
-else:
-    from courseware_old.models import StudentModule
-    StudentModule._meta.app_label = "courseware"
+
+from courseware.models import StudentModule
 
 from django.contrib.auth.models import User
 import re

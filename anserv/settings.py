@@ -5,12 +5,6 @@ import sys
 from path import path
 import datetime
 
-IMPORT_MITX_MODULES = False
-MITX_PATH = os.path.abspath("../../mitx/")
-DJANGOAPPS_PATH = "{0}/{1}/{2}".format(MITX_PATH, "lms", "djangoapps")
-LMS_LIB_PATH = "{0}/{1}/{2}".format(MITX_PATH, "lms", "lib")
-COMMON_PATH = "{0}/{1}/{2}".format(MITX_PATH, "common", "djangoapps")
-
 TIME_BETWEEN_DATA_REGENERATION = datetime.timedelta(minutes=1)
 
 #Initialize celery
@@ -23,10 +17,24 @@ ROOT_PATH = path(__file__).dirname()
 REPO_PATH = ROOT_PATH.dirname()
 ENV_ROOT = REPO_PATH.dirname()
 
-IMPORT_GIT_MODULES = False
-GIT_CLONE_URL = "git@github.com:MITx/{0}.git"
-COURSE_FILE_PATH = os.path.abspath(os.path.join(ENV_ROOT, "data"))
-COURSE_CONFIG_PATH = os.path.abspath(os.path.join(REPO_PATH, "course_listings.json"))
+IMPORT_MITX_MODULES = True
+if IMPORT_MITX_MODULES:
+    MITX_PATH = os.path.abspath("../../mitx/")
+    DJANGOAPPS_PATH = "{0}/{1}/{2}".format(MITX_PATH, "lms", "djangoapps")
+    LMS_LIB_PATH = "{0}/{1}/{2}".format(MITX_PATH, "lms", "lib")
+    COMMON_PATH = "{0}/{1}/{2}".format(MITX_PATH, "common", "djangoapps")
+
+    sys.path.append(MITX_PATH)
+    sys.path.append(DJANGOAPPS_PATH)
+    sys.path.append(LMS_LIB_PATH)
+    sys.path.append(COMMON_PATH)
+
+    IMPORT_GIT_MODULES = False
+    GIT_CLONE_URL = "git@github.com:MITx/{0}.git"
+    COURSE_FILE_PATH = os.path.abspath(os.path.join(ENV_ROOT, "data"))
+    COURSE_CONFIG_PATH = os.path.abspath(os.path.join(REPO_PATH, "course_listings.json"))
+else:
+    sys.path.append(ROOT_PATH / "mitx_libraries")
 
 DUMMY_MODE = False
 
@@ -183,8 +191,6 @@ INSTALLED_APPS = (
     'frontend',
     'pipeline',
     'staticfiles',
-    'courseware_old',
-    'student_old',
     'pipeline',
 )
 

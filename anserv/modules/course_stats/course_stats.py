@@ -23,13 +23,7 @@ import re
 import os
 from django.http import HttpResponse
 
-if settings.IMPORT_MITX_MODULES:
-    LMS_PATH = "{0}/{1}/{2}".format(settings.MITX_PATH, "lms", "djangoapps")
-    sys.path.append(LMS_PATH)
-    from courseware.models import StudentModule
-else:
-    from courseware_old.models import StudentModule
-    StudentModule._meta.app_label = "courseware"
+from courseware.models import StudentModule
 
 from mitxmako.shortcuts import render_to_response, render_to_string
 
