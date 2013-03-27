@@ -1,13 +1,9 @@
-<ul class="nav nav-pills">
+<ul class="nav nav-pills" xmlns="http://www.w3.org/1999/html">
     {% for anchor in anchor_data%}
         <li><a href="#{{anchor.link}}">{{anchor.name}}</a></li>
     {% endfor %}
+    <li><a href="{{csv_link}}"><i class="icon-download-alt"></i>Download data in csv format</a></li>
 </ul>
-
-<div class="csv_link">
-    <a class="btn" href="{{csv_link}}"><i class="icon-download-alt"></i>Download data in csv format</a>
-</div>
-
 
 
 {{chart_content|safe}}

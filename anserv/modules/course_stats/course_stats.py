@@ -136,7 +136,10 @@ def course_grades_view_base(fs, db, course, type,params):
     charts = []
     fixed_names = []
     percent_multiplier = 100
-    for header in headers:
+    for i, header in enumerate(headers):
+        chart_title_class = "chart-title"
+        if i==0:
+            chart_title_class = "chart-title-first"
         fixed_name = re.sub(" ","_",header).lower()
         fixed_names.append(fixed_name)
         header_data = [(round(float(j[header])*2,1)/2)*percent_multiplier for j in results]
@@ -147,7 +150,7 @@ def course_grades_view_base(fs, db, course, type,params):
         tick_data = [float(c) for c in counter_keys]
         min_val = min(tick_data + [0])
         max_val = max(tick_data + [1*percent_multiplier])
-        context_dict = {'graph_name' : fixed_name, 'chart_data' : counter_list, 'graph_title' : header, 'tick_data' : tick_data, 'x_min' : min_val, 'x_max' : max_val, 'x_label' : x_label, 'y_label' : y_label}
+        context_dict = {'graph_name' : fixed_name, 'chart_data' : counter_list, 'graph_title' : header, 'tick_data' : tick_data, 'x_min' : min_val, 'x_max' : max_val, 'x_label' : x_label, 'y_label' : y_label, 'chart_title_class' : chart_title_class}
         rendered_data = django.template.loader.render_to_string("grade_distribution/student_grade_distribution.html",context_dict)
         charts.append(rendered_data)
     chart_string = " ".join(charts)
