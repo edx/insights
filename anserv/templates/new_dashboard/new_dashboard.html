@@ -49,13 +49,13 @@
                 } else{
                     analytic_name = target.attr('analytic_name')
                     var content_tag = '#rcontent';
+                    var alert_container = $('.alert-container')
                     $(content_tag).empty();
                     query_url = '/view/course/' + analytic_name + '?course=' + course_name
                     $.get(query_url, function(data){
                         $(content_tag).append(data)
                     }).fail(function() {
-                                console.log("fail")
-                                $('.alert-container').html(['<div class="alert alert-error"><button type="button" class="close" data-dismiss="alert">×</button>',
+                                alert_container.html(['<div class="alert alert-error"><button type="button" class="close" data-dismiss="alert">×</button>',
                                     '<h4>Problem retrieving analytic.</h4>',
                                     '<p>Please choose a different analytic.</p></div>'].join("\n"));
                             });
