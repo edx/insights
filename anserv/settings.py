@@ -23,16 +23,17 @@ if IMPORT_MITX_MODULES:
     DJANGOAPPS_PATH = "{0}/{1}/{2}".format(MITX_PATH, "lms", "djangoapps")
     LMS_LIB_PATH = "{0}/{1}/{2}".format(MITX_PATH, "lms", "lib")
     COMMON_PATH = "{0}/{1}/{2}".format(MITX_PATH, "common", "djangoapps")
+    MITX_LIB_PATHS = [MITX_PATH, DJANGOAPPS_PATH, LMS_LIB_PATH, COMMON_PATH]
 
-    sys.path.append(MITX_PATH)
-    sys.path.append(DJANGOAPPS_PATH)
-    sys.path.append(LMS_LIB_PATH)
-    sys.path.append(COMMON_PATH)
-
+    sys.path += MITX_LIB_PATHS
+    
     IMPORT_GIT_MODULES = False
     GIT_CLONE_URL = "git@github.com:MITx/{0}.git"
     COURSE_FILE_PATH = os.path.abspath(os.path.join(ENV_ROOT, "data"))
     COURSE_CONFIG_PATH = os.path.abspath(os.path.join(REPO_PATH, "course_listings.json"))
+
+    #Needed for MITX imports to work
+    from mitx_settings import *
 else:
     sys.path.append(ROOT_PATH / "mitx_libraries")
 
@@ -316,9 +317,6 @@ PIPELINE_JS_COMPRESSOR = None
 
 PIPELINE_COMPILE_INPLACE = True
 PIPELINE = True
-
-#Needed for MITX imports to work
-from mitx_settings import *
 
 override_settings = os.path.join(BASE_DIR, "override_settings.py")
 if os.path.isfile(override_settings):
