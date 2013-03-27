@@ -5,37 +5,6 @@ import sys
 from path import path
 import datetime
 
-# I really don't like this structure. 
-# 1) We should have this be local to the module, as much as possible
-# 2) At this point, at any given point in time, the courseware install script
-#    has perhaps a 50/50 chance of working, and over half a gig of 
-#    requirements. By requiring it (or de-facto requiring it), we're dumping 
-#    that on anyone who wants to build an analytics module. 
-# 
-IMPORT_MITX_MODULES = False
-
-if IMPORT_MITX_MODULES:
-    MITX_PATH = os.path.abspath("../../mitx/")
-    DJANGOAPPS_PATH = "{0}/{1}/{2}".format(MITX_PATH, "lms", "djangoapps")
-    LMS_LIB_PATH = "{0}/{1}/{2}".format(MITX_PATH, "lms", "lib")
-    COMMON_PATH = "{0}/{1}/{2}".format(MITX_PATH, "common", "djangoapps")
-
-    sys.path.append(MITX_PATH)
-    sys.path.append(DJANGOAPPS_PATH)
-    sys.path.append(LMS_LIB_PATH)
-    sys.path.append(COMMON_PATH)
-
-    IMPORT_GIT_MODULES = False
-    GIT_CLONE_URL = "git@github.com:MITx/{0}.git"
-    COURSE_FILE_PATH = os.path.abspath(os.path.join(ENV_ROOT, "data"))
-    COURSE_CONFIG_PATH = os.path.abspath(os.path.join(REPO_PATH, "course_listings.json"))
-
-    #Needed for MITX imports to work
-    from mitx_settings import *
-else: 
-    sys.path.append("datalib")
-
-
 TIME_BETWEEN_DATA_REGENERATION = datetime.timedelta(minutes=1)
 
 #Initialize celery
@@ -48,6 +17,25 @@ ROOT_PATH = path(__file__).dirname()
 REPO_PATH = ROOT_PATH.dirname()
 ENV_ROOT = REPO_PATH.dirname()
 
+IMPORT_MITX_MODULES = True
+if IMPORT_MITX_MODULES:
+    MITX_PATH = os.path.abspath("../../mitx/")
+    DJANGOAPPS_PATH = "{0}/{1}/{2}".format(MITX_PATH, "lms", "djangoapps")
+    LMS_LIB_PATH = "{0}/{1}/{2}".format(MITX_PATH, "lms", "lib")
+    COMMON_PATH = "{0}/{1}/{2}".format(MITX_PATH, "common", "djangoapps")
+    MITX_LIB_PATHS = [MITX_PATH, DJANGOAPPS_PATH, LMS_LIB_PATH, COMMON_PATH]
+
+    sys.path += MITX_LIB_PATHS
+    
+    IMPORT_GIT_MODULES = False
+    GIT_CLONE_URL = "git@github.com:MITx/{0}.git"
+    COURSE_FILE_PATH = os.path.abspath(os.path.join(ENV_ROOT, "data"))
+    COURSE_CONFIG_PATH = os.path.abspath(os.path.join(REPO_PATH, "course_listings.json"))
+
+    #Needed for MITX imports to work
+    from mitx_settings import *
+else:
+    sys.path.append(ROOT_PATH / "mitx_libraries")
 
 DUMMY_MODE = False
 
@@ -88,20 +76,12 @@ DATABASES = {
 
 DATABASE_ROUTERS = ['an_evt.router.DatabaseRouter']
 
-# CACHES = {
-#     'default': {
-#         'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
-#         'LOCATION': 'django_cache'
-#     }
-# }
-
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-        'LOCATION': 'unique-snowflake'
+        'LOCATION': 'analytics-experiments'
     }
 }
-
 LOG_READ_DIRECTORY = "../../analytics-logs/"
 LOG_POST_URL = "http://127.0.0.1:9022/event"
 
@@ -211,8 +191,7 @@ INSTALLED_APPS = (
     'south',
     'frontend',
     'pipeline',
-#    'staticfiles',
-#    'static_replace',
+    'staticfiles',
     'pipeline',
 )
 
@@ -297,13 +276,38 @@ PIPELINE_JS = {
             'js/backbone.js',
             'js/backbone.validations.js'
             'js/jquery.cookie.js',
+            'js/bootstrap.js',
+            'js/jquery-ui-1.10.2.custom.js',
+            'js/jquery.flot.patched-multi.js',
+            'js/jquery.flot.tooltip.js',
+            'js/jquery.flot.axislabels.js',
             ],
         'output_filename': 'js/util.js',
-        }
+        },
+    'new_dashboard' : {
+        'source_filenames': [
+            'js/new_dashboard/load_analytics.js'
+            ],
+        'output_filename': 'js/new_dashboard.js',
+        },
 }
 
 PIPELINE_CSS = {
+    'bootstrap': {
+        'source_filenames': [
+            'css/bootstrap.css',
+            'css/bootstrap-responsive.css',
+            'css/bootstrap-extensions.css',
+            ],
+        'output_filename': 'css/bootstrap.css',
+        },
+    'util_css' : {
+        'source_filenames': [
+            'css/jquery-ui-1.10.2.custom.css',
+            ],
+        'output_filename': 'css/util_css.css',
     }
+}
 
 PIPELINE_DISABLE_WRAPPER = True
 PIPELINE_YUI_BINARY = "yui-compressor"
@@ -313,6 +317,8 @@ PIPELINE_JS_COMPRESSOR = None
 
 PIPELINE_COMPILE_INPLACE = True
 PIPELINE = True
+
+CELERY_IMPORTS = ('modules.student_course_stats.tasks',)
 
 override_settings = os.path.join(BASE_DIR, "override_settings.py")
 if os.path.isfile(override_settings):

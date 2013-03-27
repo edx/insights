@@ -76,6 +76,16 @@ def handle_probe(request, cls=None, category=None, details = None):
             l = [error_message.format(details,request_handlers)]
     return HttpResponse("\n".join(l), mimetype='text/text')
 
+def list_all_endpoints(request):
+    if not request.user.is_authenticated():
+        return HttpResponseRedirect(reverse('django.contrib.auth.views.login'))
+    endpoints = []
+    for cls in request_handlers:
+        for category in request_handlers[cls]:
+            for details in request_handlers[cls][category]:
+                endpoints.append({'type' : cls, 'category' : category, 'name' : details})
+    return HttpResponse(json.dumps(endpoints))
+
 def handle_request(request, cls, category, name, **kwargs):
     ''' Generic code from handle_view and handle_query '''
     args = dict()

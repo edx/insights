@@ -1,5 +1,6 @@
 from django.conf.urls.defaults import patterns, include, url
 from django.conf import settings
+from django.contrib.auth.decorators import login_required
 
 # Uncomment the next two lines to enable the admin:
 # from django.contrib import admin
@@ -15,12 +16,14 @@ urlpatterns = patterns('',
     url(r'^query/([A-Za-z_+]+)/([A-Za-z_+]+)$', 'an_evt.views.handle_query'),
     url(r'^query/([A-Za-z_+]+)/([A-Za-z_+]+)/([A-Za-z_0-9+]+)$', 'an_evt.views.handle_query'),
     url(r'^query/([A-Za-z_+]+)/([A-Za-z_+]+)/([A-Za-z_0-9+]+)/([A-Za-z_0-9+]+)$', 'an_evt.views.handle_query'),
+    url(r'^schema$', 'an_evt.views.list_all_endpoints'),
     url(r'^probe$', 'an_evt.views.handle_probe'),
     url(r'^probe/([A-Za-z_+]+)$', 'an_evt.views.handle_probe'),
     url(r'^probe/([A-Za-z_+]+)/([A-Za-z_+]+)$', 'an_evt.views.handle_probe'),
     url(r'^probe/([A-Za-z_+]+)/([A-Za-z_+]+)/([A-Za-z_+]+)$', 'an_evt.views.handle_probe'),
     url(r'^probe/([A-Za-z_+]+)/([A-Za-z_+]+)/([A-Za-z_+]+)/([A-Za-z_+]+)$', 'an_evt.views.handle_probe'),
     url(r'^dashboard$', 'dashboard.views.dashboard'),
+    url(r'^new_dashboard$', 'dashboard.views.new_dashboard'),
     url(r'^sns', 'sns.views.sns'),
     # url(r'^anserv/', include('anserv.foo.urls')),
 

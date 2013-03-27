@@ -13,7 +13,6 @@ log=logging.getLogger(__name__)
 import re
 import sys
 
-import courseware
 from courseware.models import StudentModule
 
 from mitxmako.shortcuts import render_to_response, render_to_string
