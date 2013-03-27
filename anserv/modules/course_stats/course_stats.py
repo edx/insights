@@ -17,6 +17,7 @@ import csv
 from pymongo import MongoClient
 connection = MongoClient()
 import django.template.loader
+from dateutil import parser
 
 log=logging.getLogger(__name__)
 import re
@@ -99,8 +100,8 @@ def course_grades_view(fs, db, course, params):
     db - mongo collection
     course - string course id
     """
-    type="course_grades"
-    return course_grades_view_base(fs, db, course, type,params)
+    data_type="course_grades"
+    return course_grades_view_base(fs, db, course, data_type,params)
 
 @view('course', 'student_problem_grades')
 def problem_grades_view(fs, db, course, params):
@@ -110,25 +111,32 @@ def problem_grades_view(fs, db, course, params):
     db - mongo collection
     course - string course id
     """
-    type="problem_grades"
-    return course_grades_view_base(fs, db, course, type,params)
+    data_type="problem_grades"
+    return course_grades_view_base(fs, db, course, data_type,params)
 
-def course_grades_view_base(fs, db, course, type,params):
+def course_grades_view_base(fs, db, course, data_type,params):
     """
     Base logic to generate charts for course grade views.
     fs - filesystem
     db - mongo collection
     course - string course id
-    type - either "course_grades" which returns weighted scores, or "problem_grades" which returns unweighted.
+    data_type - either "course_grades" which returns weighted scores, or "problem_grades" which returns unweighted.
     """
     y_label = "Count"
-    if type=="course_grades":
+    if data_type=="course_grades":
         query_data = course_grades_query(fs,db,course, params)
         x_label = "Weighted Percentage"
     else:
         query_data = problem_grades_query(fs,db,course, params)
         x_label = "Unweighted Percentage"
     json_data = query_data['json']
+    updated = json_data['updated']
+    log.info(type(updated))
+    try:
+        updated_time = parser.parse(updated)
+        updated = updated_time.strftime("%A, %B %d at %I:%M %p %Z")
+    except:
+        log.exception("Could not parse time {0}".format(updated))
     results = json_data['results']
     headers = results[0].keys()
     excluded_keys = ['student']
@@ -157,23 +165,23 @@ def course_grades_view_base(fs, db, course, type,params):
     header_dicts = []
     for i in xrange(0,len(headers)):
         header_dicts.append({'link' : fixed_names[i], 'name' : headers[i]})
-    full_context = {'csv_link' : query_data['csv'], 'chart_content' : chart_string, 'anchor_data' : header_dicts}
+    full_context = {'csv_link' : query_data['csv'], 'chart_content' : chart_string, 'anchor_data' : header_dicts, 'updated' : updated}
     full_view = django.template.loader.render_to_string("grade_distribution/grade_distribution_container.html",full_context)
     return HttpResponse(full_view)
 
-def course_grades_query_base(fs,db,course, params, type="course"):
+def course_grades_query_base(fs,db,course, params, data_type="course"):
     """
     Base logic to query all student grades for a given course.  Returns a dictionary.
     fs- file system
     db- mongo collection
     course - string course id
-    type - either "course" or "problem".  "course" will return weighted grades, "problem" unweighted.
+    data_type - either "course" or "problem".  "course" will return weighted grades, "problem" unweighted.
     """
     types = {
         'course' : ['student_course_stats', 'student_grades'],
         'problem' : ['student_problem_stats', 'student_problem_grades']
     }
-    type_list = types[type]
+    type_list = types[data_type]
     collection = connection['modules_tasks'][type_list[0]]
     course_name = re.sub("[/:]","_",course)
     json_data = list(collection.find({'course' : course}))
@@ -194,7 +202,7 @@ def course_grades_query(fs,db,course, params):
     db- mongo collection
     course - string course id
     """
-    return course_grades_query_base(fs,db,course,params,type="course")
+    return course_grades_query_base(fs,db,course,params,data_type="course")
 
 @query('course', 'student_problem_grades')
 def problem_grades_query(fs,db,course, params):
@@ -204,5 +212,5 @@ def problem_grades_query(fs,db,course, params):
     db- mongo collection
     course - string course id
     """
-    return course_grades_query_base(fs,db,course,params,type="problem")
+    return course_grades_query_base(fs,db,course,params,data_type="problem")
 
