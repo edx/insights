@@ -12,17 +12,11 @@ from dateutil import parser
 log=logging.getLogger(__name__)
 
 if settings.IMPORT_MITX_MODULES:
-    sys.path.append(settings.DJANGOAPPS_PATH)
-    sys.path.append(settings.COMMON_PATH)
-    sys.path.append(settings.LMS_LIB_PATH)
-
     from courseware import grades
-    from courseware.models import StudentModule
     from courseware.courses import get_course_with_access
-    from courseware.model_data import ModelDataCache, LmsKeyValueStore
-else:
-    import courseware_old as courseware
-    from courseware.models import StudentModule
+
+import courseware
+from courseware.models import StudentModule
 
 from django.contrib.auth.models import User
 import re
@@ -203,5 +197,3 @@ STUDENT_TASK_TYPES = {
     'course' : get_student_course_stats,
     'problem' : get_student_problem_stats
 }
-
-

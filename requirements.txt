@@ -16,4 +16,4 @@ south
 django-celery
 celery-with-redis
 django-pipeline
-requests
+

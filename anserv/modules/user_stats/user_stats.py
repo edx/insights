@@ -13,12 +13,7 @@ log=logging.getLogger(__name__)
 import re
 import sys
 
-if settings.IMPORT_MITX_MODULES:
-    LMS_PATH = "{0}/{1}/{2}".format(settings.MITX_PATH, "lms", "djangoapps")
-    sys.path.append(LMS_PATH)
-else:
-    import courseware_old as courseware
-
+import courseware
 from courseware.models import StudentModule
 
 from mitxmako.shortcuts import render_to_response, render_to_string

@@ -5,16 +5,36 @@ import sys
 from path import path
 import datetime
 
-IMPORT_MITX_MODULES = True
-MITX_PATH = os.path.abspath("../../mitx/")
-DJANGOAPPS_PATH = "{0}/{1}/{2}".format(MITX_PATH, "lms", "djangoapps")
-LMS_LIB_PATH = "{0}/{1}/{2}".format(MITX_PATH, "lms", "lib")
-COMMON_PATH = "{0}/{1}/{2}".format(MITX_PATH, "common", "djangoapps")
+# I really don't like this structure. 
+# 1) We should have this be local to the module, as much as possible
+# 2) At this point, at any given point in time, the courseware install script
+#    has perhaps a 50/50 chance of working, and over half a gig of 
+#    requirements. By requiring it (or de-facto requiring it), we're dumping 
+#    that on anyone who wants to build an analytics module. 
+# 
+IMPORT_MITX_MODULES = False
 
-sys.path.append(MITX_PATH)
-sys.path.append(DJANGOAPPS_PATH)
-sys.path.append(LMS_LIB_PATH)
-sys.path.append(COMMON_PATH)
+if IMPORT_MITX_MODULES:
+    MITX_PATH = os.path.abspath("../../mitx/")
+    DJANGOAPPS_PATH = "{0}/{1}/{2}".format(MITX_PATH, "lms", "djangoapps")
+    LMS_LIB_PATH = "{0}/{1}/{2}".format(MITX_PATH, "lms", "lib")
+    COMMON_PATH = "{0}/{1}/{2}".format(MITX_PATH, "common", "djangoapps")
+
+    sys.path.append(MITX_PATH)
+    sys.path.append(DJANGOAPPS_PATH)
+    sys.path.append(LMS_LIB_PATH)
+    sys.path.append(COMMON_PATH)
+
+    IMPORT_GIT_MODULES = False
+    GIT_CLONE_URL = "git@github.com:MITx/{0}.git"
+    COURSE_FILE_PATH = os.path.abspath(os.path.join(ENV_ROOT, "data"))
+    COURSE_CONFIG_PATH = os.path.abspath(os.path.join(REPO_PATH, "course_listings.json"))
+
+    #Needed for MITX imports to work
+    from mitx_settings import *
+else: 
+    sys.path.append("datalib")
+
 
 TIME_BETWEEN_DATA_REGENERATION = datetime.timedelta(minutes=1)
 
@@ -28,10 +48,6 @@ ROOT_PATH = path(__file__).dirname()
 REPO_PATH = ROOT_PATH.dirname()
 ENV_ROOT = REPO_PATH.dirname()
 
-IMPORT_GIT_MODULES = False
-GIT_CLONE_URL = "git@github.com:MITx/{0}.git"
-COURSE_FILE_PATH = os.path.abspath(os.path.join(ENV_ROOT, "data"))
-COURSE_CONFIG_PATH = os.path.abspath(os.path.join(REPO_PATH, "course_listings.json"))
 
 DUMMY_MODE = False
 
@@ -53,12 +69,12 @@ LOGIN_REDIRECT_URL = "/"
 
 DATABASES = {
     'default': { ## Main analytics read replica
-        'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': '../../db/mitx.db',                      # Or path to database file if using sqlite3.
-        'USER': '',                      # Not used with sqlite3.
-        'PASSWORD': '',                  # Not used with sqlite3.
-        'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
-        'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
+         'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
+         'NAME': '../../db/mitx.db',                      # Or path to database file if using sqlite3.
+         'USER': '',                      # Not used with sqlite3.
+         'PASSWORD': '',                  # Not used with sqlite3.
+         'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
+         'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
     }, 
     'local': { ## Small, local read/write DB for things like settings, cron tasks, etc. 
         'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
@@ -188,8 +204,8 @@ INSTALLED_APPS = (
     'south',
     'frontend',
     'pipeline',
-    'staticfiles',
-    'static_replace',
+#    'staticfiles',
+#    'static_replace',
     'pipeline',
 )
 
@@ -290,9 +306,6 @@ PIPELINE_JS_COMPRESSOR = None
 
 PIPELINE_COMPILE_INPLACE = True
 PIPELINE = True
-
-#Needed for MITX imports to work
-from mitx_settings import *
 
 override_settings = os.path.join(BASE_DIR, "override_settings.py")
 if os.path.isfile(override_settings):

@@ -22,11 +22,7 @@ import re
 import os
 from django.http import HttpResponse
 
-if settings.IMPORT_MITX_MODULES:
-    LMS_PATH = "{0}/{1}/{2}".format(settings.MITX_PATH, "lms", "djangoapps")
-    sys.path.append(LMS_PATH)
-else:
-    import courseware_old as courseware
+import courseware
 
 from courseware.models import StudentModule
 
