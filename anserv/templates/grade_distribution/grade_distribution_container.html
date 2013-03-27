@@ -1,3 +1,7 @@
+<div class="alert alert-info">
+    <button type="button" class="close" data-dismiss="alert">×</button>
+    Data last updated on {{updated}}.
+</div>
 
 <ul class="nav nav-pills" xmlns="http://www.w3.org/1999/html">
     {% for anchor in anchor_data%}
@@ -5,8 +9,5 @@
     {% endfor %}
     <li><a href="{{csv_link}}"><i class="icon-download-alt"></i>Download data in csv format</a></li>
 </ul>
-<div class="alert alert-info">
-    Data last updated on {{updated}}.
-</div>
 
 {{chart_content|safe}}
