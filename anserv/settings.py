@@ -29,7 +29,7 @@ if IMPORT_MITX_MODULES:
     
     IMPORT_GIT_MODULES = False
     GIT_CLONE_URL = "git@github.com:MITx/{0}.git"
-    COURSE_FILE_PATH = os.path.abspath(os.path.join(ENV_ROOT, "data"))
+    COURSE_FILE_PATH = os.path.abspath(os.path.join(ENV_ROOT, "xml_data"))
     COURSE_CONFIG_PATH = os.path.abspath(os.path.join(REPO_PATH, "course_listings.json"))
 
     #Needed for MITX imports to work
