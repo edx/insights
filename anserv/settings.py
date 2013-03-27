@@ -183,7 +183,8 @@ INSTALLED_APPS = (
     'frontend',
     'pipeline',
     'staticfiles',
-    'static_replace',
+    'courseware_old',
+    'student_old',
     'pipeline',
 )
 

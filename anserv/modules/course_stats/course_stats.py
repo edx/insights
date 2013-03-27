@@ -1,6 +1,5 @@
 import logging
 log = logging.getLogger(__name__)
-log.error("BLAH")
 from modules.decorators import view, query, event_handler, memoize_query
 #from an_evt.models import StudentBookAccesses
 from django.contrib.auth.models import User
@@ -27,10 +26,10 @@ from django.http import HttpResponse
 if settings.IMPORT_MITX_MODULES:
     LMS_PATH = "{0}/{1}/{2}".format(settings.MITX_PATH, "lms", "djangoapps")
     sys.path.append(LMS_PATH)
+    from courseware.models import StudentModule
 else:
-    import courseware_old as courseware
-
-from courseware.models import StudentModule
+    from courseware_old.models import StudentModule
+    StudentModule._meta.app_label = "courseware"
 
 from mitxmako.shortcuts import render_to_response, render_to_string
 

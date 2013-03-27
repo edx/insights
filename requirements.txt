@@ -16,3 +16,4 @@ South==0.7.6
 django-celery==3.0.11
 celery-with-redis==3.0
 django-pipeline==1.3.6
+django-staticfiles
