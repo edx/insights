@@ -53,7 +53,8 @@
                     query_url = '/view/course/' + analytic_name + '?course=' + course_name
                     $.get(query_url, function(data){
                         $(content_tag).append(data)
-                    }).error(function() {
+                    }).fail(function() {
+                                console.log("fail")
                                 $('.alert-container').html(['<div class="alert alert-error"><button type="button" class="close" data-dismiss="alert">×</button>',
                                     '<h4>Problem retrieving analytic.</h4>',
                                     '<p>Please choose a different analytic.</p></div>'].join("\n"));
