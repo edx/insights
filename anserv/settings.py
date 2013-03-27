@@ -29,7 +29,7 @@ if IMPORT_MITX_MODULES:
     
     IMPORT_GIT_MODULES = False
     GIT_CLONE_URL = "git@github.com:MITx/{0}.git"
-    COURSE_FILE_PATH = os.path.abspath(os.path.join(ENV_ROOT, "data"))
+    COURSE_FILE_PATH = os.path.abspath(os.path.join(ENV_ROOT, "xml_data"))
     COURSE_CONFIG_PATH = os.path.abspath(os.path.join(REPO_PATH, "course_listings.json"))
 
     #Needed for MITX imports to work
@@ -169,6 +169,9 @@ TEMPLATE_DIRS = (
     str(os.path.abspath(REPO_PATH / 'anserv/templates/')),
 )
 
+#Append these internal paths in order to load celery tasks properly
+sys.path.append(ROOT_PATH / "modules" )
+
 INSTALLED_APPS = (
     'django.contrib.auth',
 # contenttypes has weird conflicts with multiple databases. My guess this 
@@ -193,6 +196,7 @@ INSTALLED_APPS = (
     'pipeline',
     'staticfiles',
     'pipeline',
+    'student_course_stats'
 )
 
 # A sample logging configuration. The only tangible logging
