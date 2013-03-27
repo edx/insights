@@ -1,5 +1,13 @@
+<ul class="nav nav-pills">
+    {% for anchor in anchor_data%}
+        <li><a href="#{{anchor.link}}">{{anchor.name}}</a></li>
+    {% endfor %}
+</ul>
+
 <div class="csv_link">
     <a class="btn" href="{{csv_link}}"><i class="icon-download-alt"></i>Download data in csv format</a>
 </div>
+
+
 
 {{chart_content|safe}}
