@@ -24,6 +24,7 @@
         }
         function load_analytics(url)
         {
+            $('.alert-container').empty()
             $.get(url, function(data) {
                 var split_data = data.split('\n');
                 var i;
@@ -35,18 +36,36 @@
                 query_analytic();
             });
         }
+        function create_new_alert(string_to_show)
+        {
+            $('.alert-container').empty()
+            $('.alert-container').html(string_to_show)
+            $('.alert-container').show()
+        }
         function query_analytic()
         {
             $(".analytic_select").click(function(event){
+                $('.alert-container').empty()
                 target = $(event.target)
                 course_name = $('a.dropdown-toggle').attr('current_course')
-                analytic_name = target.attr('analytic_name')
-                var content_tag = '#rcontent';
-                $(content_tag).empty();
-                query_url = '/view/course/' + analytic_name + '?course=' + course_name
-                $.get(query_url, function(data){
-                    $(content_tag).append(data)
-                });
+                if(course_name==undefined)
+                {
+                    create_new_alert(['<div class="alert alert-error"><button type="button" class="close" data-dismiss="alert">×</button>',
+                        '<h4>Course not selected!</h4>',
+                        '<p>You must choose a course above before you can get an analytic.</p></div>'].join("\n"));
+                } else{
+                    analytic_name = target.attr('analytic_name')
+                    var content_tag = '#rcontent';
+                    $(content_tag).empty();
+                    query_url = '/view/course/' + analytic_name + '?course=' + course_name
+                    $.get(query_url, function(data){
+                        $(content_tag).append(data)
+                    }).fail(function() {
+                                create_new_alert(['<div class="alert alert-error"><button type="button" class="close" data-dismiss="alert">×</button>',
+                                    '<h4>Problem retrieving analytic.</h4>',
+                                    '<p>Please choose a different analytic.</p></div>'].join("\n"));
+                            });
+                }
             });
         }
         function setup_course_links()
@@ -56,6 +75,7 @@
                 change_name = $('a.dropdown-toggle')
                 change_name.text(target.attr('course_name'))
                 change_name.attr('current_course', target.attr('course_name'))
+                $('.alert-container').empty()
             });
         }
         $(function() {
@@ -91,8 +111,14 @@
                 </div><!--/.well -->
             </div><!--/span-->
 
-            <div class="span9" id="rcontent">
-
+            <div class="span9">
+                <div class="row-fluid">
+                <div class="alert-container">
+                </div>
+                </div>
+                <div class="row-fluid">
+                    <div id="rcontent"></div>
+                </div>
 
             </div><!--/span-->
         </div><!--/row-->
