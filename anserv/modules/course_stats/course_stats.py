@@ -148,7 +148,7 @@ def course_grades_view_base(fs, db, course, data_type,params):
         chart_title_class = "chart-title"
         if i==0:
             chart_title_class = "chart-title-first"
-        fixed_name = re.sub(" ","_",header).lower()
+        fixed_name = re.sub("[^A-Za-z0-9]","_",header).lower()
         fixed_names.append(fixed_name)
         header_data = [(round(float(j[header])*2,1)/2)*percent_multiplier for j in results]
         counter = Counter(header_data)
