@@ -10,6 +10,8 @@ sudo chown CURRENT_USER /opt/edx
 virtualenv /opt/edx
 source /opt/edx/bin/activate
 pip install -r requirements.txt
-
+mkdir /opt/wwc/db
+python manage.py syncdb
+python manage.py syncdb --database=local
 
 
