@@ -148,7 +148,9 @@ def course_grades_view_base(fs, db, course, type,params):
         rendered_data = django.template.loader.render_to_string("grade_distribution/student_grade_distribution.html",context_dict)
         charts.append(rendered_data)
     chart_string = " ".join(charts)
-    return HttpResponse(chart_string)
+    full_context = {'csv_link' : query_data['csv'], 'chart_content' : chart_string}
+    full_view = django.template.loader.render_to_string("grade_distribution/grade_distribution_container.html",full_context)
+    return HttpResponse(full_view)
 
 def course_grades_query_base(fs,db,course, params, type="course"):
     """
