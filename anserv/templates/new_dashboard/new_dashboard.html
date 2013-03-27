@@ -34,10 +34,6 @@
                     $(sidebar_tag).append('<li><a class="analytic_select" href="#" analytic_name="'+ split_data[i] +'" >' + tidy_str(split_data[i]) +'</a></li>');
                 }
                 query_analytic();
-            }).fail(function() {
-                $('.alert-container').html(['<div class="alert alert-error"><button type="button" class="close" data-dismiss="alert">×</button>',
-                    '<h4>Problem retrieving analytic.</h4>',
-                    '<p>Please choose a different analytic.</p></div>'].join("\n"));
             });
         }
         function query_analytic()
@@ -59,6 +55,10 @@
                         $(content_tag).append(data)
                     });
                 }
+            }).error(function() {
+                    $('.alert-container').html(['<div class="alert alert-error"><button type="button" class="close" data-dismiss="alert">×</button>',
+                        '<h4>Problem retrieving analytic.</h4>',
+                        '<p>Please choose a different analytic.</p></div>'].join("\n"));
             });
         }
         function setup_course_links()
