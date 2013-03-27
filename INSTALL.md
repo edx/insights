@@ -7,6 +7,7 @@ First, decide on your directories:
 * ANALYTICS_DIR = directory where the analytics-experiments repo is cloned. (so something like /home/bob/analytics-experiments/)
 
 Then, start to install:
+* cd BASE_DIR
 * git clone git@github.com:MITx/analytics-experiments.git
 * cd analytics-experiments (this is the ANALYTICS_DIR)
 * sudo xargs -a apt-packages.txt apt-get install
@@ -20,6 +21,7 @@ Then, start to install:
 * pip install -r requirements.txt
 * mkdir BASE_DIR/db
 * cd ANALYTICS_DIR/anserv
+* Ensure that IMPORT_MITX_MODULES in settings.py is False .
 * python manage.py syncdb --database=default --settings=settings (this may fail, but that is fine)
 * python manage.py syncdb --database=local --settings=settings
 * mkdir ANALYTICS_DIR/staticfiles
@@ -36,8 +38,17 @@ Then, create a user:
 * user = User.objects.create_user("test","test@test.com","test") (run in the shell)
 
 If you are using the aws settings (ie deploying):
+
+* MITX_DIR = directory where you clone MITX
+
 * cd ANALYTICS_DIR/anserv
+* source VIRTUALENV_DIR/bin/activate
 * python manage.py createcachetable django_cache --database=local
+* cd BASE_DIR
+* git clone git@github.com:MITx/mitx.git
+* cd MITX_DIR
+* sudo xargs -a apt-packages.txt apt-get install
+* pip install -r pre-requirements.txt
 
 
 
