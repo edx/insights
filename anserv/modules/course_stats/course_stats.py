@@ -124,31 +124,40 @@ def course_grades_view_base(fs, db, course, type,params):
     y_label = "Count"
     if type=="course_grades":
         query_data = course_grades_query(fs,db,course, params)
-        x_label = "Weighted Score"
+        x_label = "Weighted Percentage"
     else:
         query_data = problem_grades_query(fs,db,course, params)
-        x_label = "Unweighted Score"
+        x_label = "Unweighted Percentage"
     json_data = query_data['json']
     results = json_data['results']
     headers = results[0].keys()
     excluded_keys = ['student']
     headers = [h for h in headers if h not in excluded_keys]
     charts = []
-    for header in headers:
+    fixed_names = []
+    percent_multiplier = 100
+    for i, header in enumerate(headers):
+        chart_title_class = "chart-title"
+        if i==0:
+            chart_title_class = "chart-title-first"
         fixed_name = re.sub(" ","_",header).lower()
-        header_data = [round(float(j[header])*2,1)/2 for j in results]
+        fixed_names.append(fixed_name)
+        header_data = [(round(float(j[header])*2,1)/2)*percent_multiplier for j in results]
         counter = Counter(header_data)
         counter_keys = counter.keys()
         counter_keys.sort()
         counter_list = [[float(c),int(counter[c])] for c in counter_keys]
         tick_data = [float(c) for c in counter_keys]
         min_val = min(tick_data + [0])
-        max_val = max(tick_data + [1])
-        context_dict = {'graph_name' : fixed_name, 'chart_data' : counter_list, 'graph_title' : header, 'tick_data' : tick_data, 'x_min' : min_val, 'x_max' : max_val, 'x_label' : x_label, 'y_label' : y_label}
+        max_val = max(tick_data + [1*percent_multiplier])
+        context_dict = {'graph_name' : fixed_name, 'chart_data' : counter_list, 'graph_title' : header, 'tick_data' : tick_data, 'x_min' : min_val, 'x_max' : max_val, 'x_label' : x_label, 'y_label' : y_label, 'chart_title_class' : chart_title_class}
         rendered_data = django.template.loader.render_to_string("grade_distribution/student_grade_distribution.html",context_dict)
         charts.append(rendered_data)
     chart_string = " ".join(charts)
-    full_context = {'csv_link' : query_data['csv'], 'chart_content' : chart_string}
+    header_dicts = []
+    for i in xrange(0,len(headers)):
+        header_dicts.append({'link' : fixed_names[i], 'name' : headers[i]})
+    full_context = {'csv_link' : query_data['csv'], 'chart_content' : chart_string, 'anchor_data' : header_dicts}
     full_view = django.template.loader.render_to_string("grade_distribution/grade_distribution_container.html",full_context)
     return HttpResponse(full_view)
 

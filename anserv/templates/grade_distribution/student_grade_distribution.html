@@ -1,7 +1,7 @@
-<div class="chart-wrapper">
+<div class="chart-wrapper" >
 
-    <div class="chart-title">
-        <h4>{{ graph_title }}</h4>
+    <div class="chart-header">
+         <h4 id="{{graph_name}}" class="{{chart_title_class}}">{{ graph_title }}</h4>
     </div>
 
     <div class="chart">
@@ -17,7 +17,7 @@ function render{{graph_name}}()
     var chart_data = {{chart_data}};
     var ticks = {{tick_data}};
 
-    $.plot($("#" + graph_name), [
+    $.plot($("div#" + graph_name), [
         {
             data: chart_data,
         }],
