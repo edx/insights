@@ -318,6 +318,8 @@ PIPELINE_JS_COMPRESSOR = None
 PIPELINE_COMPILE_INPLACE = True
 PIPELINE = True
 
+CELERY_IMPORTS = ('modules.student_course_stats.tasks',)
+
 override_settings = os.path.join(BASE_DIR, "override_settings.py")
 if os.path.isfile(override_settings):
     execfile(override_settings)
