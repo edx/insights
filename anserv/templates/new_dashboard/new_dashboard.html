@@ -45,6 +45,7 @@
         function query_analytic()
         {
             $(".analytic_select").click(function(event){
+                $('.alert-container').empty()
                 target = $(event.target)
                 course_name = $('a.dropdown-toggle').attr('current_course')
                 if(course_name==undefined)
