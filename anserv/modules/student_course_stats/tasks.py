@@ -11,11 +11,13 @@ from dateutil import parser
 
 log=logging.getLogger(__name__)
 
+#If we are importing the MITx modules, then full functionality will be enabled here.
 if settings.IMPORT_MITX_MODULES:
     from courseware import grades
     from courseware.courses import get_course_with_access
     from courseware.model_data import ModelDataCache, LmsKeyValueStore
 
+#If not, we will retain the studentmodule, which will give minimal functionality
 from courseware.models import StudentModule
 
 from django.contrib.auth.models import User
@@ -29,9 +31,13 @@ from django.utils.timezone import utc
 from django.core.cache import cache
 import time
 
+#Locks are set by long-running tasks to ensure that they are not duplicated.
 LOCK_EXPIRE = 24 * 60 * 60 # 1 day
 
 class RequestDict(object):
+    """
+    Mocks the request object.  Needed for the MITx grading functions to work.
+    """
     def __init__(self, user):
         self.META = {}
         self.POST = {}
@@ -40,6 +46,12 @@ class RequestDict(object):
         self.path = None
 
 def get_db_and_fs_cron(f):
+    """
+    Gets the correct fs and db for a given input function
+    f - a function signature
+    fs - A filesystem object
+    db - A mongo database collection
+    """
     import an_evt.views
     db = an_evt.views.get_database(f)
     fs = an_evt.views.get_filesystem(f)
@@ -47,6 +59,11 @@ def get_db_and_fs_cron(f):
 
 @periodic_task(run_every=settings.TIME_BETWEEN_DATA_REGENERATION)
 def regenerate_student_course_data():
+    """
+    Generates the data for a given student's performance in a course.
+    This function is a periodic task (cron job) that runs at a specified interval,
+    pulls a list of courses, and for each course sends messages to the appropriate tasks.
+    """
     if not settings.IMPORT_MITX_MODULES:
         log.error("Cannot import mitx modules and thus cannot regenerate student course data.")
         return
@@ -62,6 +79,12 @@ def regenerate_student_course_data():
 
 @task
 def get_student_course_stats(request, course):
+    """
+    Regenerates student stats for a course (weighted section grades)
+    Stores the grades to a mongo (json) collection, and to csv files
+    request - a mock request (using RequestDict)
+    course - a string course id
+    """
     course_name = re.sub("[/:]","_",course)
     log.info(course_name)
     lock_id = "regenerate_student_course_data-lock-{0}-{1}-{2}".format(course,"student_course_grades", course_name)
@@ -72,7 +95,7 @@ def get_student_course_stats(request, course):
         try:
             fs, db = get_db_and_fs_cron(get_student_course_stats)
             collection = db['student_course_stats']
-            courseware_summaries, users_in_course_ids = get_student_course_stats_base(request,course,course_name, "grades")
+            courseware_summaries, users_in_course_ids = get_student_course_stats_base(request,course, "grades")
             rows = []
             for z in xrange(0,len(courseware_summaries)):
                 row = {'student' : users_in_course_ids[z], 'overall_percent' : courseware_summaries[z]["percent"]}
@@ -93,6 +116,12 @@ def get_student_course_stats(request, course):
 
 @task
 def get_student_problem_stats(request,course):
+    """
+    Regenerates student stats for a course (unweighted exercise grades)
+    Stores the grades to a mongo (json) collection, and to csv files
+    request - a mock request (using RequestDict)
+    course - a string course id
+    """
     course_name = re.sub("[/:]","_",course)
     log.info(course_name)
     lock_id = "regenerate_student_course_data-lock-{0}-{1}-{2}".format(course,"student_problem_grades", course_name)
@@ -103,7 +132,7 @@ def get_student_problem_stats(request,course):
         try:
             fs, db = get_db_and_fs_cron(get_student_course_stats)
             collection = db['student_problem_stats']
-            courseware_summaries, users_in_course_ids = get_student_course_stats_base(request,course,course_name, "grades")
+            courseware_summaries, users_in_course_ids = get_student_course_stats_base(request,course, "grades")
             rows = []
             for z in xrange(0,len(courseware_summaries)):
                 log.info(courseware_summaries[z])
@@ -124,7 +153,14 @@ def get_student_problem_stats(request,course):
         return json.dumps({'result_data' : rows, 'result_file' : "{0}/{1}".format(settings.PROTECTED_DATA_URL, file_name)})
     return {}
 
-def get_student_course_stats_base(request,course,course_name, type="grades"):
+def get_student_course_stats_base(request,course, type="grades"):
+    """
+    Called by get_student_course_stats and get_student_problem_stats
+    Gets a list of users in a course, and then computes grades for them
+    request - a mock request (using RequestDict)
+    course - a string course id
+    type - whether to get student weighted grades or unweighted grades.  If "grades" will get weighted
+    """
     fs, db = get_db_and_fs_cron(get_student_course_stats)
     course_obj = get_course_with_access(request.user, course, 'load', depth=None)
     users_in_course = StudentModule.objects.filter(course_id=course).values('student').distinct()
@@ -149,6 +185,12 @@ def get_student_course_stats_base(request,course,course_name, type="grades"):
     return courseware_summaries, users_in_course_ids
 
 def return_csv(fs, filename, results):
+    """
+    Given a filesystem and a list of results, will write the results to a file
+    fs - filesystem object
+    filename - the name of the csv file to write
+    results - a list of dictionaries
+    """
     if len(results)<1:
         return
     output = fs.open(filename, 'w')
@@ -164,6 +206,12 @@ def return_csv(fs, filename, results):
     return True
 
 def write_to_collection(collection, results, course):
+    """
+    Given a collection and results, writes the results to the collection
+    collection - a mongo collection
+    results - a list of dictionaries
+    course - string course id
+    """
     if len(results)<1:
         return
     now = datetime.datetime.utcnow().replace(tzinfo=utc)
@@ -175,6 +223,7 @@ def write_to_collection(collection, results, course):
     else:
         collection.insert(mongo_results)
 
+#Used by regenerate_student_course_data to find and call tasks
 STUDENT_TASK_TYPES = {
     'course' : get_student_course_stats,
     'problem' : get_student_problem_stats
