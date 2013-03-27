@@ -74,11 +74,10 @@ DATABASE_ROUTERS = ['an_evt.router.DatabaseRouter']
 
 CACHES = {
     'default': {
-        'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
-        'LOCATION': 'django_cache'
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'analytics-experiments'
     }
 }
-
 LOG_READ_DIRECTORY = "../../analytics-logs/"
 LOG_POST_URL = "http://127.0.0.1:9022/event"
 

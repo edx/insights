@@ -20,3 +20,10 @@ DEBUG = False
 TIME_BETWEEN_DATA_REGENERATION = datetime.timedelta(days=1)
 
 ROOT_URLCONF = 'urls'
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
+        'LOCATION': 'django_cache'
+    }
+}
