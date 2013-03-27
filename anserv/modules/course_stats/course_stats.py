@@ -91,31 +91,36 @@ def courses_available_query(fs, db, params):
     r = [c['course'] for c in course_data]
     return r
 
-@query('course', 'student_grades')
-def course_grades_query(fs,db,course, params):
-    collection = connection['modules_tasks']['student_problem_stats']
-    course_name = re.sub("[/:]","_",course)
-    json_data = list(collection.find({'course' : course}))
-
-    if len(json_data)<1:
-        return {'success' : False, 'message' : "Cannot find the course in the list or data not available.", 'courses' : courses_available_query(fs,db,params)}
-    json_data = json_data[0]
-
-    json_data = {k:json_data[k] for k in json_data if k in ["course", "updated", "results"]}
-    csv_file = "{0}/{1}_{2}.csv".format(settings.PROTECTED_DATA_URL,"student_grades",course_name)
-    return {'csv' : csv_file, 'json' : json_data, 'success' : True}
-
 @view('course', 'student_grades')
 def course_grades_view(fs, db, course, params):
+    """
+    View student course-level grades
+    fs - filesystem
+    db - mongo collection
+    course - string course id
+    """
     type="course_grades"
     return course_grades_view_base(fs, db, course, type,params)
 
 @view('course', 'student_problem_grades')
 def problem_grades_view(fs, db, course, params):
+    """
+    View student exercise-level grades
+    fs - filesystem
+    db - mongo collection
+    course - string course id
+    """
     type="problem_grades"
     return course_grades_view_base(fs, db, course, type,params)
 
 def course_grades_view_base(fs, db, course, type,params):
+    """
+    Base logic to generate charts for course grade views.
+    fs - filesystem
+    db - mongo collection
+    course - string course id
+    type - either "course_grades" which returns weighted scores, or "problem_grades" which returns unweighted.
+    """
     y_label = "Count"
     if type=="course_grades":
         query_data = course_grades_query(fs,db,course, params)
@@ -145,9 +150,20 @@ def course_grades_view_base(fs, db, course, type,params):
     chart_string = " ".join(charts)
     return HttpResponse(chart_string)
 
-@query('course', 'student_problem_grades')
-def problem_grades_query(fs,db,course, params):
-    collection = connection['modules_tasks']['student_course_stats']
+def course_grades_query_base(fs,db,course, params, type="course"):
+    """
+    Base logic to query all student grades for a given course.  Returns a dictionary.
+    fs- file system
+    db- mongo collection
+    course - string course id
+    type - either "course" or "problem".  "course" will return weighted grades, "problem" unweighted.
+    """
+    types = {
+        'course' : ['student_course_stats', 'student_grades'],
+        'problem' : ['student_problem_stats', 'student_problem_grades']
+    }
+    type_list = types[type]
+    collection = connection['modules_tasks'][type_list[0]]
     course_name = re.sub("[/:]","_",course)
     json_data = list(collection.find({'course' : course}))
 
@@ -156,6 +172,26 @@ def problem_grades_query(fs,db,course, params):
     json_data = json_data[0]
 
     json_data = {k:json_data[k] for k in json_data if k in ["course", "updated", "results"]}
-    csv_file = "{0}/{1}_{2}.csv".format(settings.PROTECTED_DATA_URL,"student_problem_grades",course_name)
-    return {'csv' : csv_file, 'json' : json_data}
+    csv_file = "{0}/{1}_{2}.csv".format(settings.PROTECTED_DATA_URL,type_list[1],course_name)
+    return {'csv' : csv_file, 'json' : json_data, 'success' : True}
+
+@query('course', 'student_grades')
+def course_grades_query(fs,db,course, params):
+    """
+    Query all student weighted grades for a given course
+    fs- file system
+    db- mongo collection
+    course - string course id
+    """
+    return course_grades_query_base(fs,db,course,params,type="course")
+
+@query('course', 'student_problem_grades')
+def problem_grades_query(fs,db,course, params):
+    """
+    Query all student unweighted grades for a given course
+    fs- file system
+    db- mongo collection
+    course - string course id
+    """
+    return course_grades_query_base(fs,db,course,params,type="problem")
 
