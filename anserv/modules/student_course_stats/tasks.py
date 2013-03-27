@@ -57,7 +57,7 @@ def get_db_and_fs_cron(f):
     fs = an_evt.views.get_filesystem(f)
     return fs,db
 
-@periodic_task(run_every=settings.TIME_BETWEEN_DATA_REGENERATION)
+@periodic_task(run_every=settings.TIME_BETWEEN_DATA_REGENERATION, name="tasks.regenerate_student_course_data")
 def regenerate_student_course_data():
     """
     Generates the data for a given student's performance in a course.
@@ -77,7 +77,7 @@ def regenerate_student_course_data():
         for type in ['course', 'problem']:
             STUDENT_TASK_TYPES[type].delay(request,course)
 
-@task
+@task(name="tasks.get_student_course_stats")
 def get_student_course_stats(request, course):
     """
     Regenerates student stats for a course (weighted section grades)
@@ -114,7 +114,7 @@ def get_student_course_stats(request, course):
         return json.dumps({'result_data' : rows, 'result_file' : "{0}/{1}".format(settings.PROTECTED_DATA_URL, file_name)})
     return {}
 
-@task
+@task(name="tasks.get_student_problem_stats")
 def get_student_problem_stats(request,course):
     """
     Regenerates student stats for a course (unweighted exercise grades)

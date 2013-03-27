@@ -169,6 +169,9 @@ TEMPLATE_DIRS = (
     str(os.path.abspath(REPO_PATH / 'anserv/templates/')),
 )
 
+#Append these internal paths in order to load celery tasks properly
+sys.path.append(ROOT_PATH / "modules" )
+
 INSTALLED_APPS = (
     'django.contrib.auth',
 # contenttypes has weird conflicts with multiple databases. My guess this 
@@ -193,6 +196,7 @@ INSTALLED_APPS = (
     'pipeline',
     'staticfiles',
     'pipeline',
+    'student_course_stats'
 )
 
 # A sample logging configuration. The only tangible logging
