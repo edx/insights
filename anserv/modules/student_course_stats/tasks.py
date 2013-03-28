@@ -12,10 +12,6 @@ import os
 
 log=logging.getLogger(__name__)
 
-#sys.path += settings.MITX_LIB_PATHS
-#sys.path = [p for p in sys.path if p!=settings.MITX_LIBRARY_PATH]
-import imp
-
 def import_custom_module(name):
     f, pathname, desc = imp.find_module(name, sys.path[1:])
     return imp.load_module(name, f, pathname, desc)

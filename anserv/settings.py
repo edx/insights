@@ -4,6 +4,7 @@ import os
 import sys
 from path import path
 import datetime
+import imp
 
 TIME_BETWEEN_DATA_REGENERATION = datetime.timedelta(minutes=1)
 
@@ -326,7 +327,15 @@ PIPELINE_JS_COMPRESSOR = None
 PIPELINE_COMPILE_INPLACE = True
 PIPELINE = True
 
-CELERY_IMPORTS = ('modules.student_course_stats.tasks',)
+CELERY_IMPORTS = ()
+for analytics_module in INSTALLED_ANALYTICS_MODULES:
+    module_name = "{0}.{1}.{2}".format(MODULE_DIR,analytics_module,"tasks")
+    try:
+        imp.find_module(module_name)
+        CELERY_IMPORTS += (module_name,)
+    except:
+        pass
+
 
 override_settings = os.path.join(BASE_DIR, "override_settings.py")
 if os.path.isfile(override_settings):
