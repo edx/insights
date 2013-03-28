@@ -37,8 +37,6 @@ def book_page_count_query(fs, db, user, params):
 def book_page_count_view_course(fs, db, user, course, params):
     ''' Dummy test function. In the future, this should return some stats on
     how many textbook pages the user saw '''
-    log.debug(user)
-    log.debug(course)
     return "The user " + user + " saw "+str(book_page_count_query_course(fs, db, user, course, params))+" pages!"
 
 @query(name='page_count')

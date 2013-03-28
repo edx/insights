@@ -35,7 +35,6 @@ def protected_data(request, **params):
     response['Content-Length'] = 1000
     response['Content-Transfer-Encoding'] = "binary"
     response['Content-Disposition'] = 'attachment; filename={0}'.format(path)
-    log.debug("{0}{1}".format(settings.NGINX_PROTECTED_DATA_URL, path))
     response['X-Accel-Redirect'] = "{0}{1}".format(settings.NGINX_PROTECTED_DATA_URL, path)
     return response
 

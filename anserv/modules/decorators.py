@@ -80,7 +80,7 @@ def register_handler(cls, category, name, description, f, args):
     if name in request_handlers[cls][category]:
         # We used to have this be an error.
         # We changed to a warning for the way we handle dummy values.
-        log.warn("WARNING WARNING WARNING {0} already in {1}".format(name, category))  # raise KeyError(name+" already in "+category)
+        log.warn("{0} already in {1}".format(name, category))  # raise KeyError(name+" already in "+category)
     request_handlers[cls][category][name] = {'function': f, 'name': name, 'doc': description}
 
 def view(category = None, name = None, description = None, args = None):

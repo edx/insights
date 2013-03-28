@@ -72,7 +72,7 @@ def regenerate_student_course_data():
     if not settings.IMPORT_MITX_MODULES:
         log.error("Cannot import mitx modules and thus cannot regenerate student course data.")
         return
-    log.debug("Regenerating course data.")
+    log.info("Regenerating course data.")
     user = User.objects.all()[0]
     request = RequestDict(user)
     all_courses = [c['course_id'] for c in StudentModule.objects.values('course_id').distinct()]
@@ -140,7 +140,6 @@ def get_student_problem_stats(request,course):
             courseware_summaries, users_in_course_ids = get_student_course_stats_base(request,course, "grades")
             rows = []
             for z in xrange(0,len(courseware_summaries)):
-                log.info(courseware_summaries[z])
                 row = {'student' : users_in_course_ids[z]}
                 #row.update({'problem_data' : courseware_summaries[z]})
                 row.update({c['label'] : c['percent'] for c in courseware_summaries[z]["section_breakdown"]})

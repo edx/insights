@@ -100,7 +100,6 @@ def run_posts_async(data):
     num_processes = min([100,num_to_post])
     p = Pool(processes=num_processes)
     p.map_async(track_event_mixpanel_async,[(data[i][0],data[i][1]) for i in xrange(0,num_to_post)]).get(9999999)
-    log.debug("{0} posted to mixpanel.".format(num_to_post))
 
 def extract_time(resp):
     try:
