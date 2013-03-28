@@ -8,8 +8,17 @@ from django.conf import settings
 import sys
 import io
 from dateutil import parser
+import os
 
 log=logging.getLogger(__name__)
+
+#sys.path += settings.MITX_LIB_PATHS
+#sys.path = [p for p in sys.path if p!=settings.MITX_LIBRARY_PATH]
+import imp
+
+def import_custom_module(name):
+    f, pathname, desc = imp.find_module(name, sys.path[1:])
+    return imp.load_module(name, f, pathname, desc)
 
 #If we are importing the MITx modules, then full functionality will be enabled here.
 if settings.IMPORT_MITX_MODULES:
