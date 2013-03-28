@@ -170,7 +170,10 @@ TEMPLATE_DIRS = (
 )
 
 #Append these internal paths in order to load celery tasks properly
-sys.path.append(ROOT_PATH / "modules" )
+MODULE_DIR = "modules"
+sys.path.append(ROOT_PATH / MODULE_DIR )
+
+INSTALLED_ANALYTICS_MODULES = ('course_stats', 'mixpanel', 'page_count', 'student_course_stats', 'user_stats')
 
 INSTALLED_APPS = (
     'django.contrib.auth',
@@ -187,8 +190,6 @@ INSTALLED_APPS = (
     'an_evt',
     'dashboard',
     'modules',
-    'modules.page_count',
-    'modules.user_stats',
     'mitxmako',
     'djcelery',
     'south',
@@ -196,8 +197,10 @@ INSTALLED_APPS = (
     'pipeline',
     'staticfiles',
     'pipeline',
-    'student_course_stats'
 )
+
+#Make each analytics module its own installed app
+INSTALLED_APPS += INSTALLED_ANALYTICS_MODULES
 
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to

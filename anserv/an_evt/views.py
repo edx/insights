@@ -13,17 +13,6 @@ from fs.osfs import OSFS
 
 from modules.decorators import event_handlers, request_handlers
 
-### HACK ###
-# This is the way in which we activate modules, pending a proper
-# loader
-import modules.page_count.book_count
-import modules.user_stats.user_stats
-import modules.user_stats.logins
-import modules.mixpanel.generic_event_handlers
-import modules.course_stats.course_stats
-import modules.tasks
-### END HACK ###
-
 from pymongo import MongoClient
 connection = MongoClient()
 #db = connection['analytic_store']
@@ -31,6 +20,20 @@ connection = MongoClient()
 import logging
 
 log=logging.getLogger(__name__)
+
+def import_view_modules():
+    top_level_modules = settings.INSTALLED_ANALYTICS_MODULES
+    module_names = []
+    for module in top_level_modules:
+        mod = __import__(module)
+        submodules = mod.modules_to_import
+        for sub_module in submodules:
+            submod_name = "{0}.{1}".format(module,sub_module)
+            module_names.append(submod_name)
+    modules = map(__import__, module_names)
+    return modules
+
+modules = import_view_modules()
 
 def get_database(f):
     ''' Given a function in a module, return the Mongo DB associated
