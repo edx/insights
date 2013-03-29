@@ -20,7 +20,7 @@ ENV_ROOT = REPO_PATH.dirname()
 
 INSTALLED_ANALYTICS_MODULES = ('course_stats', 'mixpanel', 'page_count', 'student_course_stats', 'user_stats')
 
-IMPORT_MITX_MODULES = True
+IMPORT_MITX_MODULES = False
 if IMPORT_MITX_MODULES:
     MITX_PATH = os.path.abspath("../../mitx/")
     DJANGOAPPS_PATH = "{0}/{1}/{2}".format(MITX_PATH, "lms", "djangoapps")
