@@ -46,6 +46,8 @@ decorators. Final place is for the main views and dashboard.
 Installing
 ----------
 
+Note: These instructions are obsolete. See INSTALL.md for interrim instructions
+
     apt-get install python-pip python-matplotlib python-scipy emacs mongodb apache2-utils python-mysqldb subversion ipython nginx git redis-server
     pip install -r requirements.txt
     
