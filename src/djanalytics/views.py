@@ -2,18 +2,22 @@ import inspect
 import json
 import os
 
+from django.core.urlresolvers import reverse
+from django.dispatch import receiver
 from django.http import HttpResponse, HttpResponseRedirect
 from django.utils.datastructures import MultiValueDictKeyError
 from django.views.decorators.csrf import csrf_exempt
-from django.core.urlresolvers import reverse
+
+from fs.osfs import OSFS
+from pymongo import MongoClient
 
 from django.conf import settings
 
-from fs.osfs import OSFS
+from djeventstream.signals import event_received
 
 from decorators import event_handlers, request_handlers
 
-from pymongo import MongoClient
+
 connection = MongoClient()
 
 import logging
@@ -149,23 +153,12 @@ def handle_query(request, category, name, **kwargs):
     except:
         return request_data
 
-@csrf_exempt
-def handle_event(request):
-    if request.GET:
-        try: # Not sure why this is necessary, but on some systems it is 'msg', and on others, 'message'
-            response = json.loads(request.GET['message'])
-        except MultiValueDictKeyError:
-            response = json.loads(request.GET['msg'])
-    else:
-        try:
-            response = json.loads(request.POST['message'])
-        except:
-            response = json.loads(request.POST['msg'])
-
-    if isinstance(response,list):
-        for i in xrange(0,len(response)):
+@receiver(event_received)
+def handle_event(msg, signal, sender):
+    if isinstance(msg,list):
+        for i in xrange(0,len(msg)):
             try:
-                response[i] = json.loads(response[i])
+                msg[i] = json.loads(msg[i])
             except:
                 pass
 
@@ -174,20 +167,20 @@ def handle_event(request):
         batch = e['batch']
         fs = get_filesystem(event_func)
         database = get_database(event_func)
-        if not isinstance(response,list):
+        if not isinstance(msg,list): ## Message was a single event
             try:
-                event_func(fs, database, [response])
+                event_func(fs, database, [msg])
             except:
                 handle_event_exception(e['function'])
-        elif not batch:
-            for event in response:
+        elif not batch: ## Message was a list of events, but handler cannot batch events
+            for event in msg:
                 try:
                     event_func(fs, database, [event])
                 except:
                     handle_event_exception(e['function'])
-        else:
+        else: ## Message was a list of events, and handler can batch events
             try:
-                event_func(fs, database, response)
+                event_func(fs, database, msg)
             except:
                 handle_event_exception(e['function'])
 

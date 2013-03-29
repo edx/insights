@@ -9,7 +9,7 @@ from django.contrib.auth.decorators import login_required
 urlpatterns = patterns('',
     # Examples:
     url(r'^$', 'dashboard.views.new_dashboard'),
-    url(r'^event$', 'djanalytics.views.handle_event'),
+    url(r'^event$', 'djeventstream.httphandler.views.http_view'),
     url(r'^view/([A-Za-z_+]+)/([A-Za-z_+]+)$', 'djanalytics.views.handle_view'),
     url(r'^view/([A-Za-z_+]+)/([A-Za-z_+]+)/([A-Za-z_0-9]+)$', 'djanalytics.views.handle_view'),
     url(r'^view/([A-Za-z_+]+)/([A-Za-z_+]+)/([A-Za-z_0-9]+)/([A-Za-z_0-9]+)$', 'djanalytics.views.handle_view'),

@@ -6,6 +6,9 @@ from path import path
 import datetime
 import imp
 
+# Types of parameters that queries and views can take
+DJANALYTICS_PARAMETERS = ['user', 'event']
+
 TIME_BETWEEN_DATA_REGENERATION = datetime.timedelta(minutes=1)
 
 INSTALLED_ANALYTICS_MODULES = ('modules.testmodule',)
@@ -152,9 +155,10 @@ INSTALLED_APPS = (
     # 'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
-    'djanalytics',
+    'djeventstream.httphandler',
     'djcelery',
     'south',
+    'djanalytics',
     'modules',
 )
 
