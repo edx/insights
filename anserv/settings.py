@@ -17,7 +17,7 @@ ROOT_PATH = path(__file__).dirname()
 REPO_PATH = ROOT_PATH.dirname()
 ENV_ROOT = REPO_PATH.dirname()
 
-IMPORT_MITX_MODULES = True
+IMPORT_MITX_MODULES = False
 if IMPORT_MITX_MODULES:
     MITX_PATH = os.path.abspath("../../mitx/")
     DJANGOAPPS_PATH = "{0}/{1}/{2}".format(MITX_PATH, "lms", "djangoapps")
