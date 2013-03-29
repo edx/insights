@@ -17,4 +17,4 @@ class Migration(SchemaMigration):
         
     }
 
-    complete_apps = ['an_evt']
+    complete_apps = ['djanalytics']
