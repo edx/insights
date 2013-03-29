@@ -138,7 +138,6 @@ def handle_query(request, category, name, **kwargs):
         Category is where this should be place (per student, per problem, etc.)
         Name is specific 
     '''
-    print "Here"
     request_data = handle_request(request, 'query', category, name, **kwargs)
     try:
         request_data = json.dumps(request_data)
