@@ -87,8 +87,6 @@ def handle_probe(request, cls=None, category=None, details = None):
     return HttpResponse("\n".join(l), mimetype='text/text')
 
 def list_all_endpoints(request):
-    if not request.user.is_authenticated():
-        return HttpResponseRedirect(reverse('django.contrib.auth.views.login'))
     endpoints = []
     for cls in request_handlers:
         for category in request_handlers[cls]:
@@ -154,7 +152,8 @@ def handle_query(request, category, name, **kwargs):
         return request_data
 
 @receiver(event_received)
-def handle_event(msg, signal, sender):
+def handle_event(sender, **kwargs):
+    msg = kwargs['msg']
     if isinstance(msg,list):
         for i in xrange(0,len(msg)):
             try:
