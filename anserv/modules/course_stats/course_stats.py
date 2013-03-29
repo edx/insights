@@ -131,7 +131,6 @@ def course_grades_view_base(fs, db, course, data_type,params):
         x_label = "Unweighted Percentage"
     json_data = query_data['json']
     updated = json_data['updated']
-    log.info(type(updated))
     try:
         updated_time = parser.parse(updated)
         updated = updated_time.strftime("%A, %B %d at %I:%M %p %Z")

@@ -1,1 +1,2 @@
-__author__ = 'vik'
+analytic_name = "course_stats"
+modules_to_import = ['course_stats']

@@ -93,7 +93,6 @@ class EventTracker(object):
         else:
             if self.token:
                 resp = requests.post(TRACK_POST_URL, data=track_data, headers = {'Content-Type': 'application/json'})
-                log.info(resp.text)
             else:
                 log.error("Could not find a token to post to mixpanel.  Is MIXPANEL_KEY defined in the settings?")
 

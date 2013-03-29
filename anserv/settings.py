@@ -4,6 +4,7 @@ import os
 import sys
 from path import path
 import datetime
+import imp
 
 TIME_BETWEEN_DATA_REGENERATION = datetime.timedelta(minutes=1)
 
@@ -17,6 +18,8 @@ ROOT_PATH = path(__file__).dirname()
 REPO_PATH = ROOT_PATH.dirname()
 ENV_ROOT = REPO_PATH.dirname()
 
+INSTALLED_ANALYTICS_MODULES = ('course_stats', 'mixpanel', 'page_count', 'student_course_stats', 'user_stats')
+
 IMPORT_MITX_MODULES = False
 if IMPORT_MITX_MODULES:
     MITX_PATH = os.path.abspath("../../mitx/")
@@ -24,9 +27,8 @@ if IMPORT_MITX_MODULES:
     LMS_LIB_PATH = "{0}/{1}/{2}".format(MITX_PATH, "lms", "lib")
     COMMON_PATH = "{0}/{1}/{2}".format(MITX_PATH, "common", "djangoapps")
     MITX_LIB_PATHS = [MITX_PATH, DJANGOAPPS_PATH, LMS_LIB_PATH, COMMON_PATH]
-
     sys.path += MITX_LIB_PATHS
-    
+
     IMPORT_GIT_MODULES = False
     GIT_CLONE_URL = "git@github.com:MITx/{0}.git"
     COURSE_FILE_PATH = os.path.abspath(os.path.join(ENV_ROOT, "xml_data"))
@@ -35,7 +37,9 @@ if IMPORT_MITX_MODULES:
     #Needed for MITX imports to work
     from mitx_settings import *
 else:
-    sys.path.append(ROOT_PATH / "mitx_libraries")
+    MITX_LIBRARY_DIR = "mitx_libraries"
+    MITX_LIBRARY_PATH = str(ROOT_PATH / MITX_LIBRARY_DIR)
+    sys.path.append(MITX_LIBRARY_PATH)
 
 DUMMY_MODE = False
 
@@ -170,7 +174,8 @@ TEMPLATE_DIRS = (
 )
 
 #Append these internal paths in order to load celery tasks properly
-sys.path.append(ROOT_PATH / "modules" )
+MODULE_DIR = "modules"
+sys.path.append(str(ROOT_PATH / MODULE_DIR ))
 
 INSTALLED_APPS = (
     'django.contrib.auth',
@@ -187,8 +192,6 @@ INSTALLED_APPS = (
     'an_evt',
     'dashboard',
     'modules',
-    'modules.page_count',
-    'modules.user_stats',
     'mitxmako',
     'djcelery',
     'south',
@@ -196,8 +199,10 @@ INSTALLED_APPS = (
     'pipeline',
     'staticfiles',
     'pipeline',
-    'student_course_stats'
 )
+
+#Make each analytics module its own installed app
+INSTALLED_APPS += INSTALLED_ANALYTICS_MODULES
 
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to
@@ -322,7 +327,15 @@ PIPELINE_JS_COMPRESSOR = None
 PIPELINE_COMPILE_INPLACE = True
 PIPELINE = True
 
-CELERY_IMPORTS = ('modules.student_course_stats.tasks',)
+CELERY_IMPORTS = ()
+for analytics_module in INSTALLED_ANALYTICS_MODULES:
+    module_name = "{0}.{1}.{2}".format(MODULE_DIR,analytics_module,"tasks")
+    try:
+        imp.find_module(module_name)
+        CELERY_IMPORTS += (module_name,)
+    except:
+        pass
+
 
 override_settings = os.path.join(BASE_DIR, "override_settings.py")
 if os.path.isfile(override_settings):
