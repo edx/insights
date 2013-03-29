@@ -87,12 +87,47 @@ def handle_probe(request, cls=None, category=None, details = None):
     return HttpResponse("\n".join(l), mimetype='text/text')
 
 def list_all_endpoints(request):
+    ''' Returns all available views and queries as a JSON
+    object. Alternative to the probe hierarchy. 
+
+    '''
     endpoints = []
     for cls in request_handlers:
         for category in request_handlers[cls]:
             for details in request_handlers[cls][category]:
                 endpoints.append({'type' : cls, 'category' : category, 'name' : details})
     return HttpResponse(json.dumps(endpoints))
+
+optional_kwargs = {'fs' : get_filesystem, 
+                   'db' : get_database}
+
+def optional_parameter_call(function, optional_kwargs, passed_kwargs, arglist = None): 
+    ''' UNTESTED/in development
+
+    Calls a function with parameters: 
+    passed_kwargs are input parameters the function must take. 
+    Format: Dictionary mapping keywords to arguments. 
+
+    optional_kwargs are optional input parameters. 
+    Format: Dictionary mapping keywords to functions which generate those parameters. 
+
+    arglist is an optional list of arguments to pass to the function. 
+    '''
+    if not arglist: 
+        arglist = inspect.getargspec(handler).args
+    
+    args = {}
+    for arg in arglist:
+        # This order is important for security. We don't want users
+        # being able to pass in 'fs' or 'db' and having that take
+        # precedence. 
+        if arg in optional_kwargs:
+            args[arg] = optional_kwargs[arg](function)
+        elif arg in passed_kwargs: 
+            args[arg] = passed_kwargs[arg]
+        else: 
+            raise TypeError("Missing argument needed for handler ", arg)
+    function(**args)
 
 def handle_request(request, cls, category, name, **kwargs):
     ''' Generic code from handle_view and handle_query '''
@@ -104,24 +139,24 @@ def handle_request(request, cls, category, name, **kwargs):
     else:
         arglist = inspect.getargspec(handler).args
 
-    params = {}
-    params.update(request.GET)
-    params.update(request.POST)
-    params.update({'request' : request})
+    passed_kwargs = {}
+    passed_kwargs.update(request.GET)
+    passed_kwargs.update(request.POST)
+    passed_kwargs.update({'request' : request})
     for arg in arglist:
         if arg == 'db':
             args[arg] = get_database(handler)
         elif arg == 'fs':
             args[arg] = get_filesystem(handler)
         elif arg == 'params':
-            args[arg] = params
+            args[arg] = passed_kwargs
         else:
             if arg in kwargs:
                 args[arg] = kwargs[arg]
-            elif arg in params:
-                args[arg] = params[arg][0]
+            elif arg in passed_kwargs:
+                args[arg] = passed_kwargs[arg][0]
             else:
-                raise TypeError("Missing argument needed for handler ", arg)
+                
 
     return handler(**args)
 
