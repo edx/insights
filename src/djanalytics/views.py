@@ -15,7 +15,6 @@ from decorators import event_handlers, request_handlers
 
 from pymongo import MongoClient
 connection = MongoClient()
-#db = connection['analytic_store']
 
 import logging
 
@@ -26,7 +25,11 @@ def import_view_modules():
     module_names = []
     for module in top_level_modules:
         mod = __import__(module)
-        submodules = mod.modules_to_import
+        submodules = []
+        try: 
+            submodules = mod.modules_to_import # I'd like to deprecate this syntax
+        except AttributeError: 
+            pass
         for sub_module in submodules:
             submod_name = "{0}.{1}".format(module,sub_module)
             module_names.append(submod_name)
@@ -135,8 +138,7 @@ def handle_query(request, category, name, **kwargs):
         Category is where this should be place (per student, per problem, etc.)
         Name is specific 
     '''
-    if not request.user.is_authenticated():
-        return HttpResponseRedirect(reverse('django.contrib.auth.views.login'))
+    print "Here"
     request_data = handle_request(request, 'query', category, name, **kwargs)
     try:
         request_data = json.dumps(request_data)
