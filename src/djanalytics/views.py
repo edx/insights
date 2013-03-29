@@ -11,7 +11,7 @@ from django.conf import settings
 
 from fs.osfs import OSFS
 
-from modules.decorators import event_handlers, request_handlers
+from decorators import event_handlers, request_handlers
 
 from pymongo import MongoClient
 connection = MongoClient()

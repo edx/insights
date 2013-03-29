@@ -32,7 +32,6 @@ urlpatterns = patterns('',
 
     # Uncomment the next line to enable the admin:
     # url(r'^admin/', include(admin.site.urls)),
-    url(r'^frontend/', include('frontend.urls')),
     url('^tasks/', include('djcelery.urls')),
 )
 
