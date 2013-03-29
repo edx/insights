@@ -53,6 +53,3 @@ else:
                            url(r'^data/(?P<path>.*)$', 'protected_data')
     )
 
-handler404 = 'error_templates.render_404'
-handler500 = 'error_templates.render_500'
-
