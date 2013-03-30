@@ -2,7 +2,8 @@ analytics-experiments
 =====================
 
 This is a development version of an analytics framework for the edX
-infrastructure. The goal of this framework is to define an
+infrastructure. It will replace the ad-hoc analytics used in the
+software previously. The goal of this framework is to define an
 architecture for simple, pluggable analytics modules. The architecture
 must have the following properties:
 
@@ -19,18 +20,39 @@ each others' work.
 Architecture
 ------------
 
-The analytics framework has access to the event stream from the
-tracking architecture, a read-replica of the main database, as well
-as, in the future, course definition database, and read-replicas of
-auxilliary databases, such as discussion forums. 
+edX currently has many sources of data: 
+
+1. User tracking events. The software has a middleware layer which
+   captures all data (within reason) that the user sends to the
+   server. In addition, the server is instrumented, where necessary,
+   to capture context for this (e.g. for a problem submission, we also
+   need to capture the random number seed used to generate that
+   problem). The JavaScript is instrumented to capture most of what
+   the user does client-side (e.g. textbook page turns or video
+   scrubs). These events are captured in a Python logger, and streamed
+   into this framework.
+2. Databases. The application-layer of the analytics framework has or
+   will have access to these through read replicas. While virtually
+   all of the information is in the events, in practice, most
+   analytics can be performed from just the databases. This is
+   generally both much easier, and less sensitive to breaking when the
+   software changes.
+3. External services used for surveys and mailings. This is not
+   currently integrated.
+4. Course data. Most of this is in the read replica databases, but for
+   some courses, this lives in github repositories of XML files. This
+   is not currently integrated.
+5. Course-specific services (e.g. CS50 forums, Berkeley graders, etc.)
+6. E-mails to course staff. 
+7. Anecdotal interactions. 
 
 A block diagram of the overall system is: 
 
 ![System structure](docs/system_structure.png)
 
-Each module in the analytics framework has its own Mongo database. In
-addition, in the near future, it should have read-only access to the
-DBs associated with other modules.
+Each module in the analytics framework has its own Mongo database, as
+well as a filesystem abstraction. In addition, in the near future, it
+should have read-only access to the DBs associated with other modules.
 
 The module consists of a set of functions which can be decorated as: 
 * Event handlers. These receive tracking events. 

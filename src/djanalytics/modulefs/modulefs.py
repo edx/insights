@@ -33,8 +33,8 @@ def expire_objects():
     module = None
     for o in objects:
         if module != o.module:
-            fs = get_filesystem(module)
             module = o.module
+            fs = get_filesystem(module)
         if fs.exists(o.filename):
             fs.remove(o.filename)
         o.delete()
@@ -43,14 +43,14 @@ def patch_fs(fs, namespace, url_method):
     ''' Patch a filesystem object to add get_url method and
     expire method. 
     ''' 
-    def expire(self, filename, seconds, days=0, expire = True):
+    def expire(self, filename, seconds, days=0, expires = True):
         ''' Set the lifespan of a file on the filesystem. 
 
         filename: Name of file
         expire: False means the file will never be removed
         seconds and days give time to expiration. 
         '''
-        FSExpirations.create_expiration(cls, namespace, filename, expires, seconds, days=days)
+        FSExpirations.create_expiration(namespace, filename, seconds, days=days, expires = expires)
 
     fs.expire = types.MethodType(expire, fs)
     fs.get_url = types.MethodType(url_method, fs)

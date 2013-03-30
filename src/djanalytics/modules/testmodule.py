@@ -32,7 +32,7 @@ def clear_database(db):
     return "Database clear"
 
 @event_handler()
-def event(db, events):
+def event_count_event(db, events):
     for evt in events:
         if 'user' in evt:
             collection = db['user_event_count']
@@ -51,7 +51,42 @@ def event(db, events):
     return 0
 
 @event_handler()
-def event(fs, events):
+def python_fs_forgets(fs, events):
+    ''' Test case for checking whether the file system properly forgets. 
+    To write a file: 
+
+    { 'fs_forgets_contents' : True, 
+      'filename' : "foo.txt",
+      'contents' : "hello world!"}
+
+    To set or change expiry on a file: 
+    { 'fs_forgets_expiry' : -5, 
+      'filename' : "foo.txt"}
+
+    The two may be combined into one operation. 
+    '''
+    def checkfile(filename, contents):
+        if not fs.exists(filename):
+            return False
+        if fs.open(filename).read == contents:
+            return True
+        raise Exception("File contents do not match")
+    for evt in events:
+        if 'fs_forgets_contents' in evt:
+            f=fs.open(evt['filename'], 'w')
+            f.write(evt['fs_forgets_contents'])
+            f.close()
+        if 'fs_forgets_expiry' in evt:
+            try: 
+                fs.expire(evt['filename'], evt['fs_forgets_expiry'])
+            except:
+                print "Failed"
+                import traceback
+                traceback.print_exc()
+    return 0
+
+@event_handler()
+def python_fs_event(fs, events):
     for evt in events:
         if 'event' in evt and evt['event'] == 'pyfstest':
             if 'create' in evt:
