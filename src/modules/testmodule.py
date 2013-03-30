@@ -32,7 +32,7 @@ def clear_database(db):
     return "Database clear"
 
 @event_handler()
-def event(fs, db, events):
+def event(db, events):
     for evt in events:
         if 'user' in evt:
             collection = db['user_event_count']
