@@ -17,11 +17,26 @@ class FSExpirations(models.Model):
 
     @classmethod
     def create_expiration(cls, module, filename, expires, seconds, days=0):
+        ''' May be used instead of the constructor to create a new expiration. 
+        Automatically applies timedelta and saves to DB. 
+        '''
+        expiration_time = datetime.datetime.now() + datetime.timedelta(days, seconds)
+
+        # If object exists, update it
+        objects = cls.objects.filter(module = module, filename = filename)
+        if objects:
+            exp = objects[0]
+            exp.expires = expires
+            exp.expiration = expiration_time
+            exp.save()
+            return
+
+        # Otherwise, create a new one
         f = cls()
         f.module = module
         f.filename = filename
         f.expires = expires
-        f.expiration = datetime.datetime.now() + datetime.timedelta(days, seconds)
+        f.expiration = expiration_time
         f.save()
 
     module = models.CharField(max_length=500) # Defines the namespace
@@ -29,9 +44,10 @@ class FSExpirations(models.Model):
     expires = models.BooleanField() # Does it expire? 
     expiration = models.DateTimeField(db_index = True) 
 
-    def expired(self):
+    @classmethod
+    def expired(cls):
         ''' Returns a list of expired objects '''
-        return self.objects.filter(expires=True, expiration__lte = datetime.datetime.now())
+        return cls.objects.filter(expires=True, expiration__lte = datetime.datetime.now())
 
     class Meta:
         unique_together = (("module","filename"))
