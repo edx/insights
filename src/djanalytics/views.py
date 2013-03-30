@@ -102,7 +102,7 @@ optional_kwargs = {'fs' : get_filesystem,
                    'db' : get_database}
 
 def optional_parameter_call(function, optional_kwargs, passed_kwargs, arglist = None): 
-    ''' UNTESTED/in development
+    ''' UNTESTED/in developement
 
     Calls a function with parameters: 
     passed_kwargs are input parameters the function must take. 
@@ -156,7 +156,7 @@ def handle_request(request, cls, category, name, **kwargs):
             elif arg in passed_kwargs:
                 args[arg] = passed_kwargs[arg][0]
             else:
-                
+                raise TypeError("Missing argument needed for handler ", arg)
 
     return handler(**args)
 
@@ -188,7 +188,8 @@ def handle_query(request, category, name, **kwargs):
 
 @receiver(event_received)
 def handle_event(sender, **kwargs):
-    msg = kwargs['msg']
+    print kwargs['msg']
+    msg = json.loads(kwargs['msg'])
     if isinstance(msg,list):
         for i in xrange(0,len(msg)):
             try:

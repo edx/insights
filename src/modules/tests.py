@@ -36,3 +36,16 @@ class SimpleTest(TestCase):
         print "After 3 events: ", response.content
         response = c.get('/query/global/clear_database')
         self.assertEqual(response.content, '"Database clear"')
+    
+    def test_per_user_works(self):
+        c = Client()
+        response = c.get('/query/global/clear_database')
+        self.assertEqual(response.content, '"Database clear"')
+        response = c.get('/query/user/user_event_count?user=alice')
+        self.assertEqual(response.content, "0")
+        response = c.get('/event?msg=%7B%22user%22:%22alice%22%7D')
+        response = c.get('/event?msg=%7B%22user%22:%22eve%22%7D')
+        response = c.get('/event?msg=%7B%22user%22:%22alice%22%7D')
+        response = c.get('/query/user/user_event_count?user=alice')
+        self.assertEqual(response.content, "2")
+        print response
