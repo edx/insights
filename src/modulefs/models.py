@@ -16,7 +16,7 @@ class FSExpirations(models.Model):
     '''
 
     @classmethod
-    def create_expiration(cls, module, filename, expires, seconds, days=0):
+    def create_expiration(cls, module, filename, seconds, days=0, expires = True):
         ''' May be used instead of the constructor to create a new expiration. 
         Automatically applies timedelta and saves to DB. 
         '''
