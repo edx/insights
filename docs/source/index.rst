@@ -14,6 +14,8 @@ Contents:
 djanalytics.decorators
 ======================
 
+djanalytics.decorators is the public interface of djanalytics
+
 .. automodule:: djanalytics.decorators
    :members:
 
