@@ -20,9 +20,9 @@ else:
 def get_filesystem(namespace):
     ''' Returns a pyfilesystem for static module storage. 
 
-    Unimplemented: The file system will have two additional properties: 
-    1) A way to get a URL for a static file download
-    2) A way to expire files (so they are automatically destroyed)
+    The file system will have two additional properties: 
+    1) get_url: A way to get a URL for a static file download
+    2) expire: A way to expire files (so they are automatically destroyed)
     '''
     if settings.DJFS['type'] == 'osfs':
         return get_osfs( namespace )
