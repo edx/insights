@@ -100,14 +100,16 @@ def query(category = None, name = None, description = None, args = None):
 import hashlib
 import json
 
-def isuseful(a):
-    if str(type(a)) in ["<class 'pymongo.database.Database'>", "<class 'fs.osfs.OSFS'>"]:
-        return False
-    return True
-
-def memoize_query(cache_time = 60*4, timeout = 60*15):
-    ''' Call function only if we do not have the results for it's execution already
+def memoize_query(cache_time = 60*4, timeout = 60*15, ignores = ["<class 'pymongo.database.Database'>", "<class 'fs.osfs.OSFS'>"]):
+    ''' Call function only if we do not have the results for its execution already
+        We ignore parameters of type pymongo.database.Database and fs.osfs.OSFS. These
+        will be different per call, but function identically. 
     '''
+    def isuseful(a, ignores):
+        if str(type(a)) in ignores:
+            return False
+        return True
+
     def view_factory(f):
         def wrap_function(f, *args, **kwargs):
             # Assumption: dict gets dumped in same order
@@ -119,7 +121,7 @@ def memoize_query(cache_time = 60*4, timeout = 60*15):
             s = str({'uniquifier': 'anevt.memoize',
                      'name' : f.__name__,
                      'module' : f.__module__,
-                     'args': [a for a in args if isuseful(a)],
+                     'args': [a for a in args if isuseful(a, ignores)],
                      'kwargs': kwargs})
             m.update(s)
             key = m.hexdigest()
