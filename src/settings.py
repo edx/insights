@@ -8,6 +8,11 @@ import imp
 
 # Types of parameters that queries and views can take
 DJANALYTICS_PARAMETERS = ['user', 'event']
+DJFS = { 'type' : 'osfs',
+         'directory_root' : '/tmp/djfsmodule',
+         'url_root' : 'file:///tmp/'
+       }
+
 
 TIME_BETWEEN_DATA_REGENERATION = datetime.timedelta(minutes=1)
 

@@ -1,3 +1,12 @@
+''' Decorators for analytics modules. 
+
+@view defines a user-visible view
+@query defines a machine-readable SOA
+@event_handler takes the user tracking event stream
+@cron allows for periodic and delayed events
+'''
+
+
 import hashlib
 import inspect
 import json
@@ -40,6 +49,7 @@ def event_handler(batch=True, per_user=False, per_resource=False,
         return func
     return event_handler_factory
 
+## TODO: Move from settings
 funcskips = ['fs','db','params']
 funcspecs = [ ([], 'global'),
               (['user'], 'user'),
@@ -47,6 +57,8 @@ funcspecs = [ ([], 'global'),
             ]
 
 def register_handler(cls, category, name, description, f, args):
+    ''' Helper function for @view and @query decorators. 
+    '''
     log.debug("Register {0} {1} {2} {3}".format(cls, category, name, f))
     if args == None:
         args = inspect.getargspec(f).args

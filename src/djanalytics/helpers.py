@@ -1,9 +1,10 @@
 import inspect
 
-from fs.osfs import OSFS
 from pymongo import MongoClient
 
 from django.conf import settings
+
+import modulefs
 
 connection = MongoClient()
 
@@ -28,11 +29,14 @@ def import_view_modules():
     modules = map(__import__, module_names)
     return modules
 
+def namespace(f):
+    return str(f.__module__).replace(".","_")
+
 def get_database(f):
     ''' Given a function in a module, return the Mongo DB associated
     with that function. 
     '''
-    return connection[str(f.__module__).replace(".","_")]
+    return connection[namespace(f)]
 
 def get_filesystem(f):
     ''' Given a function in a module, return the Pyfilesystem for that
@@ -40,12 +44,7 @@ def get_filesystem(f):
     Mongo gridfs or S3 or similar (both of which are supported by 
     pyfs).
     '''
-    directory = settings.PROTECTED_DATA_ROOT
-    #+ '/' + str(f.__module__).replace(".","_")
-    if not os.path.exists(directory):
-        os.mkdir(directory)
-    
-    return OSFS(directory)
+    return modulefs.get_filesystem(namespace(f))
 
 def optional_parameter_call(function, optional_kwargs, passed_kwargs, arglist = None): 
     ''' Calls a function with parameters: 

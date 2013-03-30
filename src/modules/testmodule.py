@@ -49,3 +49,21 @@ def event(db, events):
         else:
             collection.insert({'event_count' : 1})
     return 0
+
+@event_handler()
+def event(fs, events):
+    for evt in events:
+        if 'event' in evt and evt['event'] == 'pyfstest':
+            if 'create' in evt:
+                f=fs.open(evt['create'], 'w')
+                f.write(evt['contents'])
+                f.close()
+            if 'delete' in evt and fs.exists(evt['delete']): 
+                fs.remove(evt['delete'])
+
+@query()
+def readfile(fs, filename):
+    if fs.exists(filename): 
+        f=fs.open(filename)
+        return f.read()
+    return "File not found"
