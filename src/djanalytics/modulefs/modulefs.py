@@ -43,8 +43,16 @@ def expire_objects():
         o.delete()
 
 def patch_fs(fs, namespace, url_method):
-    ''' Patch a filesystem object to add get_url method and
-    expire method. 
+    ''' Patch a filesystem object to add two methods: 
+          get_url returns a URL for a resource stored on that filesystem. It takes two parameters: 
+              filename: Which resource
+              timeout: How long that resource is available for
+          expire sets a timeout on how long the system should keep the resource. It takes four parameters:
+              filename: Which resource
+              seconds: How long we will keep it
+              days: (optional) More user-friendly if a while
+              expires: (optional) boolean; if set to False, we keep the resource forever. 
+          Without calling this method, we provide no guarantees on how long resources will stick around. 
     ''' 
     def expire(self, filename, seconds, days=0, expires = True):
         ''' Set the lifespan of a file on the filesystem. 
@@ -60,6 +68,7 @@ def patch_fs(fs, namespace, url_method):
     return fs
 
 def get_osfs(namespace):
+    ''' Helper method to get_filesystem for a file system on disk '''
     full_path = os.path.join(settings.DJFS['directory_root'], namespace)
     if not os.path.exists(full_path):
         os.makedirs(full_path)
@@ -68,6 +77,7 @@ def get_osfs(namespace):
     return osfs
 
 def get_s3fs(namespace):
+    ''' Helper method to get_filesystem for a file system on S3 '''
     fullpath = namespace
     if 'prefix' in settings.DJFS: 
         fullpath = os.path.join(settings.DJFS['prefix'], fullpath)
