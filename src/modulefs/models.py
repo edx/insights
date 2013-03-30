@@ -15,12 +15,14 @@ class FSExpirations(models.Model):
     well as the expirations of those models. 
     '''
 
-    def __init__(self, module, filename, expires, seconds, days=0):
-        models.Model.__init__(self)
-        self.module = module
-        self.filename = filename
-        self.expires = expires
-        self.expiration = datetime.datetime.now() + datetime.timedelta(days, seconds)
+    @classmethod
+    def create_expiration(cls, module, filename, expires, seconds, days=0):
+        f = cls()
+        f.module = module
+        f.filename = filename
+        f.expires = expires
+        f.expiration = datetime.datetime.now() + datetime.timedelta(days, seconds)
+        f.save()
 
     module = models.CharField(max_length=500) # Defines the namespace
     filename = models.CharField(max_length=500) # Filename within the namespace
