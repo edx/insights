@@ -127,7 +127,7 @@ def memoize_query(cache_time = 60*4, timeout = 60*15):
             # process of computing it
             cached = cache.get(key)
             if cached:
-                print "Cache hit", key
+                #print "Cache hit", key
                 # If we're already computing it, wait to finish
                 # computation
                 while cached == 'Processing':
@@ -139,7 +139,7 @@ def memoize_query(cache_time = 60*4, timeout = 60*15):
                 results = cached
 
             if not cached:
-                print "Cache miss", key
+                #print "Cache miss", key
                 # HACK: There's a slight race condition here, where we
                 # might recompute twice.
                 cache.set(key, 'Processing', timeout)
@@ -171,20 +171,3 @@ def cron_new(period, params=None):
             f(fs, db, params)
         return decorator(run,f)
     return factory
-
-if False:
-    # Test case. Should be made into a proper test case.
-    @memoize_query(1)
-    def test_function(x):
-        print "Boo", x, ">",2*x
-        return 2*x
-
-    print test_function(2)
-    print test_function(4)
-    print test_function(2)
-    print test_function(4)
-    time.sleep(2)
-    print test_function(2)
-    print test_function(4)
-    print test_function(2)
-    print test_function(4)
