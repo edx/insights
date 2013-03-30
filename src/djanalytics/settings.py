@@ -1,13 +1,13 @@
-# Django settings for src project.
+# Django settings for djanalytics project.
 
-#### Additional setting required for djanalytics
+#### Additional setting required for core
 
 import datetime
 
 DJ_REQUIRED_APPS = ( 'djeventstream.httphandler',
     'djcelery',
     'south',
-    'djanalytics',
+    'core',
     'modulefs',
     'modules',)
 
@@ -139,7 +139,7 @@ MIDDLEWARE_CLASSES = (
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
 
-ROOT_URLCONF = 'src.urls'
+ROOT_URLCONF = 'djanalytics.urls'
 
 TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".

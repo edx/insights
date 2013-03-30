@@ -5,7 +5,7 @@ Count number of events that hit the server.
 
 modules_to_import = []
 
-from djanalytics.decorators import query, event_handler
+from core.decorators import query, event_handler
 
 @query()
 def event_count(db):
