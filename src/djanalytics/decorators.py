@@ -14,7 +14,6 @@ from celery.task import PeriodicTask, periodic_task
 
 log=logging.getLogger(__name__)
 
-
 event_handlers = []
 
 request_handlers = {'view':{}, 'query':{}}
@@ -51,7 +50,6 @@ def register_handler(cls, category, name, description, f, args):
     log.debug("Register {0} {1} {2} {3}".format(cls, category, name, f))
     if args == None:
         args = inspect.getargspec(f).args
-#    traceback.print_stack()
     if cls not in ['view', 'query']:
         raise ValueError("We can only register views and queries")
     if not name:
@@ -88,13 +86,44 @@ def register_handler(cls, category, name, description, f, args):
     request_handlers[cls][category][name] = {'function': f, 'name': name, 'doc': description}
 
 def view(category = None, name = None, description = None, args = None):
+    ''' This decorator is appended to a view in an analytics module. A
+    view will return HTML which will be shown to the user. 
+
+    category: Optional specification for type (global, per-user,
+      etc.). If not given, this will be extrapolated from the
+      argspec. This should typically be omitted. 
+
+    name: Optional specification for name shown to the user. This will
+      default to function name. In most cases, this is recommended.
+
+    description: Optional description. If not given, this will default
+      to the docstring.
+
+    args: Optional argspec for the function. This is generally better
+      omitted. 
+    '''
     def view_factory(f):
         register_handler('view',category, name, description, f, args)
         return f
     return view_factory
 
 def query(category = None, name = None, description = None, args = None):
-    '''
+    ''' This decorator is appended to a query in an analytics
+    module. A module will return output that can be used
+    programmatically (typically JSON). 
+
+    category: Optional specification for type (global, per-user,
+      etc.). If not given, this will be extrapolated from the
+      argspec. This should typically be omitted. 
+
+    name: Optional specification for name exposed via SOA. This will
+      default to function name. In most cases, this is recommended. 
+
+    description: Optional description exposed via the SOA
+      discovery. If not given, this will default to the docstring. 
+
+    args: Optional argspec for the function. This is generally better
+      omitted. 
     '''
     def query_factory(f):
         register_handler('query',category, name, description, f, args)
