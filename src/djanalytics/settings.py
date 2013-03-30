@@ -11,7 +11,8 @@ DJ_REQUIRED_APPS = ( 'djeventstream.httphandler',
     'modulefs',
     'modules',)
 
-# Types of parameters that queries and views can take
+# Types of parameters that queries and views can take. 
+# This is not properly used yet. 
 DJANALYTICS_PARAMETERS = ['user', 'filename']
 DJFS = { 'type' : 'osfs',
          'directory_root' : '/tmp/djfsmodule',
