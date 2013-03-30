@@ -6,37 +6,38 @@
 Welcome to djanalytics's documentation!
 =======================================
 
-Contents:
+..
+   Contents:
 
-.. toctree::
-   :maxdepth: 2
+   .. toctree::
+      :maxdepth: 2
 
-djanalytics.decorators
+core.decorators
 ======================
 
-djanalytics.decorators is the public interface of djanalytics
+core.decorators is the bulk of the public interface of djanalytics. 
 
-.. automodule:: djanalytics.decorators
+.. automodule:: core.decorators
    :members:
 
-djanalytics.views
+core.views
 ======================
 
-.. automodule:: djanalytics.views
+.. automodule:: core.views
    :members:
 
-djanalytics.models
+core.models
 ======================
 
-.. automodule:: djanalytics.models
+.. automodule:: core.models
    :members:
 
-djanalytics.helpers
+core.helpers
 ======================
 
 These are internal interfaces, and cannot be relied upon. 
 
-.. automodule:: djanalytics.helpers
+.. automodule:: core.helpers
    :members:
 
 Indices and tables
