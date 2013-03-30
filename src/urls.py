@@ -8,7 +8,6 @@ from django.contrib.auth.decorators import login_required
 
 urlpatterns = patterns('',
     # Examples:
-    url(r'^$', 'dashboard.views.new_dashboard'),
     url(r'^event$', 'djeventstream.httphandler.views.http_view'),
     url(r'^view/([A-Za-z_+]+)/([A-Za-z_+]+)$', 'djanalytics.views.handle_view'),
     url(r'^view/([A-Za-z_+]+)/([A-Za-z_+]+)/([A-Za-z_0-9]+)$', 'djanalytics.views.handle_view'),
@@ -22,9 +21,6 @@ urlpatterns = patterns('',
     url(r'^probe/([A-Za-z_+]+)/([A-Za-z_+]+)$', 'djanalytics.views.handle_probe'),
     url(r'^probe/([A-Za-z_+]+)/([A-Za-z_+]+)/([A-Za-z_+]+)$', 'djanalytics.views.handle_probe'),
     url(r'^probe/([A-Za-z_+]+)/([A-Za-z_+]+)/([A-Za-z_+]+)/([A-Za-z_+]+)$', 'djanalytics.views.handle_probe'),
-    url(r'^dashboard$', 'dashboard.views.dashboard'),
-    url(r'^new_dashboard$', 'dashboard.views.new_dashboard'),
-    url(r'^sns', 'sns.views.sns'),
     # url(r'^anserv/', include('anserv.foo.urls')),
 
     # Uncomment the admin/doc line below to enable admin documentation:
@@ -35,7 +31,7 @@ urlpatterns = patterns('',
     url('^tasks/', include('djcelery.urls')),
 )
 
-if settings.DEBUG:
+if settings.DEBUG and settings.DJFS['type'] == 'osfs':
     #urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT, show_indexes=True)
     urlpatterns+= patterns('',
                            url(r'^static/(?P<path>.*)$', 'django.views.static.serve', {
@@ -43,7 +39,7 @@ if settings.DEBUG:
                                'show_indexes' : True,
                                }),
                            url(r'^data/(?P<path>.*)$', 'django.views.static.serve', {
-                               'document_root': settings.PROTECTED_DATA_ROOT,
+                               'document_root': settings.DJFS['directory_root'],
                                'show_indexes' : True,
                                }),
                            )
