@@ -98,13 +98,11 @@ def list_all_endpoints(request):
                 endpoints.append({'type' : cls, 'category' : category, 'name' : details})
     return HttpResponse(json.dumps(endpoints))
 
-optional_kwargs = {'fs' : get_filesystem, 
-                   'db' : get_database}
+default_optional_kwargs = {'fs' : get_filesystem, 
+                           'db' : get_database}
 
 def optional_parameter_call(function, optional_kwargs, passed_kwargs, arglist = None): 
-    ''' UNTESTED/in developement
-
-    Calls a function with parameters: 
+    ''' Calls a function with parameters: 
     passed_kwargs are input parameters the function must take. 
     Format: Dictionary mapping keywords to arguments. 
 
@@ -114,7 +112,7 @@ def optional_parameter_call(function, optional_kwargs, passed_kwargs, arglist = 
     arglist is an optional list of arguments to pass to the function. 
     '''
     if not arglist: 
-        arglist = inspect.getargspec(handler).args
+        arglist = inspect.getargspec(function).args
     
     args = {}
     for arg in arglist:
@@ -127,7 +125,7 @@ def optional_parameter_call(function, optional_kwargs, passed_kwargs, arglist = 
             args[arg] = passed_kwargs[arg]
         else: 
             raise TypeError("Missing argument needed for handler ", arg)
-    function(**args)
+    return function(**args)
 
 def handle_request(request, cls, category, name, **kwargs):
     ''' Generic code from handle_view and handle_query '''
@@ -140,25 +138,11 @@ def handle_request(request, cls, category, name, **kwargs):
         arglist = inspect.getargspec(handler).args
 
     passed_kwargs = {}
-    passed_kwargs.update(request.GET)
-    passed_kwargs.update(request.POST)
+    passed_kwargs.update(request.POST.items())
+    passed_kwargs.update(request.GET.items())
     passed_kwargs.update({'request' : request})
-    for arg in arglist:
-        if arg == 'db':
-            args[arg] = get_database(handler)
-        elif arg == 'fs':
-            args[arg] = get_filesystem(handler)
-        elif arg == 'params':
-            args[arg] = passed_kwargs
-        else:
-            if arg in kwargs:
-                args[arg] = kwargs[arg]
-            elif arg in passed_kwargs:
-                args[arg] = passed_kwargs[arg][0]
-            else:
-                raise TypeError("Missing argument needed for handler ", arg)
 
-    return handler(**args)
+    return optional_parameter_call(handler, default_optional_kwargs, passed_kwargs, arglist)
 
 def handle_view(request, category, name, **kwargs):
     ''' Handles generic view. 
@@ -188,6 +172,12 @@ def handle_query(request, category, name, **kwargs):
 
 @receiver(event_received)
 def handle_event(sender, **kwargs):
+    ''' Receives either an event or a list of events, as sent by
+    djeventstream (either from a Python logging HTTPHandler or
+    SNSHandler. 
+
+    Forwards it along to the event handlers defined in the modules. 
+    '''
     print kwargs['msg']
     msg = json.loads(kwargs['msg'])
     if isinstance(msg,list):
@@ -200,22 +190,20 @@ def handle_event(sender, **kwargs):
     for e in event_handlers:
         event_func = e['function']
         batch = e['batch']
-        fs = get_filesystem(event_func)
-        database = get_database(event_func)
         if not isinstance(msg,list): ## Message was a single event
             try:
-                event_func(fs, database, [msg])
+                optional_parameter_call(event_func, default_optional_kwargs, {'events':[msg]})
             except:
                 handle_event_exception(e['function'])
         elif not batch: ## Message was a list of events, but handler cannot batch events
             for event in msg:
                 try:
-                    event_func(fs, database, [event])
+                    optional_parameter_call(event_func, default_optional_kwargs, {'events':[event]})
                 except:
                     handle_event_exception(e['function'])
         else: ## Message was a list of events, and handler can batch events
             try:
-                event_func(fs, database, msg)
+                optional_parameter_call(event_func, default_optional_kwargs, {'events':msg})
             except:
                 handle_event_exception(e['function'])
 
