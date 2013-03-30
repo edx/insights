@@ -164,6 +164,7 @@ INSTALLED_APPS = (
     'djcelery',
     'south',
     'djanalytics',
+    'modulefs',
     'modules',
 )
 

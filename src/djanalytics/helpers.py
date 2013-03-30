@@ -4,7 +4,7 @@ from pymongo import MongoClient
 
 from django.conf import settings
 
-import modulefs
+from src.modulefs import modulefs ## TEMPORARY HACK
 
 connection = MongoClient()
 
