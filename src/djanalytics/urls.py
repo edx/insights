@@ -8,26 +8,20 @@ from django.contrib.auth.decorators import login_required
 
 urlpatterns = patterns('',
     # Examples:
+    url('^', include('core.urls')),
     url(r'^event$', 'djeventstream.httphandler.views.http_view'),
-    url(r'^view/([A-Za-z_+]+)/([A-Za-z_+]+)$', 'core.views.handle_view'),
-    url(r'^view/([A-Za-z_+]+)/([A-Za-z_+]+)/([A-Za-z_0-9]+)$', 'core.views.handle_view'),
-    url(r'^view/([A-Za-z_+]+)/([A-Za-z_+]+)/([A-Za-z_0-9]+)/([A-Za-z_0-9]+)$', 'core.views.handle_view'),
-    url(r'^query/([A-Za-z_+]+)/([A-Za-z_+]+)$', 'core.views.handle_query'),
-    url(r'^query/([A-Za-z_+]+)/([A-Za-z_+]+)/([A-Za-z_0-9+]+)$', 'core.views.handle_query'),
-    url(r'^query/([A-Za-z_+]+)/([A-Za-z_+]+)/([A-Za-z_0-9+]+)/([A-Za-z_0-9+]+)$', 'core.views.handle_query'),
-    url(r'^schema$', 'core.views.list_all_endpoints'),
-    url(r'^probe$', 'core.views.handle_probe'),
-    url(r'^probe/([A-Za-z_+]+)$', 'core.views.handle_probe'),
-    url(r'^probe/([A-Za-z_+]+)/([A-Za-z_+]+)$', 'core.views.handle_probe'),
-    url(r'^probe/([A-Za-z_+]+)/([A-Za-z_+]+)/([A-Za-z_+]+)$', 'core.views.handle_probe'),
-    url(r'^probe/([A-Za-z_+]+)/([A-Za-z_+]+)/([A-Za-z_+]+)/([A-Za-z_+]+)$', 'core.views.handle_probe'),
-    # url(r'^anserv/', include('anserv.foo.urls')),
-
-    # Uncomment the admin/doc line below to enable admin documentation:
-    # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
-
-    # Uncomment the next line to enable the admin:
-    # url(r'^admin/', include(admin.site.urls)),
+    # url(r'^view/([A-Za-z_+]+)/([A-Za-z_+]+)$', 'core.views.handle_view'),
+    # url(r'^view/([A-Za-z_+]+)/([A-Za-z_+]+)/([A-Za-z_0-9]+)$', 'core.views.handle_view'),
+    # url(r'^view/([A-Za-z_+]+)/([A-Za-z_+]+)/([A-Za-z_0-9]+)/([A-Za-z_0-9]+)$', 'core.views.handle_view'),
+    # url(r'^query/([A-Za-z_+]+)/([A-Za-z_+]+)$', 'core.views.handle_query'),
+    # url(r'^query/([A-Za-z_+]+)/([A-Za-z_+]+)/([A-Za-z_0-9+]+)$', 'core.views.handle_query'),
+    # url(r'^query/([A-Za-z_+]+)/([A-Za-z_+]+)/([A-Za-z_0-9+]+)/([A-Za-z_0-9+]+)$', 'core.views.handle_query'),
+    # url(r'^schema$', 'core.views.list_all_endpoints'),
+    # url(r'^probe$', 'core.views.handle_probe'),
+    # url(r'^probe/([A-Za-z_+]+)$', 'core.views.handle_probe'),
+    # url(r'^probe/([A-Za-z_+]+)/([A-Za-z_+]+)$', 'core.views.handle_probe'),
+    # url(r'^probe/([A-Za-z_+]+)/([A-Za-z_+]+)/([A-Za-z_+]+)$', 'core.views.handle_probe'),
+    # url(r'^probe/([A-Za-z_+]+)/([A-Za-z_+]+)/([A-Za-z_+]+)/([A-Za-z_+]+)$', 'core.views.handle_probe'),
     url('^tasks/', include('djcelery.urls')),
 )
 
