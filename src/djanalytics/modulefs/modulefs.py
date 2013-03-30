@@ -9,13 +9,13 @@ from models import FSExpirations
 
 if settings.DJFS['type'] == 'osfs':
     from fs.osfs import OSFS
-elif settings.DJFS['type'] == 'sf3s':
+elif settings.DJFS['type'] == 's3fs':
     from fs.s3fs import S3FS
     from boto.s3.connection import S3Connection
     from boto.s3.key import Key
     s3conn = S3Connection()
 else: 
-    raise AttributeError("Bad filesystem")
+    raise AttributeError("Bad filesystem: "+str(settings.DJFS['type']))
 
 def get_filesystem(namespace):
     ''' Returns a pyfilesystem for static module storage. 
@@ -26,8 +26,10 @@ def get_filesystem(namespace):
     '''
     if settings.DJFS['type'] == 'osfs':
         return get_osfs( namespace )
+    elif settings.DJFS['type'] == 's3fs':
+        return get_s3fs( namespace )
     else:
-        raise AttributeError("Bad filesystem")
+        raise AttributeError("Bad filesystem: "+str(settings.DJFS['type']))
 
 def expire_objects():
     ''' Remove all obsolete objects from the file systems. Untested. '''
@@ -91,6 +93,6 @@ def get_s3fs(namespace):
             s3conn = S3Connection()
             return s3conn.generate_s3_url(timeout, 'GET', bucket = settings.DJFS['bucket'], key = filename)
 
-    s3fs = patchfs(fs, namespace, get_s3_url)
+    s3fs = patch_fs(s3fs, namespace, get_s3_url)
     return s3fs
 
