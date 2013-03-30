@@ -11,6 +11,9 @@ if settings.DJFS['type'] == 'osfs':
     from fs.osfs import OSFS
 elif settings.DJFS['type'] == 'sf3s':
     from fs.s3fs import S3FS
+    from boto.s3.connection import S3Connection
+    from boto.s3.key import Key
+    s3conn = S3Connection()
 else: 
     raise AttributeError("Bad filesystem")
 
@@ -61,7 +64,7 @@ def get_osfs(namespace):
     if not os.path.exists(full_path):
         os.makedirs(full_path)
     osfs = OSFS(full_path)
-    osfs = patch_fs(osfs, namespace, lambda self, filename:os.path.join(settings.DJFS['url_root'], namespace, filename))
+    osfs = patch_fs(osfs, namespace, lambda self, filename, timeout=0:os.path.join(settings.DJFS['url_root'], namespace, filename))
     return osfs
 
 def get_s3fs(namespace):
@@ -69,5 +72,15 @@ def get_s3fs(namespace):
     if 'prefix' in settings.DJFS: 
         fullpath = os.path.join(settings.DJFS['prefix'], fullpath)
     s3fs = S3FS(settings.DJFS['bucket'], fullpath)
+
+    def get_s3_url(self, filename, timeout=60):
+        global s3conn
+        try: 
+            return s3conn.generate_s3_url(timeout, 'GET', bucket = settings.DJFS['bucket'], key = filename)
+        except: # If connection has timed out
+            s3conn = S3Connection()
+            return s3conn.generate_s3_url(timeout, 'GET', bucket = settings.DJFS['bucket'], key = filename)
+
+    s3fs = patchfs(fs, namespace, get_s3_url)
     return s3fs
 
