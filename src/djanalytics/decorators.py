@@ -1,15 +1,19 @@
+import hashlib
 import inspect
-# import decorator
-from django.core.cache import cache
-import time
-from decorator import decorator
+import json
 import logging
-from celery.task import PeriodicTask, periodic_task
+import time
+import traceback
+
 from datetime import timedelta
+from decorator import decorator
+
+from django.core.cache import cache
+
+from celery.task import PeriodicTask, periodic_task
 
 log=logging.getLogger(__name__)
 
-import traceback
 
 event_handlers = []
 
@@ -97,8 +101,6 @@ def query(category = None, name = None, description = None, args = None):
         return f
     return query_factory
 
-import hashlib
-import json
 
 def memoize_query(cache_time = 60*4, timeout = 60*15, ignores = ["<class 'pymongo.database.Database'>", "<class 'fs.osfs.OSFS'>"]):
     ''' Call function only if we do not have the results for its execution already

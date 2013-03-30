@@ -21,8 +21,6 @@ import logging
 
 log=logging.getLogger(__name__)
 
-modules = helpers.import_view_modules()
-
 def handle_probe(request, cls=None, category=None, details = None):
     ''' Handles probes for what types of modules are available, and
     what they do. Shown as, effectively, a big directory tree to the
@@ -113,6 +111,8 @@ def handle_event(sender, **kwargs):
     SNSHandler. 
 
     Forwards it along to the event handlers defined in the modules. 
+
+    This is not a view, but it is the moral equivalent. 
     '''
     print kwargs['msg']
     msg = json.loads(kwargs['msg'])

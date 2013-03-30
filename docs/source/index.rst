@@ -31,6 +31,13 @@ djanalytics.models
 .. automodule:: djanalytics.models
    :members:
 
+djanalytics.helpers
+======================
+
+These are internal interfaces, and cannot be relied upon. 
+
+.. automodule:: djanalytics.helpers
+   :members:
 
 Indices and tables
 ==================
