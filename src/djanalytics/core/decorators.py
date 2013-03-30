@@ -202,10 +202,10 @@ def memoize_query(cache_time = 60*4, timeout = 60*15, ignores = ["<class 'pymong
         return decorator(wrap_function,f)
     return view_factory
 
-def cron_new(period, params=None):
+def cron(period, params=None):
     ''' Run command periodically
-    Command takes database and
-
+    
+    Unknown whether or how well this works. 
     '''
     def factory(f):
         @periodic_task(run_every=period, name=f.__name__)
