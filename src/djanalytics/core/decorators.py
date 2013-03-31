@@ -210,7 +210,7 @@ def cron(period, params=None):
     def factory(f):
         @periodic_task(run_every=period, name=f.__name__)
         def run():
-            import core.views
+            import djanalytics.core.views
             db = core.views.get_database(f)
             fs = core.views.get_filesystem(f)
             f(fs, db, params)

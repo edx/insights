@@ -4,7 +4,7 @@
 
 modules_to_import = []
 
-from core.decorators import query, event_handler
+from djanalytics.core.decorators import query, event_handler
 
 @query()
 def event_count(db):
