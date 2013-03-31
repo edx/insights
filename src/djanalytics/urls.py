@@ -37,8 +37,8 @@ if settings.DEBUG and settings.DJFS['type'] == 'osfs':
                                'show_indexes' : True,
                                }),
                            )
-else:
-    urlpatterns+= patterns('frontend.views',
-                           url(r'^data/(?P<path>.*)$', 'protected_data')
-    )
+# else:
+#     urlpatterns+= patterns('frontend.views',
+#                            url(r'^data/(?P<path>.*)$', 'protected_data')
+#     )
 

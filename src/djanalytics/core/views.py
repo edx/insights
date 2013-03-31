@@ -83,8 +83,8 @@ def handle_view(request, category, name, **kwargs):
         Category is where this should be place (per student, per problem, etc.)
         Name is specific 
     '''
-    if not request.user.is_authenticated():
-        return HttpResponseRedirect(reverse('django.contrib.auth.views.login'))
+    # if not request.user.is_authenticated():
+    #     return HttpResponseRedirect(reverse('django.contrib.auth.views.login'))
 
     return HttpResponse(handle_request(request, 'view', category, name, **kwargs))
 

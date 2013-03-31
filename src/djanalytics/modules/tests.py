@@ -93,3 +93,7 @@ class SimpleTest(TestCase):
         self.send_event(c, { 'filename' : "foo4.txt", 'fs_forgets_expiry' : -15})
         expire_objects()
         verify({"foo1.txt":False, "foo2.txt":False, "foo3.txt":False, "foo4.txt":False})
+
+    def test_render(self):
+        c = Client()
+        self.assertEqual(c.get('/view/global/hello_template').content, open('modules/testmodule/templates/hello.html').read())

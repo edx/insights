@@ -4,7 +4,12 @@
 
 modules_to_import = []
 
-from djanalytics.core.decorators import query, event_handler
+from djanalytics.core.decorators import query, event_handler, view
+
+@view()
+def hello_template():
+    from djanalytics.core.render import render
+    return render("hello.html", {})
 
 @query()
 def event_count(db):
