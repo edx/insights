@@ -1,6 +1,5 @@
-''' Basic module for test suite. 
+''' Basic module containing events, views, and queries for the test suite. 
 
-Count number of events that hit the server. 
 '''
 
 modules_to_import = []
@@ -9,6 +8,8 @@ from core.decorators import query, event_handler
 
 @query()
 def event_count(db):
+    ''' Number of hits to event_handler since clear_database
+    '''
     collection = db['event_count']
     t = list(collection.find())
     if len(t):
@@ -17,6 +18,9 @@ def event_count(db):
 
 @query()
 def user_event_count(db, user):
+    ''' Number of hits by a specific user to event_handler since
+    clear_database
+    '''
     collection = db['user_event_count']
     t = list(collection.find({'user':user}))
     if len(t):
@@ -25,6 +29,8 @@ def user_event_count(db, user):
 
 @query()
 def clear_database(db):
+    ''' Clear event counts
+    '''
     collection = db['event_count']
     collection.remove({})
     collection = db['user_event_count']
@@ -33,6 +39,8 @@ def clear_database(db):
 
 @event_handler()
 def event_count_event(db, events):
+    ''' Count events per user and per system. Used as test case for
+    per-user and global queries. '''
     for evt in events:
         if 'user' in evt:
             collection = db['user_event_count']
@@ -87,6 +95,9 @@ def python_fs_forgets(fs, events):
 
 @event_handler()
 def python_fs_event(fs, events):
+    ''' Handles events which will create and delete files in the
+    filesystem. 
+    '''
     for evt in events:
         if 'event' in evt and evt['event'] == 'pyfstest':
             if 'create' in evt:
@@ -98,6 +109,8 @@ def python_fs_event(fs, events):
 
 @query()
 def readfile(fs, filename):
+    ''' Return the contents of a file in the fs. 
+    '''
     if fs.exists(filename): 
         f=fs.open(filename)
         return f.read()
