@@ -1,5 +1,5 @@
-analytics-experiments
-=====================
+djanalytics
+===========
 
 This is a development version of an analytics framework for the edX
 infrastructure. It will replace the ad-hoc analytics used in the
