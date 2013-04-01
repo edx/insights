@@ -128,9 +128,14 @@ drop function metainformation.
 
 See examples for syntax. 
 
+Please be aware that the exported API is quite minimal. 
+
 Shortcuts/invariants
 --------------------
 
+* Static file handling is not there yet. 
+* Template rendering is a hack. 
+* Duplicate events/downtime is not handled. 
 * At present, events come into the system through an SOA. The tracking
 framework is modified to use a Python HTTP logger, which are received
 by the framework. For most events, this should be replaced with
@@ -145,8 +150,9 @@ API is designed to support this, but this is not implemented.
 * The analytics framework has no way to generate new events. This would be 
 useful for chaining analytics.
 * There are no filters. E.g. an event handler cannot ask for all video events. 
-* We are copying code from the main mitx repo (models.py, mitmako). We
-  should figure out a better way to handle this.
+* We are either copying code from the main mitx repo (models.py,
+  mitmako) or importing. We should figure out a better way to handle
+  this.
 
 Target markets
 --------------
@@ -207,16 +213,11 @@ Product Backlog
 1. Add support for asynchronous views. When the client issues a
 request for a view which takes a while to calculate, there should be
 visual feedback.
-2. Rewrite the cron code from scratch .
-3. Add gridfs/pythonfs support for e.g. generating plots with
-matplotlib, animations, etc.
-4. Move views into an iframe. 
-5. Be more clever about inspection. Recognize names of arguments (fs,
-database, etc.), and pass in whatever is required.
-6. Create appropriate userspace. We need higher-level functions to
+2. Move views into an iframe. 
+3. Create appropriate userspace. We need higher-level functions to
 extract information from events.
-7. Convert views to take arbitrary sets of parameters and advertise
-that (e.g. user+course, course+resource, etc.)
+4. Find ways to handle and drop duplicate events. 
+5. Find ways to handle robust, queued events
 
 Other useful next steps
 -----------------------
@@ -225,22 +226,3 @@ Other useful next steps
 and be able to confirm output of all queries.
 2. Development data. We need sample outputs for all queries for when
 the DB is not available for UI development (some of this exists). 
-
-
-Issues:
--------
-
-Issues 1:
-memoize_query does not use decorator.decorator, so it drops function spec
-Answer 1: I can't found `decorator` module. So only with comment I can run project:
-# import decorator
-What does it mean "drops function spec"?
-
-Issues 2: Right now, analytics can only take one argument (e.g. user). This should take an arbitrary number of args
-Answer 2: Can you describe this in more detail?
-
-Issues 3: event_handler also does not do introspection in the way other decorators do.
-Answer 3: About what introspection did you say?
-
-Issues 4: event_handler needs to be able to take a list of many events (still support 1, but default for should be many)
-Answer 4: `event_handler` is just decorator, which save function to the global list `event_handlers`. What do you mean by "list of many events"? Can you explain how it works in more details?
