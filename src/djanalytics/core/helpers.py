@@ -1,3 +1,4 @@
+from importlib import import_module
 import inspect
 
 from pymongo import MongoClient
@@ -17,7 +18,7 @@ def import_view_modules():
     top_level_modules = settings.INSTALLED_ANALYTICS_MODULES
     module_names = []
     for module in top_level_modules:
-        mod = __import__(module)
+        mod = import_module(module)
         submodules = []
         try: 
             submodules = mod.modules_to_import # I'd like to deprecate this syntax
@@ -26,7 +27,7 @@ def import_view_modules():
         for sub_module in submodules:
             submod_name = "{0}.{1}".format(module,sub_module)
             module_names.append(submod_name)
-    modules = map(__import__, module_names)
+    modules = map(import_module, module_names)
     return modules
 
 def namespace(f):
