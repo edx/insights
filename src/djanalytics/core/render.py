@@ -87,11 +87,24 @@ from django.contrib.staticfiles import utils
 from django.core.files.storage import FileSystemStorage
 
 class ModuleStorage(FileSystemStorage):
+    ''' Storage which allows static files to live with prefixes in the
+    static directory which do not exist in the filesystem. A file can
+    exist as /modules/foo/static/bar.html in the source filesystem,
+    but as /djmodules/foo/bar.html in the static_files directory. 
+    '''
     def path(self, name):
+        ''' Returns the absolute path to a file, stripping out
+        /djmodules/[module] from the beginning. If the system requests
+        /djmodules/testmodule/hello.html, this will return
+        /home/user/djanalytics/src/modules/testmodule/static/hello.html
+        '''
         rootpath = os.path.relpath(os.path.join(name), self.base_url)
         return FileSystemStorage.path(self, rootpath)
 
     def listdir(self, path):
+        ''' Lists a directory, stripping out /djmodules/static from
+        the directory (and allowing / and /djmodules to work)
+        '''
         if path == "" or path == "/":
             return ["djmodules"], []
         elif path in ["djmodules", "djmodules/", "/djmodules", "/djmodules/"]:
@@ -100,11 +113,17 @@ class ModuleStorage(FileSystemStorage):
             return FileSystemStorage.listdir(self, path)
 
 class ModuleFileFinder(BaseFinder):
+    ''' Finds the static files for all installed analytics
+    modules. Does magic to put them in the right place in the URL
+    space.
+    '''
     def __init__(self, apps=None, *args, **kwargs):
         self.static_paths = None
         self.load_static()
 
     def load_static(self):
+        ''' Walk all modules. Find paths. Create Django storages for them (Django's poorman's pyfs). 
+        '''
         self.module_paths = [(module.split('.')[-1], os.path.abspath(resource_filename(module, "static"))) for module in settings.INSTALLED_ANALYTICS_MODULES]
         self.static_paths = [(module, path, ModuleStorage(path, os.path.join("djmodules", module))) for module, path in self.module_paths]
 

@@ -97,3 +97,10 @@ class SimpleTest(TestCase):
     def test_render(self):
         c = Client()
         self.assertEqual(c.get('/view/global/hello_template').content, open('modules/testmodule/templates/hello.html').read())
+
+    def test_storage(self):
+        from django.contrib.staticfiles import finders
+        import os.path
+
+        absolute_path = finders.find('djmodules/testmodule/hello.html')
+        assert os.path.exists(absolute_path)
