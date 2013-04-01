@@ -18,6 +18,10 @@
 # with each new module written. 
 # 
 ### HACK HACK HACK ###
+# 
+# This file also has a static file finder for the modules. This is a
+# bit less of a hack (although the implementation is still somewhat
+# crude), but it sure doesn't belong in core.render.
 
 import atexit
 import importlib
@@ -73,8 +77,51 @@ def render(templatefile, context, caller = None):
 
     template_directory = os.path.abspath(resource_filename(caller_name, "templates"))
 
-    print "Caller, ", template_directory
     template = lookup(template_directory).get_template(templatefile)
     return template.render_unicode(**context)
-    return "Hello!"
+
+#### Related hack for static files (although this could be de-hackified easily)
+
+from django.contrib.staticfiles.finders import BaseFinder
+from django.contrib.staticfiles import utils
+from django.core.files.storage import FileSystemStorage
+
+class ModuleStorage(FileSystemStorage):
+    def path(self, name):
+        rootpath = os.path.relpath(os.path.join(name), self.base_url)
+        return FileSystemStorage.path(self, rootpath)
+
+    def listdir(self, path):
+        if path == "" or path == "/":
+            return ["djmodules"], []
+        elif path in ["djmodules", "djmodules/", "/djmodules", "/djmodules/"]:
+            return [self.base_url.split('/')[1]], []
+        else: 
+            return FileSystemStorage.listdir(self, path)
+
+class ModuleFileFinder(BaseFinder):
+    def __init__(self, apps=None, *args, **kwargs):
+        self.static_paths = None
+        self.load_static()
+
+    def load_static(self):
+        self.module_paths = [(module.split('.')[-1], os.path.abspath(resource_filename(module, "static"))) for module in settings.INSTALLED_ANALYTICS_MODULES]
+        self.static_paths = [(module, path, ModuleStorage(path, os.path.join("djmodules", module))) for module, path in self.module_paths]
+
+    def find(self, path, all=False):
+        found = []
+        for p in self.static_paths:
+            s = os.path.join("djmodules", p[0])+'/'
+            if path[:len(s)] == s:
+                found.append(os.path.join(p[1], path[len(s):]))
+                if not all:
+                    return found[0]
+
+        return found
+
+    def list(self, ignore_patterns):
+        for module, path, storage in self.static_paths:
+            for path in utils.get_files(storage, ignore_patterns):
+                yield path, storage
+
 
