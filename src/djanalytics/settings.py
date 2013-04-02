@@ -22,7 +22,7 @@ DJFS = { 'type' : 'osfs',
 
 TIME_BETWEEN_DATA_REGENERATION = datetime.timedelta(minutes=1)
 
-INSTALLED_ANALYTICS_MODULES = ('djanalytics.modules.testmodule',)
+INSTALLED_ANALYTICS_MODULES = ('modules.testmodule',)
 
 #Initialize celery
 import djcelery

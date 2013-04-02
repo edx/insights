@@ -67,10 +67,11 @@ def optional_parameter_call(function, optional_kwargs, passed_kwargs, arglist = 
     #This will set the "params" field in args to a dictionary of the fields that do not appear in arglist.
     #The params field will be overriden in the loop further down if the user explicitly specifies it.
     additional_argument_variable = "params"
-    params = {k:passed_kwargs[k] for k in passed_kwargs if k not in arglist}
-    if additional_argument_variable not in passed_kwargs and additional_argument_variable not in optional_kwargs:
-        arglist = [a for a in arglist if a!=additional_argument_variable]
-    args[additional_argument_variable] = params
+    if additional_argument_variable in arglist:
+        params = {k:passed_kwargs[k] for k in passed_kwargs if k not in arglist}
+        if additional_argument_variable not in passed_kwargs and additional_argument_variable not in optional_kwargs:
+            arglist = [a for a in arglist if a!=additional_argument_variable]
+        args[additional_argument_variable] = params
 
     for arg in arglist:
         # This order is important for security. We don't want users
