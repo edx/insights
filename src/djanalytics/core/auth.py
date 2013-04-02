@@ -11,6 +11,11 @@ following to settings.py:
 import django.contrib.auth.decorators
 DJA_AUTH = { '.*' : django.contrib.auth.decorators.login_required } 
 
+The goal of this is to, for example, be able to add login_required for
+views, but some kind of secret key authentication for queries, and
+similar. This code has not been integration-tested yet (although it is
+likely to be by the time you read this). 
+
 '''
 
 from django.conf import settings
