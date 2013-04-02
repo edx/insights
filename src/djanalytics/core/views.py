@@ -14,6 +14,7 @@ from djeventstream.signals import event_received
 
 from decorators import event_handlers, request_handlers
 
+import auth
 import helpers
 from helpers import optional_parameter_call
 
@@ -46,6 +47,7 @@ def handle_probe(request, cls=None, category=None, details = None):
             l = [error_message.format(details,request_handlers)]
     return HttpResponse("\n".join(l), mimetype='text/text')
 
+@auth.auth
 def list_all_endpoints(request):
     ''' Returns all available views and queries as a JSON
     object. Alternative to the probe hierarchy. 

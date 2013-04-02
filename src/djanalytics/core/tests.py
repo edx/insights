@@ -39,3 +39,43 @@ class SimpleTest(TestCase):
         self.assertEqual(double_trouble(2), 4)
         self.assertEqual(double_trouble(4), 8)
         self.assertEqual(self.calls, 4)
+
+    def test_auth(self):
+        ''' Inject a dummy settings.DJA_AUTH into auth. 
+        '''
+        import auth
+        temp = auth.settings
+
+        def plus1dec(f):
+            def p1(x):
+                return f(x)+1
+            return p1
+
+        def minus1dec(f):
+            def p1(x):
+                return f(x)-1
+            return p1
+
+        class S(object):
+            DJA_AUTH = {'f1' : plus1dec, 
+                        'g.*' : minus1dec}
+        
+        auth.settings = S
+        
+        @auth.auth
+        def f1(x):
+            return x**2
+        
+        @auth.auth
+        def f2(x):
+            return x**2
+
+        @auth.auth
+        def g2(x):
+            return x**2
+
+        self.assertEqual(f1(7), 50)
+        self.assertEqual(f2(7), 49)
+        self.assertEqual(g2(7), 48)
+
+        auth.settings = temp
