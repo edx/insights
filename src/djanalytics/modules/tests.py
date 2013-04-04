@@ -21,7 +21,7 @@ class SimpleTest(TestCase):
         ''' Send a JSON event to the server
         '''
         params = urllib.urlencode({'msg':json.dumps(event)})
-        response = client.get("/event?"+params)
+        response = client.get("/httpevent?"+params)
         return response
 
     def test_db_works(self):
@@ -34,13 +34,13 @@ class SimpleTest(TestCase):
         response = c.get('/query/global/event_count')
         response = c.get('/query/global/event_count')
         self.assertEqual(response.content, "0")
-        response = c.get('/event?msg="Hello"')
+        response = c.get('/httpevent?msg="Hello"')
         response = c.get('/query/global/event_count')
         self.assertEqual(response.content, "1")
-        response = c.get('/event?msg="Hello"')
+        response = c.get('/httpevent?msg="Hello"')
         response = c.get('/query/global/event_count')
         self.assertEqual(response.content, "2")
-        response = c.get('/event?msg="Hello"')
+        response = c.get('/httpevent?msg="Hello"')
         response = c.get('/query/global/event_count')
         self.assertEqual(response.content, "3")
         print "After 3 events: ", response.content
@@ -55,9 +55,9 @@ class SimpleTest(TestCase):
         self.assertEqual(response.content, '"Database clear"')
         response = c.get('/query/user/user_event_count?user=alice')
         self.assertEqual(response.content, "0")
-        response = c.get('/event?msg=%7B%22user%22:%22alice%22%7D')
-        response = c.get('/event?msg=%7B%22user%22:%22eve%22%7D')
-        response = c.get('/event?msg=%7B%22user%22:%22alice%22%7D')
+        response = c.get('/httpevent?msg=%7B%22user%22:%22alice%22%7D')
+        response = c.get('/httpevent?msg=%7B%22user%22:%22eve%22%7D')
+        response = c.get('/httpevent?msg=%7B%22user%22:%22alice%22%7D')
         response = c.get('/query/user/user_event_count?user=alice')
         self.assertEqual(response.content, "2")
 
