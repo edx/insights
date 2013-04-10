@@ -27,6 +27,7 @@ def handle_probe(request, cls=None, category=None, details = None):
     what they do. Shown as, effectively, a big directory tree to the
     caller.
     '''
+    print "Probe"
     error_message = "{0} not found in {1}."
     if cls == None:
         l = ['view','query']
@@ -45,6 +46,13 @@ def handle_probe(request, cls=None, category=None, details = None):
             l = [request_handlers[cls][category][details]['doc']]
         else:
             l = [error_message.format(details,request_handlers)]
+    print "HERE", request.GET, request.GET.get("f", "")
+    if request.GET.get("f", "") == "html":
+        if not details:
+            l = ["<li><a href={a}?f=html>{b}</a></li>".format(a=(category or cls or "probe")+"/"+i, b=i) for i in l]
+        else:
+            l = ["<p>".join(l)]
+        return HttpResponse("".join(l), mimetype='text/html')
     return HttpResponse("\n".join(l), mimetype='text/text')
 
 @auth.auth
