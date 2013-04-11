@@ -25,7 +25,8 @@ class SimpleTest(TestCase):
         return response
 
     def test_db_works(self):
-        ''' Test that events and queries work
+        ''' Test that events and queries work. 
+            Side test that things don't die if the message isn't valid. 
         '''
         c = Client()
 
@@ -104,3 +105,27 @@ class SimpleTest(TestCase):
 
         absolute_path = finders.find('djmodules/testmodule/hello.html')
         assert os.path.exists(absolute_path)
+
+    def test_cache(self):
+        c = Client()
+        ## Tests fail. In progress
+        print "Testing cache..."
+        self.assertEqual(self.send_event(c, {'event':'cachetest', 
+                                             'key' : 'key1', 
+                                             'value': 'value1',
+                                             'timeout':30}).content, "Success")
+        self.assertEqual(self.send_event(c, {'event':'cachetest', 
+                                             'key' : 'key2', 
+                                             'value': 'value2',
+                                             'timeout':30}).content, "Success")
+
+        response = json.loads(c.get('/query/key/cache_get?key=key1').content)
+        self.assertEqual(response, 'value1')
+        response = json.loads(c.get('/query/key/cache_get?key=key2').content)
+        self.assertEqual(response, 'value2')
+        self.assertEqual(self.send_event(c, {'event':'cachetest', 
+                                             'key' : 'key1', 
+                                             'value': 'valuea',
+                                             'timeout':30}).content, "Success")
+        response = json.loads(c.get('/query/key/cache_get?key=key1').content)
+        self.assertEqual(response, 'valuea')

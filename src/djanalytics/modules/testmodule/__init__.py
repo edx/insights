@@ -120,3 +120,14 @@ def readfile(fs, filename):
         f=fs.open(filename)
         return f.read()
     return "File not found"
+
+@query()
+def cache_get(cache, key):
+    result = cache.get(key)
+    return result
+
+@event_handler()
+def cache_set(cache, events):
+    for evt in events:
+        if 'event' in evt and evt['event'] == 'cachetest':
+            cache.set(evt['key'], evt['value'], evt['timeout'])

@@ -27,7 +27,6 @@ def handle_probe(request, cls=None, category=None, details = None):
     what they do. Shown as, effectively, a big directory tree to the
     caller.
     '''
-    print "Probe"
     error_message = "{0} not found in {1}."
     if cls == None:
         l = ['view','query']
@@ -46,7 +45,6 @@ def handle_probe(request, cls=None, category=None, details = None):
             l = [request_handlers[cls][category][details]['doc']]
         else:
             l = [error_message.format(details,request_handlers)]
-    print "HERE", request.GET, request.GET.get("f", "")
     if request.GET.get("f", "") == "html":
         if not details:
             l = ["<li><a href={a}?f=html>{b}</a></li>".format(a=(category or cls or "probe")+"/"+i, b=i) for i in l]
@@ -69,7 +67,8 @@ def list_all_endpoints(request):
     return HttpResponse(json.dumps(endpoints))
 
 default_optional_kwargs = {'fs' : helpers.get_filesystem, 
-                           'db' : helpers.get_database}
+                           'db' : helpers.get_database, 
+                           'cache' : helpers.get_cache}
 
 def handle_request(request, cls, category, name, **kwargs):
     ''' Generic code from handle_view and handle_query '''
@@ -124,7 +123,7 @@ def handle_event(sender, **kwargs):
 
     This is not a view, but it is the moral equivalent. 
     '''
-    print kwargs['msg']
+    #print kwargs['msg']
     msg = json.loads(kwargs['msg'])
     if isinstance(msg,list):
         for i in xrange(0,len(msg)):

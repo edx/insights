@@ -4,6 +4,7 @@ import inspect
 from pymongo import MongoClient
 
 from django.conf import settings
+from django.core.cache import cache
 
 from djanalytics.modulefs import modulefs
 
@@ -46,6 +47,24 @@ def get_filesystem(f):
     pyfs).
     '''
     return modulefs.get_filesystem(namespace(f))
+
+class CacheHelper:
+    def __init__(self, name, cache):
+        self.name = name
+        self.cache = cache
+
+    def set(self, key, value, time):
+        return self.cache.set(self.name+"/"+key, value, time)
+
+    def get(self, key):
+        return self.cache.get(self.name+"/"+key)
+
+def get_cache(f):
+    ''' Given a function, return a cache for that function. This is
+    helpful for things like daily activity, where we don't want to hit
+    Mongo for every event. Cache is not guaranteed. It is likely to be
+    per-thread or per-process. '''
+    return CacheHelper(namespace(f), cache)
 
 def optional_parameter_call(function, optional_kwargs, passed_kwargs, arglist = None): 
     ''' Calls a function with parameters: 

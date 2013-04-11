@@ -18,6 +18,7 @@ from datetime import timedelta
 from decorator import decorator
 
 from django.core.cache import cache
+from django.conf import settings
 
 from celery.task import PeriodicTask, periodic_task
 
@@ -49,8 +50,11 @@ def event_handler(batch=True, per_user=False, per_resource=False,
         return func
     return event_handler_factory
 
+import views # TODO: Clean up imports/where functions live
+
+funcskips = views.default_optional_kwargs.keys()+['params'] # params are additional GET/POST parameters
 ## TODO: Move from settings
-funcskips = ['fs','db','params']
+## TODO: I'm actually confused about how this works/ with the new + notation. 
 funcspecs = [ ([], 'global'),
               (['user'], 'user'),
               (['course'], 'course'),
