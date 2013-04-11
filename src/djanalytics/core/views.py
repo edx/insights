@@ -136,6 +136,9 @@ def handle_event(sender, **kwargs):
     # compatibility between patched and unbatched. 
     if not isinstance(msg, list):
         msg = [msg]
+    
+    from decorators import StreamingEvent
+    #map(StreamingEvent, msg)
 
     for e in event_handlers:
         event_func = e['function']

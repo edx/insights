@@ -26,7 +26,6 @@ class SimpleTest(TestCase):
 
     def test_db_works(self):
         ''' Test that events and queries work. 
-            Side test that things don't die if the message isn't valid. 
         '''
         c = Client()
 
@@ -35,13 +34,13 @@ class SimpleTest(TestCase):
         response = c.get('/query/global/event_count')
         response = c.get('/query/global/event_count')
         self.assertEqual(response.content, "0")
-        response = c.get('/httpevent?msg="Hello"')
+        self.assertEqual(self.send_event(c, {'event':'hello'}).content, "Success")
         response = c.get('/query/global/event_count')
         self.assertEqual(response.content, "1")
-        response = c.get('/httpevent?msg="Hello"')
+        self.assertEqual(self.send_event(c, {'event':'hello'}).content, "Success")
         response = c.get('/query/global/event_count')
         self.assertEqual(response.content, "2")
-        response = c.get('/httpevent?msg="Hello"')
+        self.assertEqual(self.send_event(c, {'event':'hello'}).content, "Success")
         response = c.get('/query/global/event_count')
         self.assertEqual(response.content, "3")
         print "After 3 events: ", response.content
@@ -56,11 +55,13 @@ class SimpleTest(TestCase):
         self.assertEqual(response.content, '"Database clear"')
         response = c.get('/query/user/user_event_count?user=alice')
         self.assertEqual(response.content, "0")
-        response = c.get('/httpevent?msg=%7B%22user%22:%22alice%22%7D')
-        response = c.get('/httpevent?msg=%7B%22user%22:%22eve%22%7D')
-        response = c.get('/httpevent?msg=%7B%22user%22:%22alice%22%7D')
+        self.assertEqual(self.send_event(c, {'user':'alice'}).content, "Success")
+        self.assertEqual(self.send_event(c, {'user':'eve'}).content, "Success")
+        self.assertEqual(self.send_event(c, {'user':'alice'}).content, "Success")
         response = c.get('/query/user/user_event_count?user=alice')
         self.assertEqual(response.content, "2")
+        response = c.get('/query/user/user_event_count?user=eve')
+        self.assertEqual(response.content, "1")
 
     def test_osfs_works(self):
         ''' Make sure there is no file. Create a file. Read it. Erase it. Confirm it is gone. 
