@@ -259,9 +259,15 @@ class StreamingEvent:
 
     Using these would allow modules to continue working even with
     schema changes (or using this framework with LMSes with different
-    event structures).'''
+    event structures).
+
+    It is also immutable. 
+    '''
     def __init__(self, event):
         self.event = event
+
+    def __contains__(self, key):
+        return key in self.event
 
     def __getitem__(self, key):
         return self.event[key]
@@ -272,3 +278,11 @@ class StreamingEvent:
         else: 
             raise AttributeError("StreamingEvent has no attribute "+key)
 
+    def __str__(self):
+        return "Event:"+self.event.__str__()
+
+    def __repr__(self):
+        return "Event:"+self.event.__repr__()
+
+    def keys(self):
+        return self.event.keys()

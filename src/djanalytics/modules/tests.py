@@ -130,3 +130,15 @@ class SimpleTest(TestCase):
                                              'timeout':30}).content, "Success")
         response = json.loads(c.get('/query/key/cache_get?key=key1').content)
         self.assertEqual(response, 'valuea')
+
+    def test_event_property(self):
+        c = Client()
+        self.assertEqual(self.send_event(c, {'event_property_check':True, 
+                                             'user' : 'bob'}).content, "Success")
+        response = json.loads(c.get('/query/key/cache_get?key=last_seen_user').content)
+        self.assertEqual(response, "bob")
+        self.assertEqual(self.send_event(c, {'event_property_check':True, 
+                                             'user' : 'joe'}).content, "Success")
+        response = json.loads(c.get('/query/key/cache_get?key=last_seen_user').content)
+        self.assertEqual(response, "joe")
+        

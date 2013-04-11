@@ -4,7 +4,7 @@
 
 modules_to_import = []
 
-from djanalytics.core.decorators import query, event_handler, view
+from djanalytics.core.decorators import query, event_handler, view, event_property
 
 @view()
 def hello_template():
@@ -131,3 +131,18 @@ def cache_set(cache, events):
     for evt in events:
         if 'event' in evt and evt['event'] == 'cachetest':
             cache.set(evt['key'], evt['value'], evt['timeout'])
+
+@event_property(name="agent")
+def agent(event):
+    if "user" in event:
+        return event["user"]
+    elif "username" in event:
+        return event["username"]
+    else:
+        return None
+
+@event_handler()
+def event_property_check(cache, events):
+    for evt in events:
+        if "event_property_check" in evt:
+            cache.set("last_seen_user", evt.agent, 30)
