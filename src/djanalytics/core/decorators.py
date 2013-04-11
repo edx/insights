@@ -215,3 +215,49 @@ def cron(period, params=None):
             f(fs, db, params)
         return decorator(run,f)
     return factory
+
+event_property_registry = {}
+
+def register_event_property(f, name, description):
+    ''' helper for event_property decorator '''
+    if not name:
+        name = str(f.func_name)
+    if not description:
+        description = str(f.func_doc)
+    event_property_registry[name] = {'function': f, 'name': name, 'doc': description}
+
+def event_property(name=None, description=None):
+    def register(f):
+        register_event_property(f, name, description)
+        return f
+    return register
+
+@event_property()
+def agent(event):
+    ''' '''
+    try:
+        return event['user']
+    except KeyError:
+        pass
+
+    try:
+        return event['username']
+    except KeyError:
+        pass
+
+    return None
+
+class StreamingEvent:
+    ''' Event object. '''
+    def __init__(self, event):
+        self.event = json.loads(event)
+
+    def __getitem__(self, key):
+        return self.event[key]
+
+    def __getattr__(self, key):
+        if key in event_property_registry:
+            return event_property_registry[key]['function'](self)
+        else: 
+            raise AttributeError("StreamingEvent has no attribute "+key)
+

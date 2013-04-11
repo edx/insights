@@ -123,7 +123,7 @@ def handle_event(sender, **kwargs):
 
     This is not a view, but it is the moral equivalent. 
     '''
-    #print kwargs['msg']
+    # If we get a batch of events, we need to load them. 
     msg = json.loads(kwargs['msg'])
     if isinstance(msg,list):
         for i in xrange(0,len(msg)):
@@ -132,15 +132,15 @@ def handle_event(sender, **kwargs):
             except:
                 pass
 
+    # Single event should still be passed as a list for API 
+    # compatibility between patched and unbatched. 
+    if not isinstance(msg, list):
+        msg = [msg]
+
     for e in event_handlers:
         event_func = e['function']
         batch = e['batch']
-        if not isinstance(msg,list): ## Message was a single event
-            try:
-                optional_parameter_call(event_func, default_optional_kwargs, {'events':[msg]})
-            except:
-                handle_event_exception(e['function'])
-        elif not batch: ## Message was a list of events, but handler cannot batch events
+        if not batch: ## Message was a list of events, but handler cannot batch events
             for event in msg:
                 try:
                     optional_parameter_call(event_func, default_optional_kwargs, {'events':[event]})
