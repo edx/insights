@@ -232,21 +232,6 @@ def event_property(name=None, description=None):
         return f
     return register
 
-@event_property()
-def agent(event):
-    ''' '''
-    try:
-        return event['user']
-    except KeyError:
-        pass
-
-    try:
-        return event['username']
-    except KeyError:
-        pass
-
-    return None
-
 class StreamingEvent:
     ''' Event object. Behaves like the normal JSON event dictionary,
     but allows modules to add additional properties. JSON properties

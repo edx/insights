@@ -134,6 +134,8 @@ def cache_set(cache, events):
 
 @event_property(name="agent")
 def agent(event):
+    ''' Returns the user that generated the event. The terminology of
+    'agent' is borrowed from the Tincan agent/verb/object model. '''
     if "user" in event:
         return event["user"]
     elif "username" in event:

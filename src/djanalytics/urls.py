@@ -8,6 +8,8 @@ from django.contrib.auth.decorators import login_required
 
 urlpatterns = patterns('',
     # Examples:
+    url(r'^$', 'djanalytics.core.views.index'),
+    url(r'^event_properties$', 'djanalytics.core.views.event_properties'),
     url('^', include('core.urls')),
     url(r'^httpevent$', 'djeventstream.httphandler.views.http_view'),
     # url(r'^view/([A-Za-z_+]+)/([A-Za-z_+]+)$', 'core.views.handle_view'),

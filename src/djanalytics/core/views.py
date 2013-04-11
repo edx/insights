@@ -22,6 +22,17 @@ import logging
 
 log=logging.getLogger(__name__)
 
+def index(request):
+    return HttpResponseRedirect("static/index.html")
+
+def event_properties(request):
+    ''' Adds a view to advertise defined event properties '''
+    from decorators import event_property_registry
+    items = []
+    for key in event_property_registry.keys():
+        items.append("<di>{name}</di><dd>{doc}</dd>".format(**event_property_registry[key]))
+    return HttpResponse("<dl>"+"\n".join(items)+"</dl>")
+
 def handle_probe(request, cls=None, category=None, details = None):
     ''' Handles probes for what types of modules are available, and
     what they do. Shown as, effectively, a big directory tree to the
