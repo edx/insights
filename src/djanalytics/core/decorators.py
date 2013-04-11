@@ -248,7 +248,18 @@ def agent(event):
     return None
 
 class StreamingEvent:
-    ''' Event object. '''
+    ''' Event object. Behaves like the normal JSON event dictionary,
+    but allows modules to add additional properties. JSON properties
+    are gotten with [] (which should be minimally used), while derived
+    properties with . For example, a tincan module could add: 
+
+    evt.agent
+    evt.verb
+    evt.object
+
+    Using these would allow modules to continue working even with
+    schema changes (or using this framework with LMSes with different
+    event structures).'''
     def __init__(self, event):
         self.event = event
 
