@@ -53,12 +53,7 @@ def event_handler(batch=True, per_user=False, per_resource=False,
 import views # TODO: Clean up imports/where functions live
 
 funcskips = views.default_optional_kwargs.keys()+['params'] # params are additional GET/POST parameters
-## TODO: Move from settings
-## TODO: I'm actually confused about how this works/ with the new + notation. 
-funcspecs = [ ([], 'global'),
-              (['user'], 'user'),
-              (['course'], 'course'),
-            ]
+funcspecs = [ ([], 'global') ] 
 
 def register_handler(cls, category, name, description, f, args):
     ''' Helper function for @view and @query decorators. 
