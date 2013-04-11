@@ -138,7 +138,7 @@ def handle_event(sender, **kwargs):
         msg = [msg]
     
     from decorators import StreamingEvent
-    #map(StreamingEvent, msg)
+    map(StreamingEvent, msg)
 
     for e in event_handlers:
         event_func = e['function']

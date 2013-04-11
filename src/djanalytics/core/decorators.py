@@ -250,7 +250,7 @@ def agent(event):
 class StreamingEvent:
     ''' Event object. '''
     def __init__(self, event):
-        self.event = json.loads(event)
+        self.event = event
 
     def __getitem__(self, key):
         return self.event[key]
