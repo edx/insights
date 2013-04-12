@@ -34,7 +34,7 @@ effort than processing events.
 
 A rough diagram of a single analytics module is: 
 
-![System structure](docs/analytics_module.png)
+![Analytics module](docs/analytics-module.png)
 
 Each module in the analytics framework is an independent Python
 module. It has its own Mongo database, a filesystem abstraction, as
