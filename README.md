@@ -45,16 +45,16 @@ read replicas of other module's databases.
 Note that all of these are optional. A hello world module could be as
 simple as defining a single view:
 
-   @view()
-   def hello_world():
-      return "<html>Hello world!</html>"
+    @view()
+    def hello_world():
+       return "<html>Hello world!</html>"
 
 If you wanted the view to be per-user, you could include a user
 parameter:
 
-   @view()
-   def hello_world(user):
-      return "<html>Hello "+user+"</html>"
+    @view()
+    def hello_world(user):
+       return "<html>Hello "+user+"</html>"
 
 The views and queries are automatically inspect for parameters, and
 the system will do the right thing. If you would like to have a
