@@ -90,7 +90,11 @@ To build on top of the framework, you will need several things:
   should define appropriate (TBD) properties to ornament your events
   with and appropriate queries (TBD) to get data out of your
   read-replica databases, so that modules written by other folks can
-  get at your data in a generic way.
+  get at your data in a generic way. The best way to understand how
+  to do this is to read test cases in modules/testmodule/__init__.py
+
+A very minimal example of how to build applications on top of this
+framework is in the example directory.
 
 Shortcuts/invariants
 --------------------

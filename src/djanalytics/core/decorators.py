@@ -271,3 +271,7 @@ class StreamingEvent:
 
     def keys(self):
         return self.event.keys()
+
+    def raw_json(self):
+        ''' Still considering this API. Not long-term guaranteed. '''
+        return self.event
