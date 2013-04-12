@@ -134,8 +134,12 @@ def handle_event(sender, **kwargs):
 
     This is not a view, but it is the moral equivalent. 
     '''
+    # Handle strings, lists, and dictionaries
+    msg = kwargs['msg']
+    if isinstance(msg,str) or isinstance(msg,unicode):
+        msg = json.loads(msg)
+
     # If we get a batch of events, we need to load them. 
-    msg = json.loads(kwargs['msg'])
     if isinstance(msg,list):
         for i in xrange(0,len(msg)):
             try:

@@ -249,6 +249,8 @@ class StreamingEvent:
     It is also immutable. 
     '''
     def __init__(self, event):
+        if isinstance(event,str) or isinstance(event,unicode):
+            event = json.loads(event)
         self.event = event
 
     def __contains__(self, key):

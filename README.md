@@ -85,6 +85,11 @@ To build on top of the framework, you will need several things:
 * A way of piping these events into the analytics framework. The
   version we wrote for edX is available at:
     https://github.com/edx/djeventstream
+  On a high level, this is a module which sends Django signals of type
+  djeventstream.signals.event_received. The events are JSON
+  dictionaries. The event handler can handle either dictionaries,
+  lists of dictionaries, or JSON-encoded string representations of
+  both.
 * A way of embedding the analytics in your LMS based on the SOA. 
 * Potentially, some set of analytics modules. At the very least, you
   should define appropriate (TBD) properties to ornament your events
@@ -158,6 +163,8 @@ Gotchas
 
 * For events to flow in, a decorator in core.views must be
   called. This must be iported from the main appliction. 
+* Number 1 bug: Python path issues if you have this installed and are
+  developing from source.
 
 Product Backlog
 ---------------
