@@ -153,6 +153,12 @@ wiki has another set of possible metrics. The most useful metrics
 we've found were in competing systems and in publications from the
 research community.
 
+Gotchas
+-------
+
+* For events to flow in, a decorator in core.views must be
+  called. This must be iported from the main appliction. 
+
 Product Backlog
 ---------------
 
@@ -164,6 +170,11 @@ Product Backlog
    extract information from events.
 4. Find ways to handle and drop duplicate events. 
 5. Find ways to handle robust, queued events
+6. The API for genetic event properties (e.g. event.actor) should
+   support namespaces (e.g. event.tincan.actor) and generic dispatch
+   (e.g. one module defines event.tincan.actor for events from Sakai,
+   and another for events from edX, and the right one gets called).
+7. Better error handling and escalation. 
 
 Other useful next steps
 -----------------------
