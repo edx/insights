@@ -84,7 +84,10 @@ def handle_request(request, cls, name, **kwargs):
     categories = dict()
     for category in request_handlers[cls]:
         categories.update(request_handlers[cls][category])
-    handler_dict = categories[name]
+    if name in categories: 
+        handler_dict = categories[name]
+    else:
+        raise Http404(name+"  is not a valid function")
     handler = handler_dict['function']
     if 'args' in handler_dict:
         arglist = handler_dict['arglist']
@@ -103,9 +106,6 @@ def handle_view(request, name, **kwargs):
         Category is where this should be place (per student, per problem, etc.)
         Name is specific 
     '''
-    # if not request.user.is_authenticated():
-    #     return HttpResponseRedirect(reverse('django.contrib.auth.views.login'))
-
     return HttpResponse(handle_request(request, 'view', name, **kwargs))
 
 def handle_query(request, name, **kwargs):
