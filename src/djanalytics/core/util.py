@@ -32,7 +32,13 @@ def import_view_modules():
     return modules
 
 def namespace(f):
-    return str(f.__module__).replace(".","_")
+    ''' Return the namespace of a function f. 
+    If passed a string, assumes it is already a namespace. '''
+    if not isinstance(f,str) and not isinstance(f,unicode):
+        module = f.__module__
+    else:
+        module = f
+    return str(module).replace(".","_")
 
 def get_database(f):
     ''' Given a function in a module, return the Mongo DB associated
@@ -65,6 +71,15 @@ def get_cache(f):
     Mongo for every event. Cache is not guaranteed. It is likely to be
     per-thread or per-process. '''
     return CacheHelper(namespace(f), cache)
+
+def get_djobject(f):
+    ''' Returns an object which provides an abstraction to other
+    queries. This allows us to split the analytics across multiple
+    systems transparently, as well as add/remove things like cache,
+    filesystem, etc.
+    '''
+    from djobject import djobject
+    return djobject()
 
 def optional_parameter_call(function, optional_kwargs, passed_kwargs, arglist = None): 
     ''' Calls a function with parameters: 
@@ -107,4 +122,5 @@ def optional_parameter_call(function, optional_kwargs, passed_kwargs, arglist = 
 
 default_optional_kwargs = {'fs' : get_filesystem, 
                            'db' : get_database, 
-                           'cache' : get_cache}
+                           'cache' : get_cache,
+                           'analytics' : get_djobject}

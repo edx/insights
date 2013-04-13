@@ -13,11 +13,11 @@ from django.conf import settings
 from djeventstream.signals import event_received
 
 from registry import event_handlers, request_handlers
-from helpers import default_optional_kwargs
+from util import default_optional_kwargs
 
 import auth
-import helpers
-from helpers import optional_parameter_call
+import util
+from util import optional_parameter_call
 
 import logging
 

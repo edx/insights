@@ -1,3 +1,3 @@
-import helpers
+import util
 
-modules = helpers.import_view_modules()
+modules = util.import_view_modules()
