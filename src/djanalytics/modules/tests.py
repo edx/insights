@@ -29,38 +29,38 @@ class SimpleTest(TestCase):
         '''
         c = Client()
 
-        response = c.get('/query/global/clear_database')
+        response = c.get('/query/clear_database')
         self.assertEqual(response.content, '"Database clear"')
-        response = c.get('/query/global/event_count')
-        response = c.get('/query/global/event_count')
+        response = c.get('/query/event_count')
+        response = c.get('/query/event_count')
         self.assertEqual(response.content, "0")
         self.assertEqual(self.send_event(c, {'event':'hello'}).content, "Success")
-        response = c.get('/query/global/event_count')
+        response = c.get('/query/event_count')
         self.assertEqual(response.content, "1")
         self.assertEqual(self.send_event(c, {'event':'hello'}).content, "Success")
-        response = c.get('/query/global/event_count')
+        response = c.get('/query/event_count')
         self.assertEqual(response.content, "2")
         self.assertEqual(self.send_event(c, {'event':'hello'}).content, "Success")
-        response = c.get('/query/global/event_count')
+        response = c.get('/query/event_count')
         self.assertEqual(response.content, "3")
         print "After 3 events: ", response.content
-        response = c.get('/query/global/clear_database')
+        response = c.get('/query/clear_database')
         self.assertEqual(response.content, '"Database clear"')
     
     def test_per_user_works(self):
         ''' Test that we can have per-user events and queries
         ''' 
         c = Client()
-        response = c.get('/query/global/clear_database')
+        response = c.get('/query/clear_database')
         self.assertEqual(response.content, '"Database clear"')
-        response = c.get('/query/user/user_event_count?user=alice')
+        response = c.get('/query/user_event_count?user=alice')
         self.assertEqual(response.content, "0")
         self.assertEqual(self.send_event(c, {'user':'alice'}).content, "Success")
         self.assertEqual(self.send_event(c, {'user':'eve'}).content, "Success")
         self.assertEqual(self.send_event(c, {'user':'alice'}).content, "Success")
-        response = c.get('/query/user/user_event_count?user=alice')
+        response = c.get('/query/user_event_count?user=alice')
         self.assertEqual(response.content, "2")
-        response = c.get('/query/user/user_event_count?user=eve')
+        response = c.get('/query/user_event_count?user=eve')
         self.assertEqual(response.content, "1")
 
     def test_osfs_works(self):
@@ -68,17 +68,17 @@ class SimpleTest(TestCase):
         '''
         c = Client()
         self.assertEqual(self.send_event(c, {'event':'pyfstest', 'delete' : 'foo.txt'}).content, "Success")
-        response = c.get('/query/filename/readfile?filename=foo.txt')
+        response = c.get('/query/readfile?filename=foo.txt')
         self.assertEqual(self.send_event(c, {'event':'pyfstest', 'create' : 'foo.txt', 'contents':'hello'}).content, "Success")
-        response = c.get('/query/filename/readfile?filename=foo.txt')
+        response = c.get('/query/readfile?filename=foo.txt')
         self.assertEqual(self.send_event(c, {'event':'pyfstest', 'delete' : 'foo.txt'}).content, "Success")
-        response = c.get('/query/filename/readfile?filename=foo.txt')
+        response = c.get('/query/readfile?filename=foo.txt')
 
     def test_osfs_forgets(self):
         c = Client()
         def verify(d):
             for key in d:
-                r = json.loads(c.get('/query/filename/readfile?filename='+key).content)
+                r = json.loads(c.get('/query/readfile?filename='+key).content)
                 if d[key]:
                     self.assertEqual(r, "hello world!")
                 else: 
@@ -98,7 +98,7 @@ class SimpleTest(TestCase):
 
     def test_render(self):
         c = Client()
-        self.assertEqual(c.get('/view/global/hello_template').content, open('modules/testmodule/templates/hello.html').read())
+        self.assertEqual(c.get('/view/hello_template').content, open('modules/testmodule/templates/hello.html').read())
 
     def test_storage(self):
         from django.contrib.staticfiles import finders
@@ -120,25 +120,25 @@ class SimpleTest(TestCase):
                                              'value': 'value2',
                                              'timeout':30}).content, "Success")
 
-        response = json.loads(c.get('/query/key/cache_get?key=key1').content)
+        response = json.loads(c.get('/query/cache_get?key=key1').content)
         self.assertEqual(response, 'value1')
-        response = json.loads(c.get('/query/key/cache_get?key=key2').content)
+        response = json.loads(c.get('/query/cache_get?key=key2').content)
         self.assertEqual(response, 'value2')
         self.assertEqual(self.send_event(c, {'event':'cachetest', 
                                              'key' : 'key1', 
                                              'value': 'valuea',
                                              'timeout':30}).content, "Success")
-        response = json.loads(c.get('/query/key/cache_get?key=key1').content)
+        response = json.loads(c.get('/query/cache_get?key=key1').content)
         self.assertEqual(response, 'valuea')
 
     def test_event_property(self):
         c = Client()
         self.assertEqual(self.send_event(c, {'event_property_check':True, 
                                              'user' : 'bob'}).content, "Success")
-        response = json.loads(c.get('/query/key/cache_get?key=last_seen_user').content)
+        response = json.loads(c.get('/query/cache_get?key=last_seen_user').content)
         self.assertEqual(response, "bob")
         self.assertEqual(self.send_event(c, {'event_property_check':True, 
                                              'user' : 'joe'}).content, "Success")
-        response = json.loads(c.get('/query/key/cache_get?key=last_seen_user').content)
+        response = json.loads(c.get('/query/cache_get?key=last_seen_user').content)
         self.assertEqual(response, "joe")
         

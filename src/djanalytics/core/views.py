@@ -78,10 +78,13 @@ def list_all_endpoints(request):
                 endpoints.append({'type' : cls, 'category' : category, 'name' : details})
     return HttpResponse(json.dumps(endpoints))
 
-def handle_request(request, cls, category, name, **kwargs):
+def handle_request(request, cls, name, **kwargs):
     ''' Generic code from handle_view and handle_query '''
     args = dict()
-    handler_dict = request_handlers[cls][category][name]
+    categories = dict()
+    for category in request_handlers[cls]:
+        categories.update(request_handlers[cls][category])
+    handler_dict = categories[name]
     handler = handler_dict['function']
     if 'args' in handler_dict:
         arglist = handler_dict['arglist']
@@ -95,7 +98,7 @@ def handle_request(request, cls, category, name, **kwargs):
 
     return optional_parameter_call(handler, default_optional_kwargs, passed_kwargs, arglist)
 
-def handle_view(request, category, name, **kwargs):
+def handle_view(request, name, **kwargs):
     ''' Handles generic view. 
         Category is where this should be place (per student, per problem, etc.)
         Name is specific 
@@ -103,14 +106,14 @@ def handle_view(request, category, name, **kwargs):
     # if not request.user.is_authenticated():
     #     return HttpResponseRedirect(reverse('django.contrib.auth.views.login'))
 
-    return HttpResponse(handle_request(request, 'view', category, name, **kwargs))
+    return HttpResponse(handle_request(request, 'view', name, **kwargs))
 
-def handle_query(request, category, name, **kwargs):
+def handle_query(request, name, **kwargs):
     ''' Handles generic view. 
         Category is where this should be place (per student, per problem, etc.)
         Name is specific 
     '''
-    request_data = handle_request(request, 'query', category, name, **kwargs)
+    request_data = handle_request(request, 'query', name, **kwargs)
     try:
         request_data = json.dumps(request_data)
     except:
