@@ -78,7 +78,7 @@ def list_all_endpoints(request):
                 endpoints.append({'type' : cls, 'category' : category, 'name' : details})
     return HttpResponse(json.dumps(endpoints))
 
-def handle_request(request, cls, name, **kwargs):
+def handle_request(cls, name, **kwargs):
     ''' Generic code from handle_view and handle_query '''
     args = dict()
     categories = dict()
@@ -94,26 +94,25 @@ def handle_request(request, cls, name, **kwargs):
     else:
         arglist = inspect.getargspec(handler).args
 
-    passed_kwargs = {}
-    passed_kwargs.update(request.POST.items())
-    passed_kwargs.update(request.GET.items())
-    passed_kwargs.update({'request' : request})
-
-    return optional_parameter_call(handler, default_optional_kwargs, passed_kwargs, arglist)
+    return optional_parameter_call(handler, default_optional_kwargs, kwargs, arglist)
 
 def handle_view(request, name, **kwargs):
     ''' Handles generic view. 
         Category is where this should be place (per student, per problem, etc.)
         Name is specific 
     '''
-    return HttpResponse(handle_request(request, 'view', name, **kwargs))
+    kwargs.update(request.POST.items())
+    kwargs.update(request.GET.items())
+    return HttpResponse(handle_request('view', name, **kwargs))
 
 def handle_query(request, name, **kwargs):
     ''' Handles generic view. 
         Category is where this should be place (per student, per problem, etc.)
         Name is specific 
     '''
-    request_data = handle_request(request, 'query', name, **kwargs)
+    kwargs.update(request.POST.items())
+    kwargs.update(request.GET.items())
+    request_data = handle_request('query', name, **kwargs)
     try:
         request_data = json.dumps(request_data)
     except:
