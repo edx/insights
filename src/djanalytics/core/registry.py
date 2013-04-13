@@ -8,12 +8,13 @@ request_handlers = {'view':{}, 'query':{}}
 
 import views
 funcskips = views.default_optional_kwargs.keys()+['params'] # params are additional GET/POST parameters
-funcspecs = [ ([], 'global') ] 
 
 def register_handler(cls, category, name, description, f, args):
     ''' Helper function for @view and @query decorators. 
     '''
     log.debug("Register {0} {1} {2} {3}".format(cls, category, name, f))
+    # Figure out where this goes. See if there are parameters, and if not, 
+    # create them by inspecting the function. 
     if args == None:
         args = inspect.getargspec(f).args
     if cls not in ['view', 'query']:
@@ -24,23 +25,14 @@ def register_handler(cls, category, name, description, f, args):
         description = str(f.func_doc)
     if not category:
         url_argspec = [a for a in inspect.getargspec(f).args if a not in funcskips]
-        found_in_funcspec = False
-        for (params, cat) in funcspecs:
-            if url_argspec == params:
-                category = cat
-                found_in_funcspec = True
-        if not found_in_funcspec:
-            category=""
-            for i in xrange(0,len(url_argspec)):
-                spec = url_argspec[i]
-                category += "{0}".format(spec)
-                if i!= len(url_argspec) -1:
-                    category+="+"
-            funcspecs.append((url_argspec, category))
-            log.debug(funcspecs)
-    if not category:
-        pass
-        #raise ValueError('Function arguments do not match recognized type. Explicitly set category in decorator.')
+        category=""
+        for i in xrange(0,len(url_argspec)):
+            spec = url_argspec[i]
+            category += "{0}".format(spec)
+            if i!= len(url_argspec) -1:
+                category+="+"
+        if category == "": # Temporary; we don't want dual representations
+            category = "global"
     if cls not in request_handlers:
         request_handlers[cls] = {}
     if category not in request_handlers[cls]:
