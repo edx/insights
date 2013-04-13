@@ -142,3 +142,9 @@ class SimpleTest(TestCase):
         response = json.loads(c.get('/query/cache_get?key=last_seen_user').content)
         self.assertEqual(response, "joe")
         
+    def test_djobject(self):
+        ''' Test that djobject works correctly for local calls
+        '''
+        c = Client()
+        response = c.get('/view/fake_user_count').content
+        self.assertEqual(response, "<html>Users: 2</html>")

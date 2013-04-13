@@ -6,6 +6,20 @@ modules_to_import = []
 
 from djanalytics.core.decorators import query, event_handler, view, event_property
 
+### BEGIN: In development/API not stable
+# We'll have functions like get_djobject
+#
+# We'll also rename this. 
+import core.djobject
+@query()
+def fake_user_count():
+    return 2
+
+@view()
+def fake_user_count():
+    return "<html>Users: {uc}</html>".format(uc = core.djobject.djobject().query.fake_user_count())
+### END: In development/API not stable
+
 @view()
 def hello_template():
     from djanalytics.core.render import render
