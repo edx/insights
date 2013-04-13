@@ -12,7 +12,8 @@ from django.conf import settings
 
 from djeventstream.signals import event_received
 
-from decorators import event_handlers, request_handlers
+from registry import event_handlers, request_handlers
+from helpers import default_optional_kwargs
 
 import auth
 import helpers
@@ -76,10 +77,6 @@ def list_all_endpoints(request):
             for details in request_handlers[cls][category]:
                 endpoints.append({'type' : cls, 'category' : category, 'name' : details})
     return HttpResponse(json.dumps(endpoints))
-
-default_optional_kwargs = {'fs' : helpers.get_filesystem, 
-                           'db' : helpers.get_database, 
-                           'cache' : helpers.get_cache}
 
 def handle_request(request, cls, category, name, **kwargs):
     ''' Generic code from handle_view and handle_query '''
@@ -152,7 +149,7 @@ def handle_event(sender, **kwargs):
     if not isinstance(msg, list):
         msg = [msg]
     
-    from decorators import StreamingEvent
+    from registry import StreamingEvent
     msg = map(StreamingEvent, msg)
 
     for e in event_handlers:

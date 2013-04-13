@@ -104,3 +104,7 @@ def optional_parameter_call(function, optional_kwargs, passed_kwargs, arglist = 
             raise TypeError("Missing argument needed for handler ", arg)
 
     return function(**args)
+
+default_optional_kwargs = {'fs' : get_filesystem, 
+                           'db' : get_database, 
+                           'cache' : get_cache}
