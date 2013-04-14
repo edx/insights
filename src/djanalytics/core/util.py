@@ -72,14 +72,23 @@ def get_cache(f):
     per-thread or per-process. '''
     return CacheHelper(namespace(f), cache)
 
-def get_djobject(f):
+def get_view(f):
     ''' Returns an object which provides an abstraction to other
     queries. This allows us to split the analytics across multiple
     systems transparently, as well as add/remove things like cache,
     filesystem, etc.
     '''
-    from djobject import djobject
-    return djobject()
+    from djobject import djobject, embed
+    return embed('view')
+
+def get_query(f):
+    ''' Returns an object which provides an abstraction to views. This
+    allows us to split the analytics across multiple systems
+    transparently, as well as add/remove things like cache,
+    filesystem, etc.
+    '''
+    from djobject import djobject, embed
+    return embed('query')
 
 def optional_parameter_call(function, optional_kwargs, passed_kwargs, arglist = None): 
     ''' Calls a function with parameters: 
@@ -123,4 +132,6 @@ def optional_parameter_call(function, optional_kwargs, passed_kwargs, arglist = 
 default_optional_kwargs = {'fs' : get_filesystem, 
                            'db' : get_database, 
                            'cache' : get_cache,
-                           'analytics' : get_djobject}
+#                           'analytics' : get_djobject, 
+                           'view' : get_view, 
+                           'query' : get_query}

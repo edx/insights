@@ -23,9 +23,11 @@ import logging
 
 log=logging.getLogger(__name__)
 
+@auth.auth
 def index(request):
     return HttpResponseRedirect("static/index.html")
 
+@auth.auth
 def event_properties(request):
     ''' Adds a view to advertise defined event properties '''
     from decorators import event_property_registry
@@ -34,6 +36,7 @@ def event_properties(request):
         items.append("<di>{name}</di><dd>{doc}</dd>".format(**event_property_registry[key]))
     return HttpResponse("<dl>"+"\n".join(items)+"</dl>")
 
+@auth.auth
 def handle_probe(request, cls=None, category=None, details = None):
     ''' Handles probes for what types of modules are available, and
     what they do. Shown as, effectively, a big directory tree to the
@@ -96,6 +99,7 @@ def handle_request(cls, name, **kwargs):
 
     return optional_parameter_call(handler, default_optional_kwargs, kwargs, arglist)
 
+@auth.auth
 def handle_view(request, name, **kwargs):
     ''' Handles generic view. 
         Category is where this should be place (per student, per problem, etc.)
@@ -105,6 +109,7 @@ def handle_view(request, name, **kwargs):
     kwargs.update(request.GET.items())
     return HttpResponse(handle_request('view', name, **kwargs))
 
+@auth.auth
 def handle_query(request, name, **kwargs):
     ''' Handles generic view. 
         Category is where this should be place (per student, per problem, etc.)

@@ -39,7 +39,6 @@ class embed():
         if self.baseurl:
             return http_rpc_helper(self.baseembedurl+"/", attr)
         else:
-            print "Untested code path"
             return local_call_helper(self.view_or_query, attr)
 
     ## TODO: Use probe/schema to populate this

@@ -154,8 +154,8 @@ def fake_user_count():
     return 2
 
 @view()
-def fake_user_count(analytics):
+def fake_user_count(query):
     ''' Test of an abstraction used to call queries, abstracting away
     the network, as well as optional parameters like fs, db, etc. 
     '''
-    return "<html>Users: {uc}</html>".format(uc = analytics.query.fake_user_count())
+    return "<html>Users: {uc}</html>".format(uc = query.fake_user_count())
