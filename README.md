@@ -220,3 +220,36 @@ edX currently has many sources of data:
 
 We need to be able to aggregate these into useful information for
 students, instructors, researchers, marketers, etc.
+
+Architecture Expansions
+=======================
+
+This section lists some long-term architectural design goals of the
+system. 
+
+The architecture is explicitly designed to eventually scale to running
+different analytics on different servers. djanalytics.core.djobject
+provides a query object and a view object, which can be used to access
+queries and views in an identical way, regardless of whether or not
+there is a network in between. In the future, we would like to support
+an architecture where we have multiple analytics servers:
+
+![Multipule servers](docs/multiserver.png)
+
+This way, we can have production-grade code on e.g. a critical server
+which keeps student profile/grading/etc. information, while still
+maintaining prototype analytics servers, which may be on-line more
+intermittently. In order to support this, the djobject abstraction
+would have to be extended to support multiple servers. In addition,
+the current way the analytics embed in the courseware would have to
+change substantially.
+
+In addition, the architecture is designed to scale to sharing
+analytics between LMSes. A potential structure for this is: 
+
+![Multipule LMSes](docs/multilms.png)
+
+Here, each instance would have a data layer module. This module would
+translate the data generate by the particular LMS into a common
+representation. Analytics would be built on top of that common
+representation. 
