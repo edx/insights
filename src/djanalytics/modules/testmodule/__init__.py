@@ -7,12 +7,12 @@ modules_to_import = []
 from djanalytics.core.decorators import query, event_handler, view, event_property
 
 @view()
-def hello_template():
+def djt_hello_template():
     from djanalytics.core.render import render
     return render("hello.html", {})
 
 @query()
-def event_count(db):
+def djt_event_count(db):
     ''' Number of hits to event_handler since clear_database
     '''
     collection = db['event_count']
@@ -22,7 +22,7 @@ def event_count(db):
     return 0
 
 @query()
-def user_event_count(db, user):
+def djt_user_event_count(db, user):
     ''' Number of hits by a specific user to event_handler since
     clear_database
     '''
@@ -33,7 +33,7 @@ def user_event_count(db, user):
     return 0
 
 @query()
-def clear_database(db):
+def djt_clear_database(db):
     ''' Clear event counts
     '''
     collection = db['event_count']
@@ -43,7 +43,7 @@ def clear_database(db):
     return "Database clear"
 
 @event_handler()
-def event_count_event(db, events):
+def djt_event_count_event(db, events):
     ''' Count events per user and per system. Used as test case for
     per-user and global queries. '''
     for evt in events:
@@ -64,7 +64,7 @@ def event_count_event(db, events):
     return 0
 
 @event_handler()
-def python_fs_forgets(fs, events):
+def djt_python_fs_forgets(fs, events):
     ''' Test case for checking whether the file system properly forgets. 
     To write a file: 
 
@@ -78,7 +78,7 @@ def python_fs_forgets(fs, events):
 
     The two may be combined into one operation. 
     '''
-    def checkfile(filename, contents):
+    def djt_checkfile(filename, contents):
         if not fs.exists(filename):
             return False
         if fs.open(filename).read == contents:
@@ -99,7 +99,7 @@ def python_fs_forgets(fs, events):
     return 0
 
 @event_handler()
-def python_fs_event(fs, events):
+def djt_python_fs_event(fs, events):
     ''' Handles events which will create and delete files in the
     filesystem. 
     '''
@@ -113,7 +113,7 @@ def python_fs_event(fs, events):
                 fs.remove(evt['delete'])
 
 @query()
-def readfile(fs, filename):
+def djt_readfile(fs, filename):
     ''' Return the contents of a file in the fs. 
     '''
     if fs.exists(filename): 
@@ -122,18 +122,18 @@ def readfile(fs, filename):
     return "File not found"
 
 @query()
-def cache_get(cache, key):
+def djt_cache_get(cache, key):
     result = cache.get(key)
     return result
 
 @event_handler()
-def cache_set(cache, events):
+def djt_cache_set(cache, events):
     for evt in events:
         if 'event' in evt and evt['event'] == 'cachetest':
             cache.set(evt['key'], evt['value'], evt['timeout'])
 
-@event_property(name="agent")
-def agent(event):
+@event_property(name="djt_agent")
+def djt_agent(event):
     ''' Returns the user that generated the event. The terminology of
     'agent' is borrowed from the Tincan agent/verb/object model. '''
     if "user" in event:
@@ -144,18 +144,18 @@ def agent(event):
         return None
 
 @event_handler()
-def event_property_check(cache, events):
+def djt_event_property_check(cache, events):
     for evt in events:
         if "event_property_check" in evt:
-            cache.set("last_seen_user", evt.agent, 30)
+            cache.set("last_seen_user", evt.djt_agent, 30)
 
 @query()
-def fake_user_count():
+def djt_fake_user_count():
     return 2
 
 @view()
-def fake_user_count(query):
+def djt_fake_user_count(query):
     ''' Test of an abstraction used to call queries, abstracting away
     the network, as well as optional parameters like fs, db, etc. 
     '''
-    return "<html>Users: {uc}</html>".format(uc = query.fake_user_count())
+    return "<html>Users: {uc}</html>".format(uc = query.djt_fake_user_count())
