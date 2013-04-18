@@ -8,9 +8,14 @@ import requests
 import urllib
 import json
 
-def http_rpc_helper(baseurl, function, headers = {}):
+schema = None
+
+def http_rpc_helper(baseurl, view_or_query, function, headers = {}):
+    if baseurl: 
+        baseembedurl = baseurl+view_or_query+"/"
+
     def rpc_call(**kwargs):
-        url = urllib.basejoin(baseurl, function)
+        url = urllib.basejoin(baseembedurl, function)
         if kwargs:
             url = url+"?"+urllib.urlencode(kwargs)
         print url
@@ -32,11 +37,17 @@ def local_call_helper(view_or_query, function):
 
 class embed():
     def __init__(self, view_or_query, baseurl = None, headers = {}):
-        self.baseurl = baseurl
-        if baseurl: 
-            self.baseembedurl = baseurl+view_or_query
-        self.view_or_query = view_or_query
-        self.headers = headers
+        global schema
+        self._baseurl = baseurl
+        if not schema:
+            if baseurl:
+                url = baseurl+"schema"
+                schema = json.loads(requests.get(url).content)
+            else: 
+                import djobject.views
+                schema = djobject.views.schema_helper()
+        self._view_or_query = view_or_query
+        self._headers = headers
 
     def __getattr__(self, attr):
         ## Disallow internal. This is necessary both for analytics,
@@ -44,23 +55,23 @@ class embed():
         ## and similar overwritten
         if attr[0] == '_':
             return
-        if self.baseurl:
-            return http_rpc_helper(self.baseembedurl+"/", attr)
+        if self._baseurl:
+            return http_rpc_helper(self._baseurl, self._view_or_query, attr)
         else:
-            return local_call_helper(self.view_or_query, attr)
+            return local_call_helper(self._view_or_query, attr)
 
     ## TODO: Use probe/schema to populate this
     def __dir__(self):
         results = []
-        probeurl = self.baseurl+"probe/"+self.view_or_query
-        classes = requests.get(probeurl, headers = self.headers).content.split('\n')
+        probeurl = self._baseurl+"probe/"+self._view_or_query
+        classes = requests.get(probeurl, headers = self._headers).content.split('\n')
         for param_set in classes:
-            items = requests.get(probeurl+"/"+param_set, headers = self.headers).content.split('\n')
+            items = requests.get(probeurl+"/"+param_set, headers = self._headers).content.split('\n')
             results = results + items
         return results
 
     def __repr__(self):
-        return self.view_or_query+" object host: ["+self.baseurl+"]"
+        return self._view_or_query+" object host: ["+self._baseurl+"]"
                                 
 class djobject():
     def __init__(self, baseurl = None, headers = {}):
@@ -71,4 +82,4 @@ if __name__ == "__main__":
     djo = djobject(baseurl = "http://127.0.0.1:8000/")
     print djo.query.djt_event_count()
     print djo.query.djt_user_event_count(user = "bob")
-    print djo.query.__dir__()
+    #print djo.query.__dir__()

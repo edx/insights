@@ -64,16 +64,20 @@ def event_properties(request):
 #         return HttpResponse("".join(l), mimetype='text/html')
 #     return HttpResponse("\n".join(l), mimetype='text/text')
 
-@auth.auth
-def schema(request):
-    ''' Returns all available views and queries as a JSON
-    object. 
-    '''
+def schema_helper():
     endpoints = []
     for cls in request_handlers:
         for name in request_handlers[cls]:
             rh = request_handlers[cls][name]
             endpoints.append({'category' : rh['category'], 'class': cls, 'name' : name, 'doc' : rh['doc']})
+    return endpoints
+
+@auth.auth
+def schema(request):
+    ''' Returns all available views and queries as a JSON
+    object. 
+    '''
+    endpoints = schema_helper()
     if request.GET.get("f", "") == "html":
         return HttpResponse("\n".join(sorted(["<dt><p><b>{class}/{name}</b> <i>{category}</i></dt><dd>{doc}</dd>".format(**rh) for rh in endpoints])))
     return HttpResponse(json.dumps(endpoints))

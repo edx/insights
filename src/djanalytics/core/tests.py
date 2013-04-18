@@ -81,6 +81,7 @@ class SimpleTest(TestCase):
         auth.settings = temp
     
     def test_urls(self):
+        ''' Simple test to make sure we're not throwing 500s. '''
         from django.test.client import Client
         c = Client()
         urls = ["/event_properties", "/schema"]
