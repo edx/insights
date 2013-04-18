@@ -2,15 +2,23 @@
 etc. as Python objects. 
 
 This is prototype-grade code. 
+
+It will remain ugly into production, however. I'm not sure if there is
+a good way to make this clean, but the ugliness here will save a lot
+of ugliness for the API caller.
 '''
 
 import requests
 import urllib
 import json
+import decorator
 
 schema = None
 
 def find_in_schema(cls = None, name = None):
+    ''' Search for a given class/name combo in schema. Return all
+    matching objects. Either can be passed alone. 
+    ''' 
     items = []
     for item in schema: 
         if cls and item['class'] != cls: 
@@ -21,6 +29,8 @@ def find_in_schema(cls = None, name = None):
     return items
 
 def http_rpc_helper(baseurl, view_or_query, function, headers = {}):
+    ''' Make an RPC call to a remote djanalytics instance
+    '''
     if baseurl: 
         baseembedurl = baseurl+view_or_query+"/"
 
@@ -28,7 +38,6 @@ def http_rpc_helper(baseurl, view_or_query, function, headers = {}):
         url = urllib.basejoin(baseembedurl, function)
         if kwargs:
             url = url+"?"+urllib.urlencode(kwargs)
-        print url
         response = requests.get(url, headers = headers)
         if response.status_code == 200:
             return response.content
@@ -36,10 +45,11 @@ def http_rpc_helper(baseurl, view_or_query, function, headers = {}):
             raise AttributeError(function)
         error = "Error calling {func} {status}".format(func=function, status=response.status_code)
         raise Exception(error)
-    rpc_call.__doc__ = find_in_schema(cls = view_or_query, name = function)[0]['doc']
     return rpc_call
 
 def local_call_helper(view_or_query, function):
+    ''' Make a call (functionally identical to RPC) to the local djanalytics instance
+    '''
     import djanalytics.core.views
     def rpc_call(**kwargs):
         return djanalytics.core.views.handle_request(view_or_query, function, **kwargs)
@@ -68,22 +78,42 @@ class embed():
         ## and similar overwritten
         if attr[0] == '_':
             return
+
+        # Return a caller to the function
         if self._baseurl:
             helper = http_rpc_helper(self._baseurl, self._view_or_query, attr)
         else:
             helper = local_call_helper(self._view_or_query, attr)
+            
+        # Modified the function to have the proper function spec. 
+        # The internals of decorator.FunctionMaker make me sick. 
+        try: 
+            rpcspec = find_in_schema(cls = self._view_or_query, name = attr)[0]
+        except IndexError: 
+            raise AttributeError(function)
+        category = rpcspec['category']
 
-        # Set the docstring
-        helper.__doc__ = find_in_schema(cls = self._view_or_query, name = attr)[0]['doc']
-        helper.__name__ = "remote_"+attr
-        return helper
+        def_params = category.replace('+',',') # Is this still needed? 
+        if def_params:
+            call_params = ",".join(["{p}={p}".format(p=p) for p in category.split('+')])
+        else:
+            call_params = ""
+        funcspec = "{name}({params})".format(name='rpc_'+attr, 
+                                             params=def_params)
+        callspec = "return helper({params})".format(params=call_params)
+        return decorator.FunctionMaker.create(funcspec, 
+                                              callspec, 
+                                              {'helper':helper}, 
+                                              doc = rpcspec['doc'])
 
-    ## TODO: Use probe/schema to populate this
     def __dir__(self):
+        ''' Allow tab completion on function names in ipython, and
+        other sorts of introspection.  '''
         self._refresh_schema()
         return [i["name"] for i in find_in_schema(cls = self._view_or_query)]
 
     def __repr__(self):
+        ''' Pretty representation of the object. '''
         return self._view_or_query+" object host: ["+self._baseurl+"]"
                                 
 class djobject():
