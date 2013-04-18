@@ -36,44 +36,48 @@ def event_properties(request):
         items.append("<di>{name}</di><dd>{doc}</dd>".format(**event_property_registry[key]))
     return HttpResponse("<dl>"+"\n".join(items)+"</dl>")
 
-@auth.auth
-def handle_probe(request, cls=None, name = None):
-    ''' Handles probes for what types of modules are available, and
-    what they do. Shown as, effectively, a big directory tree to the
-    caller.
-    '''
-    error_message = "{0} not found in {1}."
-    if cls == None:
-        l = ['view','query']
-    elif name == None:
-        if cls in request_handlers:
-            l = request_handlers[cls].keys()
-        else:
-            raise Http404(error_message.format(cls,request_handlers))
-    else:
-        if cls in request_handlers and name in request_handlers[cls]:
-            l = [request_handlers[cls][name]['doc']]
-        else:
-            raise Http404(error_message.format(cls+'/'+name,request_handlers))
-    if request.GET.get("f", "") == "html":
-        if not name:
-            l = ["<li><a href={a}?f=html>{b}</a></li>".format(a=(cls or "probe")+"/"+i, b=i) for i in l]
-        else:
-            l = ["<p>".join(l)]
-        return HttpResponse("".join(l), mimetype='text/html')
-    return HttpResponse("\n".join(l), mimetype='text/text')
+# We don't want to have two ways to get at this data
+# @auth.auth
+# def handle_probe(request, cls=None, name = None):
+#     ''' Handles probes for what types of modules are available, and
+#     what they do. Shown as, effectively, a big directory tree to the
+#     caller.
+#     '''
+#     error_message = "{0} not found in {1}."
+#     if cls == None:
+#         l = ['view','query']
+#     elif name == None:
+#         if cls in request_handlers:
+#             l = request_handlers[cls].keys()
+#         else:
+#             raise Http404(error_message.format(cls,request_handlers))
+#     else:
+#         if cls in request_handlers and name in request_handlers[cls]:
+#             l = [request_handlers[cls][name]['doc']]
+#         else:
+#             raise Http404(error_message.format(cls+'/'+name,request_handlers))
+#     if request.GET.get("f", "") == "html":
+#         if not name:
+#             l = ["<li><a href={a}?f=html>{b}</a></li>".format(a=(cls or "probe")+"/"+i, b=i) for i in l]
+#         else:
+#             l = ["<p>".join(l)]
+#         return HttpResponse("".join(l), mimetype='text/html')
+#     return HttpResponse("\n".join(l), mimetype='text/text')
 
 @auth.auth
-def list_all_endpoints(request):
+def schema(request):
     ''' Returns all available views and queries as a JSON
-    object. Alternative to the probe hierarchy. 
-
+    object. 
     '''
     endpoints = []
     for cls in request_handlers:
         for name in request_handlers[cls]:
-            endpoints.append({'type' : request_handlers[cls][name]['category'], 'class': cls, 'name' : name})
+            rh = request_handlers[cls][name]
+            endpoints.append({'category' : rh['category'], 'class': cls, 'name' : name, 'doc' : rh['doc']})
+    if request.GET.get("f", "") == "html":
+        return HttpResponse("\n".join(sorted(["<dt><p><b>{class}/{name}</b> <i>{category}</i></dt><dd>{doc}</dd>".format(**rh) for rh in endpoints])))
     return HttpResponse(json.dumps(endpoints))
+    
 
 def handle_request(cls, name, **kwargs):
     ''' Generic code from handle_view and handle_query '''
