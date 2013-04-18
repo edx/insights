@@ -30,7 +30,7 @@ def index(request):
 @auth.auth
 def event_properties(request):
     ''' Adds a view to advertise defined event properties '''
-    from decorators import event_property_registry
+    from registry import event_property_registry
     items = []
     for key in event_property_registry.keys():
         items.append("<di>{name}</di><dd>{doc}</dd>".format(**event_property_registry[key]))

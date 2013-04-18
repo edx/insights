@@ -22,9 +22,9 @@ from django.conf import settings
 import re
 
 def auth(f):
-    if 'DJA_AUTH' in settings.__dir__():
+    try:
         dja = settings.DJA_AUTH
-    else:
+    except AttributeError:
         dja = {}
 
     for key in dja:
