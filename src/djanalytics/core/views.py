@@ -37,7 +37,7 @@ def event_properties(request):
     return HttpResponse("<dl>"+"\n".join(items)+"</dl>")
 
 @auth.auth
-def handle_probe(request, cls=None, category=None, details = None):
+def handle_probe(request, cls=None, name = None):
     ''' Handles probes for what types of modules are available, and
     what they do. Shown as, effectively, a big directory tree to the
     caller.
@@ -45,24 +45,19 @@ def handle_probe(request, cls=None, category=None, details = None):
     error_message = "{0} not found in {1}."
     if cls == None:
         l = ['view','query']
-    elif category == None:
+    elif name == None:
         if cls in request_handlers:
             l = request_handlers[cls].keys()
         else:
             raise Http404(error_message.format(cls,request_handlers))
-    elif details == None:
-        if cls in request_handlers and category in request_handlers[cls]:
-            l = request_handlers[cls][category].keys()
-        else:
-            raise Http404(error_message.format(category,request_handlers))
     else:
-        if cls in request_handlers and category in request_handlers[cls] and details in request_handlers[cls][category]:
-            l = [request_handlers[cls][category][details]['doc']]
+        if cls in request_handlers and name in request_handlers[cls]:
+            l = [request_handlers[cls][name]['doc']]
         else:
-            raise Http404(error_message.format(details,request_handlers))
+            raise Http404(error_message.format(cls+'/'+name,request_handlers))
     if request.GET.get("f", "") == "html":
-        if not details:
-            l = ["<li><a href={a}?f=html>{b}</a></li>".format(a=(category or cls or "probe")+"/"+i, b=i) for i in l]
+        if not name:
+            l = ["<li><a href={a}?f=html>{b}</a></li>".format(a=(cls or "probe")+"/"+i, b=i) for i in l]
         else:
             l = ["<p>".join(l)]
         return HttpResponse("".join(l), mimetype='text/html')
@@ -76,17 +71,14 @@ def list_all_endpoints(request):
     '''
     endpoints = []
     for cls in request_handlers:
-        for category in request_handlers[cls]:
-            for details in request_handlers[cls][category]:
-                endpoints.append({'type' : cls, 'category' : category, 'name' : details})
+        for name in request_handlers[cls]:
+            endpoints.append({'type' : request_handlers[cls][name]['category'], 'class': cls, 'name' : name})
     return HttpResponse(json.dumps(endpoints))
 
 def handle_request(cls, name, **kwargs):
     ''' Generic code from handle_view and handle_query '''
     args = dict()
-    categories = dict()
-    for category in request_handlers[cls]:
-        categories.update(request_handlers[cls][category])
+    categories = request_handlers[cls]
     if name in categories: 
         handler_dict = categories[name]
     else:

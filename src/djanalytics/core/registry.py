@@ -31,17 +31,13 @@ def register_handler(cls, category, name, description, f, args):
             category += "{0}".format(spec)
             if i!= len(url_argspec) -1:
                 category+="+"
-        if category == "": # Temporary; we don't want dual representations
-            category = "global"
     if cls not in request_handlers:
         request_handlers[cls] = {}
-    if category not in request_handlers[cls]:
-        request_handlers[cls][category]={}
-    if name in request_handlers[cls][category]:
+    if name in request_handlers[cls]:
         # We used to have this be an error.
         # We changed to a warning for the way we handle dummy values.
         log.warn("{0} already in {1}".format(name, category))  # raise KeyError(name+" already in "+category)
-    request_handlers[cls][category][name] = {'function': f, 'name': name, 'doc': description}
+    request_handlers[cls][name] = {'function': f, 'name': name, 'doc': description, 'category' : category}
 
 class StreamingEvent:
     ''' Event object. Behaves like the normal JSON event dictionary,
