@@ -117,15 +117,25 @@ class embed():
         return self._view_or_query+" object host: ["+self._baseurl+"]"
 
 class transform_embed:
-    def __init__(self, transform_policy, embed):
+    def __init__(self, transform_policy, context, embed):
         self._embed = embed
+        self._context = context
         self._transform_policy = transform_policy
     
+    def _transform(self, function, stripped_args):
+        def new_helper(**kwargs):
+            args = kwargs
+            for arg in stripped_args:
+                args[arg] = context[arg]
+            return function(**args)
+        ## TODO: Update argspec
+        return new_helper
+
     def __getattr__(self, attr):
         if attr[0] == '_':
             return
 
-        permission = self._permission(listing)
+        permission = self._permission(attr)
         if permission == 'allow':
             return self._embed.__getattr__(attr)
         elif permission == 'deny':
@@ -143,8 +153,6 @@ class transform_embed:
         listing = self._embed.__dir__()
         filtered = []
         for item in listing:
-            # pseudocode
-            print item
             if self._permission(item) != 'deny':
                 filtered.append(item)
         return filtered
@@ -168,11 +176,12 @@ if __name__ == "__main__":
                        'policy' : { 'total_user_count' : 'allow', 
                                     'user_count' : 'allow',
                                     'dash' : 'deny', 
-                                    'page_count' : { 'user' : '$user'} }
+                                    'page_count' : ['user'] }
                        }
 
     context = { 'user' : 'bob',
                 'course' : '6.002x' }
 
-    secure_view = transform_embed(transform_policy, djo.view)
+    secure_view = transform_embed(transform_policy, context, djo.view)
     print secure_view.__dir__()
+    print secure_view.page_count(course = '6.002x')
