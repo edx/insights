@@ -116,6 +116,42 @@ class embed():
     def __repr__(self):
         ''' Pretty representation of the object. '''
         return self._view_or_query+" object host: ["+self._baseurl+"]"
+
+class transform_embed:
+    def __init__(self, transform_policy, embed):
+        self._embed = embed
+        self._transform_policy = transform_policy
+    
+    def __getattr__(self, attr):
+        if attr[0] == '_':
+            return
+
+        permission = self._permission(listing)
+        if permission == 'allow':
+            return self._embed.__getattr__(attr)
+        elif permission == 'deny':
+            raise AttributeError(attr)
+        elif permission:
+            return self._transform(self._embed.__getattr__(attr), permission)
+        else:
+            raise AttributeError(attr)
+
+    def _permission(self, item):
+        default = self._transform_policy.get("default", "deny")
+        return self._transform_policy['policy'].get(item, default)
+
+    def __dir__(self):
+        listing = self._embed.__dir__()
+        filtered = []
+        for item in listing:
+            # pseudocode
+            print item
+            if self._permission(item) != 'deny':
+                filtered.append(item)
+        return filtered
+
+    def __repr__(self):
+        return "Secure ["+self._transform_policy['name']+"]:"+self._embed.__repr__()
                                 
 class djobject():
     def __init__(self, baseurl = None, headers = {}):
@@ -124,6 +160,20 @@ class djobject():
 
 if __name__ == "__main__":
     djo = djobject(baseurl = "http://127.0.0.1:8000/")
-    print djo.query.djt_event_count()
-    print djo.query.djt_user_event_count(user = "bob")
-    print djo.query.__dir__()
+    # print djo.query.djt_event_count()
+    # print djo.query.djt_user_event_count(user = "bob")
+    # print djo.query.__dir__()
+
+    transform_policy = {'name': 'test',
+                       'default' : 'deny', 
+                       'policy' : { 'total_user_count' : 'allow', 
+                                    'user_count' : 'allow',
+                                    'dash' : 'deny', 
+                                    'page_count' : { 'user' : '$user'} }
+                       }
+
+    context = { 'user' : 'bob',
+                'course' : '6.002x' }
+
+    secure_view = transform_embed(transform_policy, djo.view)
+    print secure_view.__dir__()
