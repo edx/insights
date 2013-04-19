@@ -79,3 +79,12 @@ class SimpleTest(TestCase):
         self.assertEqual(g2(7), 48)
 
         auth.settings = temp
+    
+    def test_urls(self):
+        ''' Simple test to make sure we're not throwing 500s. '''
+        from django.test.client import Client
+        c = Client()
+        urls = ["/event_properties", "/schema"]
+        for url in urls: 
+            response = c.get(url)
+            self.assertEqual(response.status_code, 200)
