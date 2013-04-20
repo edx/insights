@@ -47,23 +47,6 @@ def schema(request):
         return HttpResponse("\n".join(sorted(["<dt><p><b>{class}/{name}</b> <i>{category}</i></dt><dd>{doc}</dd>".format(**rh) for rh in endpoints])))
     return HttpResponse(json.dumps(endpoints))
     
-
-def handle_request(cls, name, **kwargs):
-    ''' Generic code from handle_view and handle_query '''
-    args = dict()
-    categories = request_handlers[cls]
-    if name in categories: 
-        handler_dict = categories[name]
-    else:
-        raise Http404(name+"  is not a valid function")
-    handler = handler_dict['function']
-    if 'args' in handler_dict:
-        arglist = handler_dict['arglist']
-    else:
-        arglist = inspect.getargspec(handler).args
-
-    return optional_parameter_call(handler, default_optional_kwargs, kwargs, arglist)
-
 @auth.auth
 def handle_view(request, name, **kwargs):
     ''' Handles generic view. 
@@ -72,6 +55,7 @@ def handle_view(request, name, **kwargs):
     '''
     kwargs.update(request.POST.items())
     kwargs.update(request.GET.items())
+    from registry import handle_request
     return HttpResponse(handle_request('view', name, **kwargs))
 
 @auth.auth
@@ -82,6 +66,7 @@ def handle_query(request, name, **kwargs):
     '''
     kwargs.update(request.POST.items())
     kwargs.update(request.GET.items())
+    from registry import handle_request
     request_data = handle_request('query', name, **kwargs)
     try:
         request_data = json.dumps(request_data)

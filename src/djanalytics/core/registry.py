@@ -98,3 +98,20 @@ def schema_helper():
             endpoints.append({'category' : rh['category'], 'class': cls, 'name' : name, 'doc' : rh['doc']})
     return endpoints
 
+def handle_request(cls, name, **kwargs):
+    ''' Generic code to handle views and requests '''
+    args = dict()
+    categories = request_handlers[cls]
+    if name in categories: 
+        handler_dict = categories[name]
+    else:
+        raise Http404(name+"  is not a valid function")
+    handler = handler_dict['function']
+    if 'args' in handler_dict:
+        arglist = handler_dict['arglist']
+    else:
+        arglist = inspect.getargspec(handler).args
+
+    from util import optional_parameter_call, default_optional_kwargs
+    return optional_parameter_call(handler, default_optional_kwargs, kwargs, arglist)
+

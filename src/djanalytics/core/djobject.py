@@ -50,9 +50,9 @@ def http_rpc_helper(baseurl, view_or_query, function, headers = {}):
 def local_call_helper(view_or_query, function):
     ''' Make a call (functionally identical to RPC) to the local djanalytics instance
     '''
-    import djanalytics.core.views
+    import djanalytics.core.registry
     def rpc_call(**kwargs):
-        return djanalytics.core.views.handle_request(view_or_query, function, **kwargs)
+        return djanalytics.core.registry.handle_request(view_or_query, function, **kwargs)
     return rpc_call
 
 class embed():
