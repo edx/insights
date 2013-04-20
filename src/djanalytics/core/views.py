@@ -36,34 +36,6 @@ def event_properties(request):
         items.append("<di>{name}</di><dd>{doc}</dd>".format(**event_property_registry[key]))
     return HttpResponse("<dl>"+"\n".join(items)+"</dl>")
 
-# We don't want to have two ways to get at this data
-# @auth.auth
-# def handle_probe(request, cls=None, name = None):
-#     ''' Handles probes for what types of modules are available, and
-#     what they do. Shown as, effectively, a big directory tree to the
-#     caller.
-#     '''
-#     error_message = "{0} not found in {1}."
-#     if cls == None:
-#         l = ['view','query']
-#     elif name == None:
-#         if cls in request_handlers:
-#             l = request_handlers[cls].keys()
-#         else:
-#             raise Http404(error_message.format(cls,request_handlers))
-#     else:
-#         if cls in request_handlers and name in request_handlers[cls]:
-#             l = [request_handlers[cls][name]['doc']]
-#         else:
-#             raise Http404(error_message.format(cls+'/'+name,request_handlers))
-#     if request.GET.get("f", "") == "html":
-#         if not name:
-#             l = ["<li><a href={a}?f=html>{b}</a></li>".format(a=(cls or "probe")+"/"+i, b=i) for i in l]
-#         else:
-#             l = ["<p>".join(l)]
-#         return HttpResponse("".join(l), mimetype='text/html')
-#     return HttpResponse("\n".join(l), mimetype='text/text')
-
 def schema_helper():
     endpoints = []
     for cls in request_handlers:
