@@ -46,34 +46,41 @@ def schema(request):
     if request.GET.get("f", "") == "html":
         return HttpResponse("\n".join(sorted(["<dt><p><b>{class}/{name}</b> <i>{category}</i></dt><dd>{doc}</dd>".format(**rh) for rh in endpoints])))
     return HttpResponse(json.dumps(endpoints))
-    
+
+view_object=None    
 @auth.auth
 def handle_view(request, name, **kwargs):
     ''' Handles generic view. 
         Category is where this should be place (per student, per problem, etc.)
         Name is specific 
     '''
+    global view_object
+    if not False:
+        from djobject import embed
+        view_object = embed('view')
+    if name[0] == '_':
+        raise SuspiciousOperation(name+' called')
     kwargs.update(request.POST.items())
     kwargs.update(request.GET.items())
-    from registry import handle_request
-    return HttpResponse(handle_request('view', name, **kwargs))
+    results = view_object.__getattr__(name)(**kwargs)
+    return HttpResponse(results)
 
-query = None
+query_object = None
 @auth.auth
 def handle_query(request, name, **kwargs):
     ''' Handles generic view. 
         Category is where this should be place (per student, per problem, etc.)
         Name is specific 
     '''
-    global query
+    global query_object
     if not False:
         from djobject import embed
-        query = embed('query')
+        query_object = embed('query')
     if name[0] == '_':
         raise SuspiciousOperation(name+' called')
     kwargs.update(request.POST.items())
     kwargs.update(request.GET.items())
-    results = query.__getattr__(name)(**kwargs)
+    results = query_object.__getattr__(name)(**kwargs)
     try:
         results = json.dumps(results)
     except:
