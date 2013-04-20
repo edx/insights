@@ -36,19 +36,12 @@ def event_properties(request):
         items.append("<di>{name}</di><dd>{doc}</dd>".format(**event_property_registry[key]))
     return HttpResponse("<dl>"+"\n".join(items)+"</dl>")
 
-def schema_helper():
-    endpoints = []
-    for cls in request_handlers:
-        for name in request_handlers[cls]:
-            rh = request_handlers[cls][name]
-            endpoints.append({'category' : rh['category'], 'class': cls, 'name' : name, 'doc' : rh['doc']})
-    return endpoints
-
 @auth.auth
 def schema(request):
     ''' Returns all available views and queries as a JSON
     object. 
     '''
+    from registry import schema_helper
     endpoints = schema_helper()
     if request.GET.get("f", "") == "html":
         return HttpResponse("\n".join(sorted(["<dt><p><b>{class}/{name}</b> <i>{category}</i></dt><dd>{doc}</dd>".format(**rh) for rh in endpoints])))

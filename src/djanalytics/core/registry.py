@@ -89,3 +89,12 @@ def register_event_property(f, name, description):
     if not description:
         description = str(f.func_doc)
     event_property_registry[name] = {'function': f, 'name': name, 'doc': description}
+
+def schema_helper():
+    endpoints = []
+    for cls in request_handlers:
+        for name in request_handlers[cls]:
+            rh = request_handlers[cls][name]
+            endpoints.append({'category' : rh['category'], 'class': cls, 'name' : name, 'doc' : rh['doc']})
+    return endpoints
+

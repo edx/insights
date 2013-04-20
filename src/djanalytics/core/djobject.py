@@ -69,8 +69,8 @@ class embed():
                 url = self._baseurl+"schema"
                 schema = json.loads(requests.get(url).content)
             else: 
-                import djanalytics.core.views
-                schema = djanalytics.core.views.schema_helper()
+                import djanalytics.core.registry
+                schema = djanalytics.core.registry.schema_helper()
 
     def __getattr__(self, attr):
         ## Disallow internal. This is necessary both for analytics,
