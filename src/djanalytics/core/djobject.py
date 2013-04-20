@@ -8,10 +8,11 @@ a good way to make this clean, but the ugliness here will save a lot
 of ugliness for the API caller.
 '''
 
+import decorator
+import inspect
+import json
 import requests
 import urllib
-import json
-import decorator
 
 schema = None
 
@@ -93,6 +94,7 @@ class embed():
             raise AttributeError(function)
         category = rpcspec['category']
 
+        # TODO: Category should be a list, not a string
         def_params = category.replace('+',',') # Is this still needed? 
         if def_params:
             call_params = ",".join(["{p}={p}".format(p=p) for p in category.split('+')])
@@ -128,7 +130,22 @@ class transform_embed:
             for arg in stripped_args:
                 args[arg] = context[arg]
             return function(**args)
-        ## TODO: Update argspec
+        ## TODO: Use common logic with 
+        args = [a for a in inspect.getargspec(function).args if a not in stripped_args]
+        if args:
+            def_params = ",".join(args)
+            call_params = ",".join(["{p}={p}".format(p=p) for p in args])
+        else:
+            def_params = ""
+            call_params = ""
+        funcspec = "{name}({params})".format(name=function.__name__, 
+                                             params=def_params)
+        callspec = "return helper({params})".format(params=call_params)
+
+        return decorator.FunctionMaker.create(funcspec, 
+                                              callspec, 
+                                              {'helper':new_helper},
+                                              doc=function.__doc__)
         return new_helper
 
     def __getattr__(self, attr):
@@ -167,21 +184,24 @@ class djobject():
 
 if __name__ == "__main__":
     djo = djobject(baseurl = "http://127.0.0.1:8000/")
-    # print djo.query.djt_event_count()
-    # print djo.query.djt_user_event_count(user = "bob")
-    # print djo.query.__dir__()
+    if False: # djanalytics
+        print djo.query.djt_event_count()
+        print djo.query.djt_user_event_count(user = "bob")
+        print djo.query.__dir__()
 
-    transform_policy = {'name': 'test',
-                       'default' : 'deny', 
-                       'policy' : { 'total_user_count' : 'allow', 
-                                    'user_count' : 'allow',
-                                    'dash' : 'deny', 
-                                    'page_count' : ['user'] }
-                       }
-
-    context = { 'user' : 'bob',
-                'course' : '6.002x' }
-
-    secure_view = transform_embed(transform_policy, context, djo.view)
-    print secure_view.__dir__()
-    print secure_view.page_count(course = '6.002x')
+    if True: # edxanalytics
+        transform_policy = {'name': 'test',
+                            'default' : 'deny', 
+                            'policy' : { 'total_user_count' : 'allow', 
+                                         'user_count' : 'allow',
+                                         'dash' : 'deny', 
+                                         'page_count' : ['user'] }
+                            }
+        
+        context = { 'user' : 'bob',
+                    'course' : '6.002x' }
+        
+        secure_view = transform_embed(transform_policy, context, djo.view)
+        print secure_view.__dir__()
+        print secure_view.page_count(course = '6.002x')
+        print inspect.getargspec(secure_view.page_count)
