@@ -58,25 +58,27 @@ def handle_view(request, name, **kwargs):
     from registry import handle_request
     return HttpResponse(handle_request('view', name, **kwargs))
 
+query = None
 @auth.auth
 def handle_query(request, name, **kwargs):
     ''' Handles generic view. 
         Category is where this should be place (per student, per problem, etc.)
         Name is specific 
     '''
+    global query
+    if not False:
+        from djobject import embed
+        query = embed('query')
+    if name[0] == '_':
+        raise SuspiciousOperation(name+' called')
     kwargs.update(request.POST.items())
     kwargs.update(request.GET.items())
-    from registry import handle_request
-    request_data = handle_request('query', name, **kwargs)
+    results = query.__getattr__(name)(**kwargs)
     try:
-        request_data = json.dumps(request_data)
+        results = json.dumps(results)
     except:
         pass
-
-    try:
-        return HttpResponse(request_data)
-    except:
-        return request_data
+    return HttpResponse(results)
 
 @receiver(event_received)
 def handle_event(sender, **kwargs):
