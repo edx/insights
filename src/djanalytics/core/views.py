@@ -55,7 +55,7 @@ def handle_view(request, name, **kwargs):
         Name is specific 
     '''
     global view_object
-    if not False:
+    if view_object is None: 
         from djobject import embed
         view_object = embed('view')
     if name[0] == '_':
@@ -73,7 +73,7 @@ def handle_query(request, name, **kwargs):
         Name is specific 
     '''
     global query_object
-    if not False:
+    if query_object is None: 
         from djobject import embed
         query_object = embed('query')
     if name[0] == '_':
