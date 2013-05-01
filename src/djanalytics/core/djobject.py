@@ -90,7 +90,7 @@ class embed():
         try: 
             rpcspec = find_in_schema(cls = self._view_or_query, name = attr)[0]
         except IndexError: 
-            raise AttributeError(function)
+            raise AttributeError(attr)
         category = rpcspec['category']
 
         def_params = category.replace('+',',') # Is this still needed? 
