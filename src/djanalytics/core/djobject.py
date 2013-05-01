@@ -90,6 +90,7 @@ class embed():
         try: 
             rpcspec = find_in_schema(cls = self._view_or_query, name = attr)[0]
         except IndexError: 
+            print schema
             raise AttributeError(attr)
         category = rpcspec['category']
 
