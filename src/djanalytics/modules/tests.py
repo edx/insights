@@ -97,14 +97,17 @@ class SimpleTest(TestCase):
         verify({"foo1.txt":False, "foo2.txt":False, "foo3.txt":False, "foo4.txt":False})
 
     def test_render(self):
+        ''' This test '''
         c = Client()
-        self.assertEqual(c.get('/view/djt_hello_template').content, open('modules/testmodule/templates/hello.html').read())
+        self.assertEqual(c.get('/view/djt_hello_template').status_code, 200)
+        self.assertEqual(c.get('/view/djt_hello_template').content, "<html>Hello World</html>\n")
 
     def test_storage(self):
         from django.contrib.staticfiles import finders
         import os.path
 
         absolute_path = finders.find('djmodules/testmodule/hello.html')
+        print "ABS PATH", absolute_path
         assert os.path.exists(absolute_path)
 
     def test_cache(self):
