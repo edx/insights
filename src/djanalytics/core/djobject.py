@@ -185,12 +185,12 @@ class djobject():
 
 if __name__ == "__main__":
     djo = djobject(baseurl = "http://127.0.0.1:8000/")
-    if False: # djanalytics
+    if True: # Internal test -- from djanalytics
         print djo.query.djt_event_count()
         print djo.query.djt_user_event_count(user = "bob")
         print djo.query.__dir__()
 
-    if True: # edxanalytics
+    if False: # External test -- from edxanalytics
         transform_policy = {'name': 'test',
                             'default' : 'deny', 
                             'policy' : { 'total_user_count' : 'allow', 
