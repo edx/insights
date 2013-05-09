@@ -8,10 +8,11 @@ a good way to make this clean, but the ugliness here will save a lot
 of ugliness for the API caller.
 '''
 
+import decorator
+import inspect
+import json
 import requests
 import urllib
-import json
-import decorator
 
 schema = None
 
@@ -94,6 +95,7 @@ class embed():
             raise AttributeError(attr)
         category = rpcspec['category']
 
+        # TODO: Category should be a list, not a string
         def_params = category.replace('+',',') # Is this still needed? 
         if def_params:
             call_params = ",".join(["{p}={p}".format(p=p) for p in category.split('+')])
@@ -116,6 +118,65 @@ class embed():
     def __repr__(self):
         ''' Pretty representation of the object. '''
         return self._view_or_query+" object host: ["+self._baseurl+"]"
+
+class transform_embed:
+    def __init__(self, transform_policy, context, embed):
+        self._embed = embed
+        self._context = context
+        self._transform_policy = transform_policy
+    
+    def _transform(self, function, stripped_args):
+        def new_helper(**kwargs):
+            args = kwargs
+            for arg in stripped_args:
+                args[arg] = context[arg]
+            return function(**args)
+        ## TODO: Use common logic with 
+        args = [a for a in inspect.getargspec(function).args if a not in stripped_args]
+        if args:
+            def_params = ",".join(args)
+            call_params = ",".join(["{p}={p}".format(p=p) for p in args])
+        else:
+            def_params = ""
+            call_params = ""
+        funcspec = "{name}({params})".format(name=function.__name__, 
+                                             params=def_params)
+        callspec = "return helper({params})".format(params=call_params)
+
+        return decorator.FunctionMaker.create(funcspec, 
+                                              callspec, 
+                                              {'helper':new_helper},
+                                              doc=function.__doc__)
+        return new_helper
+
+    def __getattr__(self, attr):
+        if attr[0] == '_':
+            return
+
+        permission = self._permission(attr)
+        if permission == 'allow':
+            return self._embed.__getattr__(attr)
+        elif permission == 'deny':
+            raise AttributeError(attr)
+        elif permission:
+            return self._transform(self._embed.__getattr__(attr), permission)
+        else:
+            raise AttributeError(attr)
+
+    def _permission(self, item):
+        default = self._transform_policy.get("default", "deny")
+        return self._transform_policy['policy'].get(item, default)
+
+    def __dir__(self):
+        listing = self._embed.__dir__()
+        filtered = []
+        for item in listing:
+            if self._permission(item) != 'deny':
+                filtered.append(item)
+        return filtered
+
+    def __repr__(self):
+        return "Secure ["+self._transform_policy['name']+"]:"+self._embed.__repr__()
                                 
 class djobject():
     def __init__(self, baseurl = None, headers = {}):
@@ -124,6 +185,24 @@ class djobject():
 
 if __name__ == "__main__":
     djo = djobject(baseurl = "http://127.0.0.1:8000/")
-    print djo.query.djt_event_count()
-    print djo.query.djt_user_event_count(user = "bob")
-    print djo.query.__dir__()
+    if True: # Internal test -- from djanalytics
+        print djo.query.djt_event_count()
+        print djo.query.djt_user_event_count(user = "bob")
+        print djo.query.__dir__()
+
+    if False: # External test -- from edxanalytics
+        transform_policy = {'name': 'test',
+                            'default' : 'deny', 
+                            'policy' : { 'total_user_count' : 'allow', 
+                                         'user_count' : 'allow',
+                                         'dash' : 'deny', 
+                                         'page_count' : ['user'] }
+                            }
+        
+        context = { 'user' : 'bob',
+                    'course' : '6.002x' }
+        
+        secure_view = transform_embed(transform_policy, context, djo.view)
+        print secure_view.__dir__()
+        print secure_view.page_count(course = '6.002x')
+        print inspect.getargspec(secure_view.page_count)
