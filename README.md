@@ -101,6 +101,26 @@ To build on top of the framework, you will need several things:
 A very minimal example of how to build applications on top of this
 framework is in the example directory.
 
+Using Analytics Externally (djobject)
+-------------------------------------
+
+djobject.py has an abstraction for accessing analytics both locally
+(function calls) and remotely (RPC). This is a standard Python
+object. All of the standard Python introspection of the methods in
+this object works. 
+
+When using analytics remotely, there are issues of security and
+permissions. Specifically, a sysadmin might want to see an analytic
+per-course/per-student. An instructor of that course might want to
+have that fixed to the course (so it transforms into a per-student
+analytic). djobject's transform_embed defines a DSL for restricting
+permissions to analytics, as well as for fixing specific commandline
+parameters. 
+
+There is an issue of network reliability and timeouts when access
+remotely. This is planned to be handled by being able to set timeouts
+on djembed objects.
+
 Shortcuts/invariants
 --------------------
 

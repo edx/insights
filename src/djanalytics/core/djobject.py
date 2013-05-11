@@ -3,9 +3,9 @@ etc. as Python objects.
 
 This is prototype-grade code. 
 
-It will remain ugly into production, however. I'm not sure if there is
-a good way to make this clean, but the ugliness here will save a lot
-of ugliness for the API caller.
+It is very ugly. It will be cleaned up, but still slightly ugly,
+however. I'm not sure if there is a good way to make this clean, but
+the ugliness here will save a lot of ugliness for the API caller.
 '''
 
 import decorator
@@ -29,7 +29,7 @@ def find_in_schema(cls = None, name = None):
         items.append(item)
     return items
 
-def http_rpc_helper(baseurl, view_or_query, function, headers = {}):
+def http_rpc_helper(baseurl, view_or_query, function, headers = {}, timeout = None):
     ''' Make an RPC call to a remote djanalytics instance
     '''
     if baseurl: 
@@ -39,7 +39,12 @@ def http_rpc_helper(baseurl, view_or_query, function, headers = {}):
         url = urllib.basejoin(baseembedurl, function)
         if kwargs:
             url = url+"?"+urllib.urlencode(kwargs)
-        response = requests.get(url, headers = headers)
+        kwargs = {}
+        if headers: 
+            kwargs['headers'] = headers
+        if timeout: 
+            kwargs['timeout'] = float(timeout)
+        response = requests.get(url, **kwargs)
         if response.status_code == 200:
             return response.content
         if response.status_code == 404:
@@ -56,12 +61,62 @@ def local_call_helper(view_or_query, function):
         return djanalytics.core.registry.handle_request(view_or_query, function, **kwargs)
     return rpc_call
 
+class multi_embed():
+    ''' Lets you merge multiple embeds into one. E.g. talk to 5
+    analytics servers.
+
+    This code is scaffolding meant to define the interface. It is
+    untested.
+
+    '''
+    def __init__(self, embeds):
+        self._embeds = embeds
+    def __getattr__(self, attr):
+        for x in self._embeds:
+            try:
+                attr = x.__getattr(attr)
+            except AttributeError:
+                pass
+            if attr:
+                return attr
+        raise AttributeError(attr)
+                
+    def _refresh_schema(self):
+        for x in self._embeds:
+            x._refresh_schema
+    def __dir__(self):
+        return list(sum(map(lambda x:set(x.__dir__()), self._embeds)))
+    def __repr__(self):
+        return "/".join(map(lambda x:repr(x), self._embeds))
+
 class embed():
     def __init__(self, view_or_query, baseurl = None, headers = {}):
         self._baseurl = baseurl
         self._view_or_query = view_or_query
         self._headers = headers
         self._refresh_schema()
+        self._timeout = [ None ]
+        class MetaEmbed(object):
+            ''' Allows operations on the view or query through view.meta. 
+            E.g. view.meta.set_timeout(t)
+            
+            This code is scaffolding meant to define the interface. It
+            is untested.
+            '''
+            def __init__(self, embed):
+                self._embed = embed
+            def set_timout(self, t):
+                ''' Set the timeout for object if it is going over a
+                network. Timeouts are kept on a stack; when you're
+                done, call unset_timeout, to return the timeout to
+                where it was. '''
+                self._embed._timeout.append(t)
+            def unset_timeout(self):
+                ''' Unset the timeout for object. See set_timeout for
+                details.  '''
+                self._embed._timeout.pop()
+
+        self.meta = MetaEmbed(self)
 
     def _refresh_schema(self):
         global schema
@@ -82,7 +137,8 @@ class embed():
 
         # Return a caller to the function
         if self._baseurl:
-            helper = http_rpc_helper(self._baseurl, self._view_or_query, attr)
+            helper = http_rpc_helper(self._baseurl, self._view_or_query, attr, 
+                                     headers = self._headers, timeout = self._timeout[-1])
         else:
             helper = local_call_helper(self._view_or_query, attr)
             
@@ -120,6 +176,12 @@ class embed():
         return self._view_or_query+" object host: ["+self._baseurl+"]"
 
 class transform_embed:
+    '''
+    Defines a DSL for restricting permissions to analytics and for
+    locking down specific parameters. 
+
+    TODO: This is prototype-grade code. It needs a cleanup pass. 
+    '''
     def __init__(self, transform_policy, context, embed):
         self._embed = embed
         self._context = context
