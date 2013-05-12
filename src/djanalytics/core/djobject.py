@@ -85,7 +85,7 @@ class multi_embed():
         for x in self._embeds:
             x._refresh_schema
     def __dir__(self):
-        return list(sum(map(lambda x:set(x.__dir__()), self._embeds)))
+        return sorted(list(set(sum(child_dirs, []))))
     def __repr__(self):
         return "/".join(map(lambda x:repr(x), self._embeds))
 
@@ -243,19 +243,10 @@ class transform_embed(object):
     def __repr__(self):
         return "Secure ["+self._transform_policy['name']+"]:"+self._embed.__repr__()
 
-def get_embed(t):
-    ''' TODO: This doesn't belong in this file. This file should not
-    depend on Django.
-    ''' 
-    from django.conf import settings
-    embed_config = None
-    try:
-        embed_config = settings.DJOBJECT_CONFIG
-    except AttributeError:
-        pass
-    if embed_config: # untested code path
+def get_embed(t, config = None):
+    if config: # untested code path
         embeds = []
-        for embed_spec in embed_config:
+        for embed_spec in config:
             embeds.append(single_embed(t, **embed_spec))
         return multi_embed(embeds)
     return single_embed(t)

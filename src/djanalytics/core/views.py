@@ -56,8 +56,8 @@ def handle_view(request, name, **kwargs):
     '''
     global view_object
     if view_object is None: 
-        from djobject import get_embed
-        view_object = get_embed('view')
+        from util import get_view
+        view_object = get_view(None)
     if name[0] == '_':
         raise SuspiciousOperation(name+' called')
     kwargs.update(request.POST.items())
@@ -74,8 +74,8 @@ def handle_query(request, name, **kwargs):
     '''
     global query_object
     if query_object is None: 
-        from djobject import get_embed
-        query_object = get_embed('query')
+        from util import get_query
+        view_object = get_query(None)
     if name[0] == '_':
         raise SuspiciousOperation(name+' called')
     kwargs.update(request.POST.items())

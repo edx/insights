@@ -79,7 +79,14 @@ def get_view(f):
     filesystem, etc.
     '''
     from djobject import djobject, get_embed
-    return get_embed('view')
+    from django.conf import settings
+    embed_config = None
+    try:
+        embed_config = settings.DJOBJECT_CONFIG
+    except AttributeError:
+        pass
+
+    return get_embed('view', config = embed_config)
 
 def get_query(f):
     ''' Returns an object which provides an abstraction to views. This
@@ -88,7 +95,14 @@ def get_query(f):
     filesystem, etc.
     '''
     from djobject import djobject, get_embed
-    return get_embed('query')
+    from django.conf import settings
+    embed_config = None
+    try:
+        embed_config = settings.DJOBJECT_CONFIG
+    except AttributeError:
+        pass
+
+    return get_embed('query', config = embed_config)
 
 def optional_parameter_call(function, optional_kwargs, passed_kwargs, arglist = None): 
     ''' Calls a function with parameters: 
