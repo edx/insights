@@ -14,21 +14,6 @@ import json
 import requests
 import urllib
 
-schema = None
-
-def find_in_schema(cls = None, name = None):
-    ''' Search for a given class/name combo in schema. Return all
-    matching objects. Either can be passed alone. 
-    ''' 
-    items = []
-    for item in schema: 
-        if cls and item['class'] != cls: 
-            continue
-        if name and item['name'] != name: 
-            continue
-        items.append(item)
-    return items
-
 def http_rpc_helper(baseurl, view_or_query, function, headers = {}, timeout = None):
     ''' Make an RPC call to a remote djanalytics instance
     '''
@@ -85,12 +70,15 @@ class multi_embed():
         for x in self._embeds:
             x._refresh_schema
     def __dir__(self):
+        child_dirs = [x.__dir__() for x in self._embeds]
+        print child_dirs
         return sorted(list(set(sum(child_dirs, []))))
     def __repr__(self):
         return "/".join(map(lambda x:repr(x), self._embeds))
 
 class single_embed(object):
     def __init__(self, view_or_query, baseurl = None, headers = {}):
+        self._schema = None
         self._baseurl = baseurl
         self._view_or_query = view_or_query
         self._headers = headers
@@ -118,15 +106,27 @@ class single_embed(object):
 
         self.meta = MetaEmbed(self)
 
+        def _find_in_schema(cls = None, name = None):
+            ''' Search for a given class/name combo in schema. Return all
+            matching objects. Either can be passed alone. 
+            ''' 
+            items = []
+            for item in schema: 
+                if cls and item['class'] != cls: 
+                    continue
+                if name and item['name'] != name: 
+                    continue
+                items.append(item)
+            return items
+
     def _refresh_schema(self):
-        global schema
-        if not schema:
+        if not self._schema:
             if self._baseurl:
                 url = self._baseurl+"schema"
-                schema = json.loads(requests.get(url).content)
+                self._schema = json.loads(requests.get(url).content)
             else: 
                 import djanalytics.core.registry
-                schema = djanalytics.core.registry.schema_helper()
+                self._schema = djanalytics.core.registry.schema_helper()
 
     def __getattr__(self, attr):
         ## Disallow internal. This is necessary both for analytics,
@@ -145,7 +145,7 @@ class single_embed(object):
         # Modified the function to have the proper function spec. 
         # The internals of decorator.FunctionMaker make me sick. 
         try: 
-            rpcspec = find_in_schema(cls = self._view_or_query, name = attr)[0]
+            rpcspec = self._find_in_schema(cls = self._view_or_query, name = attr)[0]
         except IndexError: 
             print schema
             raise AttributeError(attr)
@@ -169,7 +169,7 @@ class single_embed(object):
         ''' Allow tab completion on function names in ipython, and
         other sorts of introspection.  '''
         self._refresh_schema()
-        return [i["name"] for i in find_in_schema(cls = self._view_or_query)]
+        return [i["name"] for i in self._find_in_schema(cls = self._view_or_query)]
 
     def __repr__(self):
         ''' Pretty representation of the object. '''
