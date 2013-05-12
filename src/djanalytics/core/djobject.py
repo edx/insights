@@ -57,15 +57,21 @@ class multi_embed():
     def __init__(self, embeds):
         self._embeds = embeds
     def __getattr__(self, attr):
+        print ">>>>>>>>>>>>> Getting", attr
         for x in self._embeds:
+            f = None
             try:
-                attr = x.__getattr__(attr)
+                f = x.__getattr__(attr)
             except AttributeError:
                 pass
-            if attr:
-                return attr
+            if f:
+                print
+                print ">>>>>>>>>>>>>>>>>>>", f
+                print
+                return f
+        print "Not found"
         raise AttributeError(attr)
-                
+
     def _refresh_schema(self):
         for x in self._embeds:
             x._refresh_schema
@@ -106,18 +112,18 @@ class single_embed(object):
 
         self.meta = MetaEmbed(self)
 
-        def _find_in_schema(cls = None, name = None):
-            ''' Search for a given class/name combo in schema. Return all
-            matching objects. Either can be passed alone. 
-            ''' 
-            items = []
-            for item in schema: 
-                if cls and item['class'] != cls: 
-                    continue
-                if name and item['name'] != name: 
-                    continue
-                items.append(item)
-            return items
+    def _find_in_schema(self, cls = None, name = None):
+        ''' Search for a given class/name combo in schema. Return all
+        matching objects. Either can be passed alone. 
+        ''' 
+        items = []
+        for item in self._schema: 
+            if cls and item['class'] != cls: 
+                continue
+            if name and item['name'] != name: 
+                continue
+            items.append(item)
+        return items
 
     def _refresh_schema(self):
         if not self._schema:
@@ -147,7 +153,6 @@ class single_embed(object):
         try: 
             rpcspec = self._find_in_schema(cls = self._view_or_query, name = attr)[0]
         except IndexError: 
-            print schema
             raise AttributeError(attr)
         category = rpcspec['category']
 
@@ -248,7 +253,9 @@ def get_embed(t, config = None):
         embeds = []
         for embed_spec in config:
             embeds.append(single_embed(t, **embed_spec))
+        print "Multi"
         return multi_embed(embeds)
+    print "Single"
     return single_embed(t)
                                 
 class djobject():
