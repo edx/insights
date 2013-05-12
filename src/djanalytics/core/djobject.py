@@ -249,13 +249,13 @@ class transform_embed(object):
         return "Secure ["+self._transform_policy['name']+"]:"+self._embed.__repr__()
 
 def get_embed(t, config = None):
-    if config: # untested code path
+    if config: 
         embeds = []
         for embed_spec in config:
+            print embed_spec
             embeds.append(single_embed(t, **embed_spec))
         print "Multi"
         return multi_embed(embeds)
-    print "Single"
     return single_embed(t)
                                 
 class djobject():

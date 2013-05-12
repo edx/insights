@@ -75,7 +75,7 @@ def handle_query(request, name, **kwargs):
     global query_object
     if query_object is None: 
         from util import get_query
-        view_object = get_query(None)
+        query_object = get_query(None)
     if name[0] == '_':
         raise SuspiciousOperation(name+' called')
     kwargs.update(request.POST.items())
