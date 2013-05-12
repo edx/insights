@@ -78,8 +78,8 @@ def get_view(f):
     systems transparently, as well as add/remove things like cache,
     filesystem, etc.
     '''
-    from djobject import djobject, embed
-    return embed('view')
+    from djobject import djobject, get_embed
+    return get_embed('view')
 
 def get_query(f):
     ''' Returns an object which provides an abstraction to views. This
@@ -87,8 +87,8 @@ def get_query(f):
     transparently, as well as add/remove things like cache,
     filesystem, etc.
     '''
-    from djobject import djobject, embed
-    return embed('query')
+    from djobject import djobject, get_embed
+    return get_embed('query')
 
 def optional_parameter_call(function, optional_kwargs, passed_kwargs, arglist = None): 
     ''' Calls a function with parameters: 

@@ -89,7 +89,7 @@ class multi_embed():
     def __repr__(self):
         return "/".join(map(lambda x:repr(x), self._embeds))
 
-class embed():
+class single_embed(object):
     def __init__(self, view_or_query, baseurl = None, headers = {}):
         self._baseurl = baseurl
         self._view_or_query = view_or_query
@@ -175,7 +175,7 @@ class embed():
         ''' Pretty representation of the object. '''
         return self._view_or_query+" object host: ["+self._baseurl+"]"
 
-class transform_embed:
+class transform_embed(object):
     '''
     Defines a DSL for restricting permissions to analytics and for
     locking down specific parameters. 
@@ -239,11 +239,27 @@ class transform_embed:
 
     def __repr__(self):
         return "Secure ["+self._transform_policy['name']+"]:"+self._embed.__repr__()
+
+def get_embed(t):
+    ''' TODO: This doesn't belong in this file. This file should not
+    depend on Django.
+    ''' 
+    from django.conf import settings
+    embed_config = None
+    try:
+        embed_config = settings.DJOBJECT_CONFIG
+    except AttributeError:
+        pass
+    if embed_config: # untested code path
+        for embed_spec in embed_config:
+            single_embeds(t, embed_spec)
+        return multi_embed(embeds)
+    return single_embed(t)
                                 
 class djobject():
     def __init__(self, baseurl = None, headers = {}):
-        self.view = embed('view', baseurl = baseurl, headers = headers)
-        self.query = embed('query', baseurl = baseurl, headers = headers)
+        self.view = single_embed('view', baseurl = baseurl, headers = headers)
+        self.query = single_embed('query', baseurl = baseurl, headers = headers)
 
 if __name__ == "__main__":
     djo = djobject(baseurl = "http://127.0.0.1:8000/")
