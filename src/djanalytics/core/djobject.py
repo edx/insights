@@ -74,7 +74,7 @@ class multi_embed():
     def __getattr__(self, attr):
         for x in self._embeds:
             try:
-                attr = x.__getattr(attr)
+                attr = x.__getattr__(attr)
             except AttributeError:
                 pass
             if attr:
@@ -173,7 +173,10 @@ class single_embed(object):
 
     def __repr__(self):
         ''' Pretty representation of the object. '''
-        return self._view_or_query+" object host: ["+self._baseurl+"]"
+        if self._baseurl:
+            return self._view_or_query+" object host: ["+self._baseurl+"]"
+        else:
+            return self._view_or_query+"/local"
 
 class transform_embed(object):
     '''
@@ -251,8 +254,9 @@ def get_embed(t):
     except AttributeError:
         pass
     if embed_config: # untested code path
+        embeds = []
         for embed_spec in embed_config:
-            single_embeds(t, embed_spec)
+            embeds.append(single_embed(t, **embed_spec))
         return multi_embed(embeds)
     return single_embed(t)
                                 

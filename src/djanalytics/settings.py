@@ -4,6 +4,8 @@
 
 import datetime
 
+DJOBJECT_CONFIG = [{}, {'baseurl' : 'http://127.0.0.1:9022/'}]
+
 DJ_REQUIRED_APPS = ( 'djeventstream.httphandler',
     'djcelery',
     'south',
