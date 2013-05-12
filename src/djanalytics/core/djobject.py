@@ -254,7 +254,6 @@ def get_embed(t, config = None):
         for embed_spec in config:
             print embed_spec
             embeds.append(single_embed(t, **embed_spec))
-        print "Multi"
         return multi_embed(embeds)
     return single_embed(t)
                                 

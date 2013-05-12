@@ -81,11 +81,10 @@ def handle_query(request, name, **kwargs):
     kwargs.update(request.POST.items())
     kwargs.update(request.GET.items())
     results = query_object.__getattr__(name)(**kwargs)
-    try:
-        results = json.dumps(results)
-    except:
-        pass
-    return HttpResponse(results)
+    if isinstance(results, basestring):
+        return HttpResponse(results)
+    else:
+        return HttpResponse(json.dumps(results))
 
 @receiver(event_received)
 def handle_event(sender, **kwargs):
