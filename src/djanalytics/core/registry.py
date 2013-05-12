@@ -6,8 +6,8 @@ log=logging.getLogger(__name__)
 event_handlers = []
 request_handlers = {'view':{}, 'query':{}}
 
-import djanalytics.core.views
-funcskips = djanalytics.core.views.default_optional_kwargs.keys()+['params'] # params are additional GET/POST parameters
+from djanalytics.core.views import default_optional_kwargs
+funcskips = default_optional_kwargs.keys()+['params'] # params are additional GET/POST parameters
 
 def register_handler(cls, category, name, description, f, args):
     ''' Helper function for @view and @query decorators. 
