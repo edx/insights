@@ -1,4 +1,4 @@
-''' Decorators for analytics modules. 
+''' Decorators for analytics modules.
 
 @view defines a user-visible view
 @query defines a machine-readable SOA
@@ -51,11 +51,11 @@ def event_handler(batch=True, per_user=False, per_resource=False,
 
 def view(category = None, name = None, description = None, args = None):
     ''' This decorator is appended to a view in an analytics module. A
-    view will return HTML which will be shown to the user. 
+    view will return HTML which will be shown to the user.
 
     category: Optional specification for type (global, per-user,
       etc.). If not given, this will be extrapolated from the
-      argspec. This should typically be omitted. 
+      argspec. This should typically be omitted.
 
     name: Optional specification for name shown to the user. This will
       default to function name. In most cases, this is recommended.
@@ -64,7 +64,7 @@ def view(category = None, name = None, description = None, args = None):
       to the docstring.
 
     args: Optional argspec for the function. This is generally better
-      omitted. 
+      omitted.
     '''
     def view_factory(f):
         registry.register_handler('view',category, name, description, f, args)
@@ -74,20 +74,20 @@ def view(category = None, name = None, description = None, args = None):
 def query(category = None, name = None, description = None, args = None):
     ''' This decorator is appended to a query in an analytics
     module. A module will return output that can be used
-    programmatically (typically JSON). 
+    programmatically (typically JSON).
 
     category: Optional specification for type (global, per-user,
       etc.). If not given, this will be extrapolated from the
-      argspec. This should typically be omitted. 
+      argspec. This should typically be omitted.
 
     name: Optional specification for name exposed via SOA. This will
-      default to function name. In most cases, this is recommended. 
+      default to function name. In most cases, this is recommended.
 
     description: Optional description exposed via the SOA
-      discovery. If not given, this will default to the docstring. 
+      discovery. If not given, this will default to the docstring.
 
     args: Optional argspec for the function. This is generally better
-      omitted. 
+      omitted.
     '''
     def query_factory(f):
         registry.register_handler('query',category, name, description, f, args)
@@ -98,7 +98,7 @@ def query(category = None, name = None, description = None, args = None):
 def memoize_query(cache_time = 60*4, timeout = 60*15, ignores = ["<class 'pymongo.database.Database'>", "<class 'fs.osfs.OSFS'>"]):
     ''' Call function only if we do not have the results for its execution already
         We ignore parameters of type pymongo.database.Database and fs.osfs.OSFS. These
-        will be different per call, but function identically. 
+        will be different per call, but function identically.
     '''
     def isuseful(a, ignores):
         if str(type(a)) in ignores:
@@ -156,8 +156,8 @@ def memoize_query(cache_time = 60*4, timeout = 60*15, ignores = ["<class 'pymong
 
 def cron(period, params=None):
     ''' Run command periodically
-    
-    Unknown whether or how well this works. 
+
+    Unknown whether or how well this works.
     '''
     def factory(f):
         @periodic_task(run_every=period, name=f.__name__)
