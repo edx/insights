@@ -15,5 +15,5 @@ simplejson
 South==0.7.6
 django-celery==3.0.11
 celery-with-redis==3.0
--e git://github.com/MITx/django-pipeline.git@c5a4848d3d8fa90a7da4a4007f5653be40cccdd9#egg=django_pipeline-dev
--e git://github.com/MITx/django-staticfiles.git@6d2504e5c84a3003b4573e0ba0f11adf7583d372#egg=django_staticfiles-dev
+-e git://github.com/edx/django-pipeline.git@c5a4848d3d8fa90a7da4a4007f5653be40cccdd9#egg=django_pipeline-dev
+-e git://github.com/edx/django-staticfiles.git@6d2504e5c84a3003b4573e0ba0f11adf7583d372#egg=django_staticfiles-dev

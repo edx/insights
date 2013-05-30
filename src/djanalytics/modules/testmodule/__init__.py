@@ -1,4 +1,4 @@
-''' Basic module containing events, views, and queries for the test suite. 
+''' Basic module containing events, views, and queries for the test suite.
 
 '''
 
@@ -51,13 +51,13 @@ def djt_event_count_event(db, events):
             collection = db['user_event_count']
             user = evt['user']
             t = list(collection.find({'user' : user}))
-            if len(t): 
+            if len(t):
                 collection.update({'user' : user}, {'$inc':{'event_count':1}})
             else:
                 collection.insert({'event_count' : 1, 'user' : user})
         collection = db['event_count']
         t = list(collection.find())
-        if len(t): 
+        if len(t):
             collection.update({}, {'$inc':{'event_count':1}})
         else:
             collection.insert({'event_count' : 1})
@@ -65,18 +65,18 @@ def djt_event_count_event(db, events):
 
 @event_handler()
 def djt_python_fs_forgets(fs, events):
-    ''' Test case for checking whether the file system properly forgets. 
-    To write a file: 
+    ''' Test case for checking whether the file system properly forgets.
+    To write a file:
 
-    { 'fs_forgets_contents' : True, 
+    { 'fs_forgets_contents' : True,
       'filename' : "foo.txt",
       'contents' : "hello world!"}
 
-    To set or change expiry on a file: 
-    { 'fs_forgets_expiry' : -5, 
+    To set or change expiry on a file:
+    { 'fs_forgets_expiry' : -5,
       'filename' : "foo.txt"}
 
-    The two may be combined into one operation. 
+    The two may be combined into one operation.
     '''
     def djt_checkfile(filename, contents):
         if not fs.exists(filename):
@@ -90,7 +90,7 @@ def djt_python_fs_forgets(fs, events):
             f.write(evt['fs_forgets_contents'])
             f.close()
         if 'fs_forgets_expiry' in evt:
-            try: 
+            try:
                 fs.expire(evt['filename'], evt['fs_forgets_expiry'])
             except:
                 print "Failed"
@@ -101,7 +101,7 @@ def djt_python_fs_forgets(fs, events):
 @event_handler()
 def djt_python_fs_event(fs, events):
     ''' Handles events which will create and delete files in the
-    filesystem. 
+    filesystem.
     '''
     for evt in events:
         if 'event' in evt and evt['event'] == 'pyfstest':
@@ -109,14 +109,14 @@ def djt_python_fs_event(fs, events):
                 f=fs.open(evt['create'], 'w')
                 f.write(evt['contents'])
                 f.close()
-            if 'delete' in evt and fs.exists(evt['delete']): 
+            if 'delete' in evt and fs.exists(evt['delete']):
                 fs.remove(evt['delete'])
 
 @query()
 def djt_readfile(fs, filename):
-    ''' Return the contents of a file in the fs. 
+    ''' Return the contents of a file in the fs.
     '''
-    if fs.exists(filename): 
+    if fs.exists(filename):
         f=fs.open(filename)
         return f.read()
     return "File not found"
@@ -156,6 +156,6 @@ def djt_fake_user_count():
 @view()
 def djt_fake_user_count(query):
     ''' Test of an abstraction used to call queries, abstracting away
-    the network, as well as optional parameters like fs, db, etc. 
+    the network, as well as optional parameters like fs, db, etc.
     '''
     return "<html>Users: {uc}</html>".format(uc = query.djt_fake_user_count())
