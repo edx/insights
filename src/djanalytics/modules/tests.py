@@ -30,7 +30,7 @@ class SimpleTest(TestCase):
         c = Client()
 
         response = c.get('/query/djt_clear_database')
-        self.assertEqual(response.content, '"Database clear"')
+        self.assertEqual(response.content, 'Database clear')
         response = c.get('/query/djt_event_count')
         response = c.get('/query/djt_event_count')
         self.assertEqual(response.content, "0")
@@ -45,14 +45,14 @@ class SimpleTest(TestCase):
         self.assertEqual(response.content, "3")
         print "After 3 events: ", response.content
         response = c.get('/query/djt_clear_database')
-        self.assertEqual(response.content, '"Database clear"')
+        self.assertEqual(response.content, 'Database clear')
     
     def test_per_user_works(self):
         ''' Test that we can have per-user events and queries
         ''' 
         c = Client()
         response = c.get('/query/djt_clear_database')
-        self.assertEqual(response.content, '"Database clear"')
+        self.assertEqual(response.content, 'Database clear')
         response = c.get('/query/djt_user_event_count?user=alice')
         self.assertEqual(response.content, "0")
         self.assertEqual(self.send_event(c, {'user':'alice'}).content, "Success")
@@ -78,7 +78,7 @@ class SimpleTest(TestCase):
         c = Client()
         def verify(d):
             for key in d:
-                r = json.loads(c.get('/query/djt_readfile?filename='+key).content)
+                r = c.get('/query/djt_readfile?filename='+key).content
                 if d[key]:
                     self.assertEqual(r, "hello world!")
                 else: 
@@ -123,26 +123,26 @@ class SimpleTest(TestCase):
                                              'value': 'value2',
                                              'timeout':30}).content, "Success")
 
-        response = json.loads(c.get('/query/djt_cache_get?key=key1').content)
+        response = c.get('/query/djt_cache_get?key=key1').content
         self.assertEqual(response, 'value1')
-        response = json.loads(c.get('/query/djt_cache_get?key=key2').content)
+        response = c.get('/query/djt_cache_get?key=key2').content
         self.assertEqual(response, 'value2')
         self.assertEqual(self.send_event(c, {'event':'cachetest', 
                                              'key' : 'key1', 
                                              'value': 'valuea',
                                              'timeout':30}).content, "Success")
-        response = json.loads(c.get('/query/djt_cache_get?key=key1').content)
+        response = c.get('/query/djt_cache_get?key=key1').content
         self.assertEqual(response, 'valuea')
 
     def test_event_property(self):
         c = Client()
         self.assertEqual(self.send_event(c, {'event_property_check':True, 
                                              'user' : 'bob'}).content, "Success")
-        response = json.loads(c.get('/query/djt_cache_get?key=last_seen_user').content)
+        response = c.get('/query/djt_cache_get?key=last_seen_user').content
         self.assertEqual(response, "bob")
         self.assertEqual(self.send_event(c, {'event_property_check':True, 
                                              'user' : 'joe'}).content, "Success")
-        response = json.loads(c.get('/query/djt_cache_get?key=last_seen_user').content)
+        response = c.get('/query/djt_cache_get?key=last_seen_user').content
         self.assertEqual(response, "joe")
         
     def test_djobject(self):

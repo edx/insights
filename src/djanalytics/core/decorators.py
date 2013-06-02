@@ -163,9 +163,9 @@ def cron(period, params=None):
         @periodic_task(run_every=period, name=f.__name__)
         def run():
             import djanalytics.core.views
-            db = core.views.get_database(f)
+            mongodb = core.views.get_mongo(f)
             fs = core.views.get_filesystem(f)
-            f(fs, db, params)
+            f(fs, mongodb, params)
         return decorator(run,f)
     return factory
 

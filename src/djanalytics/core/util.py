@@ -40,7 +40,7 @@ def namespace(f):
         module = f
     return str(module).replace(".","_")
 
-def get_database(f):
+def get_mongo(f):
     ''' Given a function in a module, return the Mongo DB associated
     with that function. 
     '''
@@ -144,7 +144,7 @@ def optional_parameter_call(function, optional_kwargs, passed_kwargs, arglist = 
     return function(**args)
 
 default_optional_kwargs = {'fs' : get_filesystem, 
-                           'db' : get_database, 
+                           'mongodb' : get_mongo, 
                            'cache' : get_cache,
 #                           'analytics' : get_djobject, 
                            'view' : get_view, 

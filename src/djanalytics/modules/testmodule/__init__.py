@@ -12,50 +12,50 @@ def djt_hello_template():
     return render("hello.html", {})
 
 @query()
-def djt_event_count(db):
+def djt_event_count(mongodb):
     ''' Number of hits to event_handler since clear_database
     '''
-    collection = db['event_count']
+    collection = mongodb['event_count']
     t = list(collection.find())
     if len(t):
         return t[0]['event_count']
     return 0
 
 @query()
-def djt_user_event_count(db, user):
+def djt_user_event_count(mongodb, user):
     ''' Number of hits by a specific user to event_handler since
     clear_database
     '''
-    collection = db['user_event_count']
+    collection = mongodb['user_event_count']
     t = list(collection.find({'user':user}))
     if len(t):
         return t[0]['event_count']
     return 0
 
 @query()
-def djt_clear_database(db):
+def djt_clear_database(mongodb):
     ''' Clear event counts
     '''
-    collection = db['event_count']
+    collection = mongodb['event_count']
     collection.remove({})
-    collection = db['user_event_count']
+    collection = mongodb['user_event_count']
     collection.remove({})
     return "Database clear"
 
 @event_handler()
-def djt_event_count_event(db, events):
+def djt_event_count_event(mongodb, events):
     ''' Count events per user and per system. Used as test case for
     per-user and global queries. '''
     for evt in events:
         if 'user' in evt:
-            collection = db['user_event_count']
+            collection = mongodb['user_event_count']
             user = evt['user']
             t = list(collection.find({'user' : user}))
             if len(t): 
                 collection.update({'user' : user}, {'$inc':{'event_count':1}})
             else:
                 collection.insert({'event_count' : 1, 'user' : user})
-        collection = db['event_count']
+        collection = mongodb['event_count']
         t = list(collection.find())
         if len(t): 
             collection.update({}, {'$inc':{'event_count':1}})
@@ -149,13 +149,19 @@ def djt_event_property_check(cache, events):
         if "event_property_check" in evt:
             cache.set("last_seen_user", evt.djt_agent, 30)
 
-@query()
-def djt_fake_user_count():
+@query(name='djt_fake_user_count')
+def djt_fake_user_count_query():
     return 2
 
-@view()
-def djt_fake_user_count(query):
+@view(name='djt_fake_user_count')
+def djt_fake_user_count_view(query):
     ''' Test of an abstraction used to call queries, abstracting away
-    the network, as well as optional parameters like fs, db, etc. 
+    the network, as well as optional parameters like fs, mongodb, etc. 
     '''
     return "<html>Users: {uc}</html>".format(uc = query.djt_fake_user_count())
+
+@event_handler()
+def router(events):
+    for e in events:
+        if e.university == "Harvard":
+            track_event(e)
