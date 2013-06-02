@@ -149,19 +149,13 @@ def djt_event_property_check(cache, events):
         if "event_property_check" in evt:
             cache.set("last_seen_user", evt.djt_agent, 30)
 
-@query(name='djt_fake_user_count')
-def djt_fake_user_count_query():
+@query()
+def djt_fake_user_count():
     return 2
 
-@view(name='djt_fake_user_count')
-def djt_fake_user_count_view(query):
+@view()
+def djt_fake_user_count(query):
     ''' Test of an abstraction used to call queries, abstracting away
-    the network, as well as optional parameters like fs, mongodb, etc. 
+    the network, as well as optional parameters like fs, db, etc. 
     '''
     return "<html>Users: {uc}</html>".format(uc = query.djt_fake_user_count())
-
-@event_handler()
-def router(events):
-    for e in events:
-        if e.university == "Harvard":
-            track_event(e)
