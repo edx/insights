@@ -8,6 +8,7 @@ from djanalytics.core.decorators import query, event_handler, view, event_proper
 
 @view()
 def djt_hello_template():
+    ''' Example of how to use mako templates in a view '''
     from djanalytics.core.render import render
     return render("hello.html", {})
 
@@ -123,11 +124,13 @@ def djt_readfile(fs, filename):
 
 @query()
 def djt_cache_get(cache, key):
+    ''' Used in test case for cache '''
     result = cache.get(key)
     return result
 
 @event_handler()
 def djt_cache_set(cache, events):
+    ''' Used in test case for cache '''
     for evt in events:
         if 'event' in evt and evt['event'] == 'cachetest':
             cache.set(evt['key'], evt['value'], evt['timeout'])
@@ -145,12 +148,14 @@ def djt_agent(event):
 
 @event_handler()
 def djt_event_property_check(cache, events):
+    ''' Used in test case for event handler '''
     for evt in events:
         if "event_property_check" in evt:
             cache.set("last_seen_user", evt.djt_agent, 30)
 
 @query()
 def djt_fake_user_count():
+    ''' Used as test case for query objects '''
     return 2
 
 @view()

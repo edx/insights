@@ -58,6 +58,10 @@ lookups = {}
 
 
 def lookup(directory):
+    ''' Return the mako TemplateLookup for a directory. 
+
+    Will cache lookups if we created one before. 
+    '''
     if directory in lookups:
         return lookups[directory]
     else:

@@ -170,6 +170,11 @@ def cron(period, params=None):
     return factory
 
 def event_property(name=None, description=None):
+    ''' This is used to add properties to events. 
+
+    E.g. a module could add the tincan properties such that other
+    analytics modules could access event properties generically. 
+    '''
     def register(f):
         registry.register_event_property(f, name, description)
         return f

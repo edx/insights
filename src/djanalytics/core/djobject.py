@@ -57,7 +57,7 @@ class multi_embed():
     def __init__(self, embeds):
         self._embeds = embeds
     def __getattr__(self, attr):
-        print ">>>>>>>>>>>>> Getting", attr
+#        print ">>>>>>>>>>>>> Getting", attr
         for x in self._embeds:
             f = None
             try:
@@ -65,11 +65,11 @@ class multi_embed():
             except AttributeError:
                 pass
             if f:
-                print
-                print ">>>>>>>>>>>>>>>>>>>", f
-                print
+#                print
+#                print ">>>>>>>>>>>>>>>>>>>", f
+#                print
                 return f
-        print "Not found"
+        print "Not found", attr
         raise AttributeError(attr)
 
     def _refresh_schema(self):
@@ -77,7 +77,7 @@ class multi_embed():
             x._refresh_schema
     def __dir__(self):
         child_dirs = [x.__dir__() for x in self._embeds]
-        print child_dirs
+#        print child_dirs
         return sorted(list(set(sum(child_dirs, []))))
     def __repr__(self):
         return "/".join(map(lambda x:repr(x), self._embeds))
@@ -252,7 +252,7 @@ def get_embed(t, config = None):
     if config: 
         embeds = []
         for embed_spec in config:
-            print embed_spec
+#            print embed_spec
             embeds.append(single_embed(t, **embed_spec))
         return multi_embed(embeds)
     return single_embed(t)
@@ -267,7 +267,7 @@ if __name__ == "__main__":
     if True: # Internal test -- from djanalytics
         print djo.query.djt_event_count()
         print djo.query.djt_user_event_count(user = "bob")
-        print djo.query.__dir__()
+        print dir(djo.query)
 
     if False: # External test -- from edxanalytics
         transform_policy = {'name': 'test',
@@ -282,6 +282,6 @@ if __name__ == "__main__":
                     'course' : '6.002x' }
         
         secure_view = transform_embed(transform_policy, context, djo.view)
-        print secure_view.__dir__()
+        print dir(secure_view)
         print secure_view.page_count(course = '6.002x')
         print inspect.getargspec(secure_view.page_count)

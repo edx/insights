@@ -22,6 +22,14 @@ from django.conf import settings
 import re
 
 def auth(f):
+    ''' Authentication decorator. It will allow all access, unless
+    django settings defines a DJA_AUTH parameter. Such a parameter can
+    specify a decorator which will handle authentication/authorization. 
+
+    DJA_AUTH is a dictionary mapping regexps to appropriate decorators
+    (so it is possible to e.g. use one for views, and a different one
+    for queries)
+    '''
     try:
         dja = settings.DJA_AUTH
     except AttributeError:
