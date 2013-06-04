@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# djanalytics documentation build configuration file, created by
+# edinsights documentation build configuration file, created by
 # sphinx-quickstart on Sat Mar 30 06:06:18 2013.
 #
 # This file is execfile()d with the current directory set to its containing dir.
@@ -13,7 +13,7 @@
 
 import sys, os
 
-sys.path.insert(0, os.path.abspath('../../src/djanalytics/'))
+sys.path.insert(0, os.path.abspath('../../src/edinsights/'))
 
 print sys.path
 
@@ -48,7 +48,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'djanalytics'
+project = u'edinsights'
 copyright = u'2013, Piotr Mitros, Vik Parachuri'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -172,7 +172,7 @@ html_static_path = ['_static']
 #html_file_suffix = None
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'djanalyticsdoc'
+htmlhelp_basename = 'edinsightsdoc'
 
 
 # -- Options for LaTeX output --------------------------------------------------
@@ -191,7 +191,7 @@ latex_elements = {
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'djanalytics.tex', u'djanalytics Documentation',
+  ('index', 'edinsights.tex', u'edinsights Documentation',
    u'Piotr Mitros, Vik Parachuri', 'manual'),
 ]
 
@@ -221,7 +221,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'djanalytics', u'djanalytics Documentation',
+    ('index', 'edinsights', u'edinsights Documentation',
      [u'Piotr Mitros, Vik Parachuri'], 1)
 ]
 
@@ -235,8 +235,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'djanalytics', u'djanalytics Documentation',
-   u'Piotr Mitros, Vik Parachuri', 'djanalytics', 'One line description of project.',
+  ('index', 'edinsights', u'edinsights Documentation',
+   u'Piotr Mitros, Vik Parachuri', 'edinsights', 'One line description of project.',
    'Miscellaneous'),
 ]
 

@@ -4,12 +4,12 @@
 
 modules_to_import = []
 
-from djanalytics.core.decorators import query, event_handler, view, event_property
+from edinsights.core.decorators import query, event_handler, view, event_property
 
 @view()
 def djt_hello_template():
     ''' Example of how to use mako templates in a view '''
-    from djanalytics.core.render import render
+    from edinsights.core.render import render
     return render("hello.html", {})
 
 @query()

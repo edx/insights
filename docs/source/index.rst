@@ -1,9 +1,9 @@
-.. djanalytics documentation master file, created by
+.. edinsights documentation master file, created by
    sphinx-quickstart on Sat Mar 30 06:06:18 2013.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to djanalytics's documentation!
+Welcome to edinsights's documentation!
 =======================================
 
 ..
@@ -15,7 +15,7 @@ Welcome to djanalytics's documentation!
 core.decorators
 ======================
 
-core.decorators is the bulk of the public interface of djanalytics. 
+core.decorators is the bulk of the public interface of edinsights. 
 
 .. automodule:: core.decorators
    :members:

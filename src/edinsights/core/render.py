@@ -114,7 +114,7 @@ class ModuleStorage(FileSystemStorage):
         ''' Returns the absolute path to a file, stripping out
         /djmodules/[module] from the beginning. If the system requests
         /djmodules/testmodule/hello.html, this will return
-        /home/user/djanalytics/src/modules/testmodule/static/hello.html
+        /home/user/edinsights/src/modules/testmodule/static/hello.html
         '''
         rootpath = os.path.relpath(os.path.join(name), self.base_url)
         return FileSystemStorage.path(self, rootpath)

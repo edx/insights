@@ -17,4 +17,4 @@ urlpatterns = patterns('',
     # url(r'^admin/', include(admin.site.urls)),
 )
 
-import djanalytics.core.views
+import edinsights.core.views

@@ -88,7 +88,7 @@ class SimpleTest(TestCase):
         self.send_event(c, { 'fs_forgets_contents' : "hello world!", 'filename' : "foo3.txt", 'fs_forgets_expiry' : 15})
         self.send_event(c, { 'fs_forgets_contents' : "hello world!", 'filename' : "foo4.txt", 'fs_forgets_expiry' : 15})
         verify({"foo1.txt":True, "foo2.txt":True, "foo3.txt":True, "foo4.txt":True})
-        from djanalytics.modulefs.modulefs import expire_objects
+        from edinsights.modulefs.modulefs import expire_objects
         expire_objects()
         verify({"foo1.txt":False, "foo2.txt":False, "foo3.txt":True, "foo4.txt":True})
         self.send_event(c, { 'filename' : "foo3.txt", 'fs_forgets_expiry' : -15})

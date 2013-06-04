@@ -2,7 +2,7 @@
 
 # Django settings for edxanalytics project.
 
-#### djanalytics-specific settings
+#### edinsights-specific settings
 
 import datetime
 import os.path
@@ -15,8 +15,8 @@ from pkg_resources import resource_filename
 DJ_REQUIRED_APPS = ( 'djeventstream.httphandler',
     'djcelery',
     'south',
-    'djanalytics.core',
-    'djanalytics.modulefs',
+    'edinsights.core',
+    'edinsights.modulefs',
 #    'modules',
 )
 

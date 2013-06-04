@@ -6,7 +6,7 @@ from pymongo import MongoClient
 from django.conf import settings
 from django.core.cache import cache
 
-from djanalytics.modulefs import modulefs
+from edinsights.modulefs import modulefs
 
 connection = MongoClient()
 

@@ -1,11 +1,11 @@
 '''
-This allows djanalytics to have authentication on provided URLs. 
+This allows edinsights to have authentication on provided URLs. 
 
 All views are decorated with the @auth decorator. 
 
 The @auth decorator looks at settings.py for a DJA_AUTH setting. The
 DJA_AUTH setting maps function names to authentication decorators. For
-example, to require all djanalytics URLs to have a login, add the
+example, to require all edinsights URLs to have a login, add the
 following to settings.py:
 
 import django.contrib.auth.decorators

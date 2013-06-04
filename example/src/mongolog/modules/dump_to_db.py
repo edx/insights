@@ -1,6 +1,6 @@
 import sys
 
-from djanalytics.core.decorators import event_handler
+from edinsights.core.decorators import event_handler
 
 @event_handler()
 def dump_to_db(mongodb, events):

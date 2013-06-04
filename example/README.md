@@ -1,8 +1,8 @@
-This is a minimal application built on top of djanalytics. 
+This is a minimal application built on top of edinsights. 
 
 All it does is stream events verbatim into a database. 
 
-To run this, first install djanalytics: 
+To run this, first install edinsights: 
 
     sudo python setup.py install
 

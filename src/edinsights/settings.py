@@ -1,4 +1,4 @@
-# Django settings for djanalytics project.
+# Django settings for edinsights project.
 
 #### Additional setting required for core
 
@@ -143,7 +143,7 @@ MIDDLEWARE_CLASSES = (
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
 
-ROOT_URLCONF = 'djanalytics.urls'
+ROOT_URLCONF = 'edinsights.urls'
 
 TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".

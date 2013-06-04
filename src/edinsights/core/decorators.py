@@ -162,7 +162,7 @@ def cron(period, params=None):
     def factory(f):
         @periodic_task(run_every=period, name=f.__name__)
         def run():
-            import djanalytics.core.views
+            import edinsights.core.views
             mongodb = core.views.get_mongo(f)
             fs = core.views.get_filesystem(f)
             f(fs, mongodb, params)
