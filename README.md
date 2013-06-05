@@ -277,7 +277,8 @@ representation.
 Other edX Code
 ==============
 
-See [code.edx.org](http://code.edx.org/) for other parts of the edX code base.
+This code was developed as part of edX. See
+[code.edx.org](http://code.edx.org/) for other code from edX.
 
 License
 -------
