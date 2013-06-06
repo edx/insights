@@ -57,7 +57,9 @@ class multi_embed():
     def __init__(self, embeds):
         self._embeds = embeds
     def __getattr__(self, attr):
-#        print ">>>>>>>>>>>>> Getting", attr
+        # print ">>>>>>>>>>>>> Getting", attr
+        # if attr[0] == '_':
+        #     return
         for x in self._embeds:
             f = None
             try:
@@ -65,9 +67,9 @@ class multi_embed():
             except AttributeError:
                 pass
             if f:
-#                print
-#                print ">>>>>>>>>>>>>>>>>>>", f
-#                print
+                # print
+                # print ">>>>>>>>>>>>>>>>>>>", f
+                # print
                 return f
         print "Not found", attr
         raise AttributeError(attr)
@@ -252,7 +254,6 @@ def get_embed(t, config = None):
     if config: 
         embeds = []
         for embed_spec in config:
-#            print embed_spec
             embeds.append(single_embed(t, **embed_spec))
         return multi_embed(embeds)
     return single_embed(t)
