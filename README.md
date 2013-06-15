@@ -12,12 +12,17 @@ write plug-ins quickly and easily. These should be able to run in the
 system without impacting the overall stability. Results should be
 automatically shown to customers. 
 2. The API must support robust, scalable implementations. The current
-back-end is not designed for mass scaling, but the modules should be. 
+back-end is not designed for mass scaling, but the API for the modules 
+should permit e.g. sharding in the future. 
 3. Reusable. The individual analytics modules should be able to use
 the results from other modules, and people should be able to build on
 each others' work.
 4. Interoperable. We would like the framework to be sufficiently
 generic to be useable outside of edX.
+5. Cross-scope. There should be a smooth path from off-line analytics,
+to on-line batched analytics (e.g. for an instructor dashboard), to
+on-line realtime analytics (e.g. for the system to react to an event
+the analytics detects).
 
 Architecture
 ------------
@@ -109,6 +114,13 @@ djobject.py has an abstraction for accessing analytics both locally
 object. All of the standard Python introspection of the methods in
 this object works. 
 
+This is, in particular, useful for off-line analytics. You have access
+to the raw data, analyzed data, and queries defined by other analytics
+modules. For example, given a time_on_task module, you could call
+event.time_on_task to get the time between that event and the
+following event. Or you could call query.irt(problem) to get the IRT
+parameters for that problem.
+
 When using analytics remotely, there are issues of security and
 permissions. Specifically, a sysadmin might want to see an analytic
 per-course/per-student. An instructor of that course might want to
@@ -129,10 +141,13 @@ Shortcuts/invariants
 * At present, events come into the system through an SOA. The tracking
   framework is modified to use a Python HTTP logger, which are
   received by the framework. For most events, this should be replaced
-  with something asynchronous, as well as queued.
-* The analytics have no isolation from each other. The architecture
-  supports running each module in its own sandbox. This should not be
-  broken (e.g. by having direct calls across modules).
+  with something asynchronous, as well as queued, such as Twitter
+  storm.
+* The analytics have limited isolation from each other. They can run
+  on seperate servers, but with multiple modules on one server, there
+  is no isolation. The architecture supports running each module in
+  its own sandbox. This should not be broken (e.g. by having direct
+  calls across modules).
 * Right now, all functions must be process-safe (the function gets
   called multiple times, although in different memory spaces). Some
   folks would like to write an analytic that runs in a single process
@@ -140,20 +155,22 @@ Shortcuts/invariants
   get_event(); handle_event(); }). The API is designed to support
   this, but this is not implemented.
 * The analytics framework has no way to generate new events. This would be 
-  useful for chaining analytics.
+  useful for chaining analytics. This is trivial to add. 
 * There are no filters. E.g. an event handler cannot ask for all video
-  events. This is high priority.
+  events. This is high priority. This is trivial to add. 
 
 Desired Modes of operation
 --------------------------
 
 1. Hard realtime. When an event comes in, it is synchronously
-processed. The caller knows that by the time the event returns, it can
-extract results from the analytic.
+   processed. The caller knows that by the time the event returns, it
+   can extract results from the analytic.
 2. Soft realtime. There is a queue, but processing is fast enough that
-the queue is assumed to be nearly empty.
+   the queue is assumed to be nearly empty.
 3. Queued. There is a queue with potentially a significant backlog. 
 4. Batched. Processing runs at e.g. 5 minute or 1 day intervals. 
+5. Off-line. There is a database populated with data, and the data is
+   analyzed by hand.
 
 For developing the system, hard realtime is the most critical, and
 we'd like to keep the invariant that it works. Next most useful is
@@ -200,8 +217,17 @@ Product Backlog
 6. The API for genetic event properties (e.g. event.actor) should
    support namespaces (e.g. event.tincan.actor) and generic dispatch
    (e.g. one module defines event.tincan.actor for events from Sakai,
-   and another for events from edX, and the right one gets called).
+   and another for events from edX, and the right one gets
+   called). Note that, in the short term, no namespace is required
+   (for being able to access data), while namespaces is only important
+   (for clean abstractions).
 7. Better error handling and escalation. 
+8. Better off-line support. 
+9. Extend the property API to support not just events. We'd like to
+   have things like problem.difficulty (from IRT), or video.rewinds,
+   etc.
+10. Make the types of parameters passed (user, resource, etc.) static,
+    rather than dynamic.
 
 Other useful next steps
 -----------------------
@@ -210,7 +236,6 @@ Other useful next steps
 and be able to confirm output of all queries.
 2. Development data. We need sample outputs for all queries for when
 the DB is not available for UI development (some of this exists). 
-
 
 Needs of edX
 ------------
@@ -273,6 +298,14 @@ Here, each instance would have a data layer module. This module would
 translate the data generate by the particular LMS into a common
 representation. Analytics would be built on top of that common
 representation. 
+
+We would like to also support FERPA-compliance. This could be built in
+one of two ways. Per-school stacks, including analytics: 
+
+Split analytics: 
+
+The API supports either. Building out back-end support for either
+would be substantial.
 
 Other edX Code
 ==============
