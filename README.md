@@ -228,6 +228,8 @@ Product Backlog
    etc.
 10. Make the types of parameters passed (user, resource, etc.) static,
     rather than dynamic.
+11. Better batch processing. We add a module. It should be able to get
+    all past events.
 
 Other useful next steps
 -----------------------
@@ -336,5 +338,8 @@ Please do not report security issues in public. Please email security@edx.org
 Mailing List and IRC Channel
 ----------------------------
 
-You can discuss this code on the [edx-code Google Group](https://groups.google.com/forum/#!forum/edx-code) or in the
+You can discuss development specific to this package, as well as
+general learning analytics and educational datamining on the
+[insights-dev Google Group](https://groups.google.com/forum/#!forum/insights-dev). General
+edX platform discussion can happen on the [edx-code Google Group](https://groups.google.com/forum/#!forum/edx-code) or in the
 `edx-code` IRC channel on Freenode.
