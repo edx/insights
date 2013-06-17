@@ -167,6 +167,7 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'mongolog',
 ) + DJ_REQUIRED_APPS
 
 # A sample logging configuration. The only tangible logging

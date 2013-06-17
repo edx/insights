@@ -1,0 +1,27 @@
+<html>
+<head><title>It's running!</title></head>
+<body>
+<h1> The example application is running. Next steps: </h1>
+<p> Send an event to the database (the sendevent script is in src/sendevent/): 
+<pre> python sendevent.py localhost:8000 /httpevent actor=bob action=submitanswer object=problem5
+</pre>
+<p> Connect to the database, and see what events are there: 
+<pre>
+$ mongo
+MongoDB shell version: 2.0.4
+connecting to: test
+> show dbs
+...
+modules_dump_to_db
+...
+> use modules_dump_to_db
+switched to db modules_dump_to_db
+> show collections
+event_log
+system.indexes
+> db.event_log.find()
+
+[ should show all events sent to database ]
+</pre>
+</body>
+</html>

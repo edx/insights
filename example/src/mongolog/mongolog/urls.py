@@ -7,7 +7,7 @@ from django.conf.urls import patterns, include, url
 urlpatterns = patterns('',
     url(r'^httpevent$', 'djeventstream.httphandler.views.http_view'),
     # Examples:
-    # url(r'^$', 'mongolog.views.home', name='home'),
+    url(r'^$', 'mongolog.views.home', name='home'),
     # url(r'^mongolog/', include('mongolog.foo.urls')),
 
     # Uncomment the admin/doc line below to enable admin documentation:
