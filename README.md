@@ -1,4 +1,4 @@
-edinsights
+Insights
 ===========
 
 This is a development version of an analytics framework for the edX
@@ -276,10 +276,11 @@ system.
 
 The architecture is explicitly designed to eventually scale to running
 different analytics on different servers. edinsights.core.djobject
-provides a query object and a view object, which can be used to access
-queries and views in an identical way, regardless of whether or not
-there is a network in between. In the future, we would like to support
-an architecture where we have multiple analytics servers:
+(TODO: change to insights.core) provides a query object and a view
+object, which can be used to access queries and views in an identical
+way, regardless of whether or not there is a network in between. In
+the future, we would like to support an architecture where we have
+multiple analytics servers:
 
 ![Multipule servers](docs/multiserver.png)
 
