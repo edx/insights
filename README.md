@@ -1,4 +1,4 @@
-Insights
+edX Insights
 ===========
 
 This is a development version of an analytics framework for the edX
