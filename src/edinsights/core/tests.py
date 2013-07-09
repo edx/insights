@@ -4,11 +4,29 @@ when you run "manage.py test".
 
 Replace this with more appropriate tests for your application.
 """
-import time
+import time, tempfile
 
 from django.test import TestCase
 
-from decorators import memoize_query
+from decorators import memoize_query,cron
+from django.utils.timezone import timedelta
+from celery.task import periodic_task
+
+
+@cron(run_every=timedelta(seconds=1))
+def test_cron_task(*args):
+    """ Simple task that gets executed by the scheduler (celery beat).
+        The test case test_cron defined below verifies that the execution
+        has taken place.
+
+        Defined outside of the SimpleTest class because current support of celery decorators
+        for methods and nested functions is experimental.
+    """
+    with open(tempfile.gettempdir() + '/' + 'test_cron_task_counter', 'a') as temp_file:
+        temp_file.write(str(time.time()) + '\n') #write a timestamp for each call
+
+
+
 
 class SimpleTest(TestCase):
     def test_basic_addition(self):
@@ -19,26 +37,27 @@ class SimpleTest(TestCase):
 
     def __init__(self, arg):
         TestCase.__init__(self, arg)
-        self.calls =  0
+        self.memoize_calls =  0
+
 
     def test_memoize(self):
-        self.calls = 0
+        self.memoize_calls = 0
         @memoize_query(0.05)
         def double_trouble(x):
-            self.calls = self.calls + 1
+            self.memoize_calls = self.memoize_calls + 1
             return 2*x
 
         self.assertEqual(double_trouble(2), 4)
         self.assertEqual(double_trouble(4), 8)
         self.assertEqual(double_trouble(2), 4)
         self.assertEqual(double_trouble(4), 8)
-        self.assertEqual(self.calls, 2)
+        self.assertEqual(self.memoize_calls, 2)
         time.sleep(0.1)
         self.assertEqual(double_trouble(2), 4)
         self.assertEqual(double_trouble(4), 8)
         self.assertEqual(double_trouble(2), 4)
         self.assertEqual(double_trouble(4), 8)
-        self.assertEqual(self.calls, 4)
+        self.assertEqual(self.memoize_calls, 4)
 
     def test_auth(self):
         ''' Inject a dummy settings.DJA_AUTH into auth. 
@@ -88,3 +107,37 @@ class SimpleTest(TestCase):
         for url in urls: 
             response = c.get(url)
             self.assertEqual(response.status_code, 200)
+
+    def test_cron(self):
+        """ Test that periodic tasks are scheduled and run
+        """
+
+        # truncate the file used as a counter of test_cron_task calls
+        # the file is used to share state between the test process and
+        # the scheduler process (celery beat)
+        with open(tempfile.gettempdir() + '/' + 'test_cron_task_counter', 'w') as temp_file:
+            pass
+
+        import os
+        with open(os.devnull, 'w') as devnull:
+            from subprocess import Popen,PIPE
+            command = ['python', 'manage.py',  'celery', 'worker', '-B', '--loglevel=INFO', '--settings=testsettings',]
+            #supressing stdout and stderr, remove if more debug info is needed
+            celery_beat_process = Popen(command, stdout=devnull, stderr=devnull)
+
+        # give time to celery beat to execute test_cron_task
+        from time import sleep
+        sleep_duration = 3
+        print "Sleeping for %s seconds... " % sleep_duration
+        sleep(sleep_duration)
+        celery_beat_process.terminate()
+
+        # verify number of calls and time of last call
+        with open(tempfile.gettempdir() + '/' + 'test_cron_task_counter', 'r') as temp_file:
+            timestamps = temp_file.readlines()
+            ncalls = len(timestamps)
+            self.assertGreaterEqual(ncalls,2)
+            last_call = float(timestamps[-1].rstrip())
+            self.assertAlmostEqual(last_call, time.time(), delta=10)
+
+

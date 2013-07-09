@@ -8,7 +8,7 @@ from django.core.cache import cache
 
 from edinsights.modulefs import modulefs
 
-connection = MongoClient()
+connection = MongoClient() # TODO: Parameter setting for Mongos over the network
 
 def import_view_modules():
     '''

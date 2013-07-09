@@ -6,12 +6,6 @@ import datetime
 
 # DJOBJECT_CONFIG = [{}, {'baseurl' : 'http://127.0.0.1:9022/'}]
 
-DJ_REQUIRED_APPS = ( 'djeventstream.httphandler',
-    'djcelery',
-    'south',
-    'core',
-    'modulefs',
-    'modules',)
 
 # Types of parameters that queries and views can take. 
 # This is not properly used yet. 
@@ -25,10 +19,6 @@ DJFS = { 'type' : 'osfs',
 TIME_BETWEEN_DATA_REGENERATION = datetime.timedelta(minutes=1)
 
 INSTALLED_ANALYTICS_MODULES = ('modules.testmodule',)
-
-#Initialize celery
-import djcelery
-djcelery.setup_loader()
 
 SNS_SUBSCRIPTIONS = []
 
@@ -151,6 +141,13 @@ TEMPLATE_DIRS = (
     # Don't forget to use absolute paths, not relative paths.
 )
 
+DJ_REQUIRED_APPS = ( 'djeventstream.httphandler',
+    'djcelery',
+    'south',
+    'core',
+    'modulefs',
+    'modules',)
+
 INSTALLED_APPS = (
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -192,3 +189,11 @@ LOGGING = {
         },
     }
 }
+
+##uncomment to provide full location of code that uses naive datetime
+#import warnings
+#warnings.filterwarnings(
+#        'error', r"DateTimeField received a naive datetime",
+#        RuntimeWarning, r'django\.db\.models\.fields')
+
+from celerysettings import *

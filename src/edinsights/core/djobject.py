@@ -258,6 +258,9 @@ def get_embed(t, config = None):
     return single_embed(t)
                                 
 class djobject():
+    ## djobject, you should ignore. Use view and query objects directly.
+    ## Combining the two in this way is probably not a good abstraction
+    ## (I could be wrong; just current intuition).
     def __init__(self, baseurl = None, headers = {}):
         self.view = single_embed('view', baseurl = baseurl, headers = headers)
         self.query = single_embed('query', baseurl = baseurl, headers = headers)
@@ -275,7 +278,7 @@ if __name__ == "__main__":
                             'policy' : { 'total_user_count' : 'allow', 
                                          'user_count' : 'allow',
                                          'dash' : 'deny', 
-                                         'page_count' : ['user'] }
+                                         'page_count' : ['user'] } # List of parameters to lock down
                             }
         
         context = { 'user' : 'bob',

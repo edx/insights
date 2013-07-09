@@ -154,17 +154,20 @@ def memoize_query(cache_time = 60*4, timeout = 60*15, ignores = ["<class 'pymong
         return decorator(wrap_function,f)
     return view_factory
 
-def cron(period, params=None):
+def cron(run_every, params=None):
     ''' Run command periodically
 
-    Unknown whether or how well this works.
+    The task scheduler process (typically celery beat) needs to be started 
+    manually by the client module with:
+    python manage.py celery worker -B --loglevel=INFO
+    Celery beat will automatically add tasks from files named 'tasks.py'    
     '''
     def factory(f):
-        @periodic_task(run_every=period, name=f.__name__)
+        @periodic_task(run_every=run_every, name=f.__name__)
         def run():
-            import edinsights.core.views
-            mongodb = core.views.get_mongo(f)
-            fs = core.views.get_filesystem(f)
+            from edinsights import core
+            mongodb = core.util.get_mongo(f)
+            fs = core.util.get_filesystem(f)
             f(fs, mongodb, params)
         return decorator(run,f)
     return factory
