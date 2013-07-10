@@ -26,7 +26,42 @@ def test_cron_task(*args):
         temp_file.write(str(time.time()) + '\n') #write a timestamp for each call
 
 
+@cron(run_every=timedelta(seconds=1))  # cron decorators should go on top
+@memoize_query(60)
+def test_cron_memoize_task(*args):
+    """ Simple task that gets executed by the scheduler (celery beat).
+        The test case test_cron_and_memoize defined below verifies that the execution
+        has taken place.
 
+        Defined outside of the SimpleTest class because current support of celery decorators
+        for methods and nested functions is experimental.
+
+        The cron decorator should precede all other decorators
+    """
+    with open(tempfile.gettempdir() + '/' + 'test_cron_memoize_task', 'a') as temp_file:
+        temp_file.write(str(time.time()) + '\n') #write a timestamp for each call
+
+    return 42
+
+def run_celery_beat(seconds=3, verbose=False):
+    """ Runs the task scheduler celery beat for the specified number of seconds within a child process
+    """
+    import os
+    with open(os.devnull, 'w') as devnull:
+        from subprocess import Popen
+        command = ['python', 'manage.py',  'celery', 'worker', '-B', '--loglevel=INFO', '--settings=testsettings',]
+        if verbose:
+            supress_output_args = {}
+        else:
+            supress_output_args = {'stdout':devnull, 'stderr':devnull}
+
+        celery_beat_process = Popen(command, **supress_output_args)
+
+        # give time to celery beat to execute test_cron_task
+        from time import sleep
+        print "running periodic tasks for %s seconds... " % seconds
+        sleep(seconds)
+        celery_beat_process.terminate()
 
 class SimpleTest(TestCase):
     def test_basic_addition(self):
@@ -42,6 +77,7 @@ class SimpleTest(TestCase):
 
     def test_memoize(self):
         self.memoize_calls = 0
+        return
         @memoize_query(0.05)
         def double_trouble(x):
             self.memoize_calls = self.memoize_calls + 1
@@ -111,26 +147,13 @@ class SimpleTest(TestCase):
     def test_cron(self):
         """ Test that periodic tasks are scheduled and run
         """
-
         # truncate the file used as a counter of test_cron_task calls
         # the file is used to share state between the test process and
         # the scheduler process (celery beat)
         with open(tempfile.gettempdir() + '/' + 'test_cron_task_counter', 'w') as temp_file:
             pass
 
-        import os
-        with open(os.devnull, 'w') as devnull:
-            from subprocess import Popen,PIPE
-            command = ['python', 'manage.py',  'celery', 'worker', '-B', '--loglevel=INFO', '--settings=testsettings',]
-            #supressing stdout and stderr, remove if more debug info is needed
-            celery_beat_process = Popen(command, stdout=devnull, stderr=devnull)
-
-        # give time to celery beat to execute test_cron_task
-        from time import sleep
-        sleep_duration = 3
-        print "Sleeping for %s seconds... " % sleep_duration
-        sleep(sleep_duration)
-        celery_beat_process.terminate()
+        run_celery_beat(seconds=3,verbose=False)
 
         # verify number of calls and time of last call
         with open(tempfile.gettempdir() + '/' + 'test_cron_task_counter', 'r') as temp_file:
@@ -139,5 +162,27 @@ class SimpleTest(TestCase):
             self.assertGreaterEqual(ncalls,2)
             last_call = float(timestamps[-1].rstrip())
             self.assertAlmostEqual(last_call, time.time(), delta=10)
+
+
+    def test_cron_and_memoize(self):
+        """ Test that periodic tasks are scheduled and run
+        """
+
+        # truncate the file used as a counter of test_cron_task calls
+        # the file is used to share state between the test process and
+        # the scheduler process (celery beat)
+        with open(tempfile.gettempdir() + '/' + 'test_cron_memoize_task', 'w') as temp_file:
+            pass
+
+        run_celery_beat(seconds=3,verbose=False)
+
+        # verify number of calls and time of last call
+        with open(tempfile.gettempdir() + '/' + 'test_cron_memoize_task', 'r') as temp_file:
+            timestamps = temp_file.readlines()
+            ncalls = len(timestamps)
+            self.assertEqual(ncalls,1)  # after the first call all subsequent calls should be cached
+            last_call = float(timestamps[-1].rstrip())
+            self.assertAlmostEqual(last_call, time.time(), delta=10)
+
 
 

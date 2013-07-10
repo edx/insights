@@ -124,7 +124,7 @@ def memoize_query(cache_time = 60*4, timeout = 60*15, ignores = ["<class 'pymong
             # process of computing it
             cached = cache.get(key)
             if cached:
-                #print "Cache hit", key
+                print "Cache hit", f.__name__, key
                 # If we're already computing it, wait to finish
                 # computation
                 while cached == 'Processing':
@@ -136,7 +136,7 @@ def memoize_query(cache_time = 60*4, timeout = 60*15, ignores = ["<class 'pymong
                 results = cached
 
             if not cached:
-                #print "Cache miss", key
+                print "Cache miss",f.__name__, key
                 # HACK: There's a slight race condition here, where we
                 # might recompute twice.
                 cache.set(key, 'Processing', timeout)
