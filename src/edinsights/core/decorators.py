@@ -21,6 +21,8 @@ from django.core.cache import cache
 from django.conf import settings
 
 from celery.task import PeriodicTask, periodic_task
+from util import optional_parameter_call
+from util import default_optional_kwargs
 
 import registry
 from registry import event_handlers, request_handlers
@@ -124,7 +126,7 @@ def memoize_query(cache_time = 60*4, timeout = 60*15, ignores = ["<class 'pymong
             # process of computing it
             cached = cache.get(key)
             if cached:
-                print "Cache hit", f.__name__, key
+                # print "Cache hit", f.__name__, key
                 # If we're already computing it, wait to finish
                 # computation
                 while cached == 'Processing':
@@ -136,7 +138,7 @@ def memoize_query(cache_time = 60*4, timeout = 60*15, ignores = ["<class 'pymong
                 results = cached
 
             if not cached:
-                print "Cache miss",f.__name__, key
+                # print "Cache miss",f.__name__, key
                 # HACK: There's a slight race condition here, where we
                 # might recompute twice.
                 cache.set(key, 'Processing', timeout)
@@ -162,14 +164,11 @@ def cron(run_every, params=None):
     python manage.py celery worker -B --loglevel=INFO
     Celery beat will automatically add tasks from files named 'tasks.py'    
     '''
-    def factory(f):
-        @periodic_task(run_every=run_every, name=f.__name__)
+    def factory(func):
+        @periodic_task(run_every=run_every, name=func.__name__)
         def run():
-            from edinsights import core
-            mongodb = core.util.get_mongo(f)
-            fs = core.util.get_filesystem(f)
-            f(fs, mongodb, params)
-        return decorator(run,f)
+            optional_parameter_call(func, default_optional_kwargs, params)
+        return decorator(run,func)
     return factory
 
 def event_property(name=None, description=None):

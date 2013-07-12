@@ -194,9 +194,12 @@ LOGGING = {
     }
 }
 
-##uncomment to provide full location of code that uses naive datetime
-#import warnings
-#warnings.filterwarnings(
+# # By default timezone-related warnings do not display the location in code
+# # where they occurred. The code below will turn these warnings into
+# # exceptions with stack trace so that one can identify the offending code.
+# # Uncomment to turn timezone warnings into exceptions
+# import warnings
+# warnings.filterwarnings(
 #        'error', r"DateTimeField received a naive datetime",
 #        RuntimeWarning, r'django\.db\.models\.fields')
 
