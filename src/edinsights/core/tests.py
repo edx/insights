@@ -14,7 +14,7 @@ from celery.task import periodic_task
 
 
 @cron(run_every=timedelta(seconds=1))
-def test_cron_task(*args):
+def test_cron_task():
     """ Simple task that gets executed by the scheduler (celery beat).
         The test case test_cron verifies that the execution
         has taken place.
@@ -28,7 +28,7 @@ def test_cron_task(*args):
 
 @cron(run_every=timedelta(seconds=1))  # cron decorators should go on top
 @memoize_query(60)
-def test_cron_memoize_task(*args):
+def test_cron_memoize_task():
     """ Simple task that gets executed by the scheduler (celery beat).
         The test case test_cron_and_memoize verifies that the execution
         has taken place.
