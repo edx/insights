@@ -97,10 +97,13 @@ def query(category = None, name = None, description = None, args = None):
     return query_factory
 
 
-def memoize_query(cache_time = 60*4, timeout = 60*15, ignores = ["<class 'pymongo.database.Database'>", "<class 'fs.osfs.OSFS'>"]):
+def memoize_query(cache_time = 60*4, timeout = 60*15, ignores = ["<class 'pymongo.database.Database'>", "<class 'fs.osfs.OSFS'>"], key_override=None):
     ''' Call function only if we do not have the results for its execution already
         We ignore parameters of type pymongo.database.Database and fs.osfs.OSFS. These
         will be different per call, but function identically.
+
+        key_override: use this as a cache key instead of computing a key from the
+        function signature. Useful for testing.
     '''
     def isuseful(a, ignores):
         if str(type(a)) in ignores:
@@ -114,14 +117,19 @@ def memoize_query(cache_time = 60*4, timeout = 60*15, ignores = ["<class 'pymong
             # this is just for SOA queries, but may break
             # down if this were to be used as a generic
             # memoization framework
-            m = hashlib.new("md4")
-            s = str({'uniquifier': 'anevt.memoize',
-                     'name' : f.__name__,
-                     'module' : f.__module__,
-                     'args': [a for a in args if isuseful(a, ignores)],
-                     'kwargs': kwargs})
-            m.update(s)
-            key = m.hexdigest()
+
+            if key_override is not None:
+                key = key_override
+            else:
+                m = hashlib.new("md4")
+                s = str({'uniquifier': 'anevt.memoize',
+                         'name' : f.__name__,
+                         'module' : f.__module__,
+                         'args': [a for a in args if isuseful(a, ignores)],
+                         'kwargs': kwargs})
+                m.update(s)
+                key = m.hexdigest()
+
             # Check if we've cached the computation, or are in the
             # process of computing it
             cached = cache.get(key)
@@ -164,11 +172,15 @@ def cron(run_every, params=None):
     python manage.py celery worker -B --loglevel=INFO
     Celery beat will automatically add tasks from files named 'tasks.py'    
     '''
-    def factory(func):
-        @periodic_task(run_every=run_every, name=func.__name__)
-        def run():
-            optional_parameter_call(func, default_optional_kwargs, params)
-        return decorator(run,func)
+    def factory(f):
+        @periodic_task(run_every=run_every, name=f.__name__)
+        def run(func=None):
+            if func:
+                result = optional_parameter_call(func, default_optional_kwargs, params)
+            else:
+                result = optional_parameter_call(f, default_optional_kwargs, params)
+            return result
+        return decorator(run, f)
     return factory
 
 def event_property(name=None, description=None):

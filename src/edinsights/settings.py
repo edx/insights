@@ -44,18 +44,7 @@ DATABASES = {
     }
 }
 
-CACHES = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-        'LOCATION': 'analytics-experiments',
-        'TIMEOUT': 60*60, #one hour
-        'OPTIONS' : {
-            'MAX_ENTRIES' : 100
-        }
-    }
-}
-
-# Hosts/domain names that are valid for this site; required if DEBUG is False
+# Hosts/domain names that are for this site; required if DEBUG is False
 # See https://docs.djangoproject.com/en/1.5/ref/settings/#allowed-hosts
 ALLOWED_HOSTS = []
 
@@ -150,7 +139,8 @@ DJ_REQUIRED_APPS = ( 'djeventstream.httphandler',
     'south',
     'core',
     'modulefs',
-    'modules',)
+    'modules',
+    'periodic',)
 
 INSTALLED_APPS = (
     'django.contrib.auth',
@@ -203,4 +193,12 @@ LOGGING = {
 #        'error', r"DateTimeField received a naive datetime",
 #        RuntimeWarning, r'django\.db\.models\.fields')
 
-from celerysettings import *
+#initialize celery
+import djcelery
+djcelery.setup_loader()
+#import the settings for celery from the edinsights module
+from edinsights.celerysettings_dev import *
+
+
+# import django cache settings
+from edinsights.djangocachesettings_dev import *
