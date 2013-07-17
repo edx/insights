@@ -2,6 +2,8 @@ import django
 from django.db import models
 import datetime
 
+from django.utils import timezone
+
 ## Create your models here.
 #class StudentBookAccesses(models.Model):
 #    username = models.CharField(max_length=500, unique=True) # TODO: Should not have max_length
@@ -20,7 +22,7 @@ class FSExpirations(models.Model):
         ''' May be used instead of the constructor to create a new expiration. 
         Automatically applies timedelta and saves to DB. 
         '''
-        expiration_time = datetime.datetime.now() + datetime.timedelta(days, seconds)
+        expiration_time = timezone.now() + timezone.timedelta(days, seconds)
 
         # If object exists, update it
         objects = cls.objects.filter(module = module, filename = filename)
@@ -47,7 +49,9 @@ class FSExpirations(models.Model):
     @classmethod
     def expired(cls):
         ''' Returns a list of expired objects '''
-        return cls.objects.filter(expires=True, expiration__lte = datetime.datetime.now())
+
+        expiration_lte = timezone.now()
+        return cls.objects.filter(expires=True, expiration__lte = expiration_lte)
 
     class Meta:
         unique_together = (("module","filename"))

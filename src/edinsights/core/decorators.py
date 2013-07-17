@@ -21,6 +21,8 @@ from django.core.cache import cache
 from django.conf import settings
 
 from celery.task import PeriodicTask, periodic_task
+from util import optional_parameter_call
+from util import default_optional_kwargs
 
 import registry
 from registry import event_handlers, request_handlers
@@ -95,10 +97,13 @@ def query(category = None, name = None, description = None, args = None):
     return query_factory
 
 
-def memoize_query(cache_time = 60*4, timeout = 60*15, ignores = ["<class 'pymongo.database.Database'>", "<class 'fs.osfs.OSFS'>"]):
+def memoize_query(cache_time = 60*4, timeout = 60*15, ignores = ["<class 'pymongo.database.Database'>", "<class 'fs.osfs.OSFS'>"], key_override=None):
     ''' Call function only if we do not have the results for its execution already
         We ignore parameters of type pymongo.database.Database and fs.osfs.OSFS. These
         will be different per call, but function identically.
+
+        key_override: use this as a cache key instead of computing a key from the
+        function signature. Useful for testing.
     '''
     def isuseful(a, ignores):
         if str(type(a)) in ignores:
@@ -112,19 +117,24 @@ def memoize_query(cache_time = 60*4, timeout = 60*15, ignores = ["<class 'pymong
             # this is just for SOA queries, but may break
             # down if this were to be used as a generic
             # memoization framework
-            m = hashlib.new("md4")
-            s = str({'uniquifier': 'anevt.memoize',
-                     'name' : f.__name__,
-                     'module' : f.__module__,
-                     'args': [a for a in args if isuseful(a, ignores)],
-                     'kwargs': kwargs})
-            m.update(s)
-            key = m.hexdigest()
+
+            if key_override is not None:
+                key = key_override
+            else:
+                m = hashlib.new("md4")
+                s = str({'uniquifier': 'anevt.memoize',
+                         'name' : f.__name__,
+                         'module' : f.__module__,
+                         'args': [a for a in args if isuseful(a, ignores)],
+                         'kwargs': kwargs})
+                m.update(s)
+                key = m.hexdigest()
+
             # Check if we've cached the computation, or are in the
             # process of computing it
             cached = cache.get(key)
             if cached:
-                #print "Cache hit", key
+                # print "Cache hit", f.__name__, key
                 # If we're already computing it, wait to finish
                 # computation
                 while cached == 'Processing':
@@ -136,7 +146,7 @@ def memoize_query(cache_time = 60*4, timeout = 60*15, ignores = ["<class 'pymong
                 results = cached
 
             if not cached:
-                #print "Cache miss", key
+                # print "Cache miss",f.__name__, key
                 # HACK: There's a slight race condition here, where we
                 # might recompute twice.
                 cache.set(key, 'Processing', timeout)
@@ -154,19 +164,23 @@ def memoize_query(cache_time = 60*4, timeout = 60*15, ignores = ["<class 'pymong
         return decorator(wrap_function,f)
     return view_factory
 
-def cron(period, params=None):
+def cron(run_every, params=None):
     ''' Run command periodically
 
-    Unknown whether or how well this works.
+    The task scheduler process (typically celery beat) needs to be started 
+    manually by the client module with:
+    python manage.py celery worker -B --loglevel=INFO
+    Celery beat will automatically add tasks from files named 'tasks.py'    
     '''
     def factory(f):
-        @periodic_task(run_every=period, name=f.__name__)
-        def run():
-            import edinsights.core.views
-            mongodb = core.views.get_mongo(f)
-            fs = core.views.get_filesystem(f)
-            f(fs, mongodb, params)
-        return decorator(run,f)
+        @periodic_task(run_every=run_every, name=f.__name__)
+        def run(func=None):
+            if func:
+                result = optional_parameter_call(func, default_optional_kwargs, params)
+            else:
+                result = optional_parameter_call(f, default_optional_kwargs, params)
+            return result
+        return decorator(run, f)
     return factory
 
 def event_property(name=None, description=None):

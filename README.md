@@ -80,6 +80,24 @@ the test module will be at:
 
     http://127.0.0.1:8000/static/index.html
 
+Running periodic tasks 
+-------------------------------------
+Periodic tasks (which are scheduled with core.decorators.cron) 
+rely on Celery for execution. It is the reponsability of the
+client django project to ensure Celery is configured and running.
+To configure, add the following to settings.py of your django
+project: 
+
+    from edinsights.celerysettings import * 
+
+To start celery, run from your django project 
+
+    python manage.py celery worker -B
+
+Only tasks located in files named "tasks.py" located in the main 
+directory of your django project or installed django app will
+be scheduled.
+
 Building on top of the framework
 --------------------------------
 

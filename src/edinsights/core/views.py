@@ -97,6 +97,7 @@ def handle_event(sender, **kwargs):
     This is not a view, but it is the moral equivalent. 
     '''
     # Handle strings, lists, and dictionaries
+    # TODO handle errors if not valid json
     msg = kwargs['msg']
     if isinstance(msg,str) or isinstance(msg,unicode):
         msg = json.loads(msg)
