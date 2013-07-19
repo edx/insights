@@ -97,6 +97,23 @@ def query(category = None, name = None, description = None, args = None):
     return query_factory
 
 
+def mq_force_memoize(func):
+    if hasattr(func, 'force_memoize'):
+        print "it has it"
+        return func.force_memoize
+    else:
+        print "it has not"
+        return func
+
+def mq_force_retrieve(func):
+    if hasattr(func, 'force_retrieve'):
+        print "it has it"
+        return func.force_retrieve
+    else:
+        print "it has not"
+        return func
+
+
 def memoize_query(cache_time = 60*4, timeout = 60*15, ignores = ["<class 'pymongo.database.Database'>", "<class 'fs.osfs.OSFS'>"], key_override=None):
     ''' Call function only if we do not have the results for its execution already
         We ignore parameters of type pymongo.database.Database and fs.osfs.OSFS. These
@@ -105,66 +122,100 @@ def memoize_query(cache_time = 60*4, timeout = 60*15, ignores = ["<class 'pymong
         key_override: use this as a cache key instead of computing a key from the
         function signature. Useful for testing.
     '''
+    print "in memoize query"
+
+    # Helper functions
     def isuseful(a, ignores):
         if str(type(a)) in ignores:
             return False
         return True
 
-    def view_factory(f):
-        def wrap_function(f, *args, **kwargs):
-            # Assumption: dict gets dumped in same order
-            # Arguments are serializable. This is okay since
-            # this is just for SOA queries, but may break
-            # down if this were to be used as a generic
-            # memoization framework
+    def make_cache_key(f, args, kwargs):
+        # Assumption: dict gets dumped in same order
+        # Arguments are serializable. This is okay since
+        # this is just for SOA queries, but may break
+        # down if this were to be used as a generic
+        # memoization framework
+        m = hashlib.new("md4")
+        s = str({'uniquifier': 'anevt.memoize',
+                 'name' : f.__name__,
+                 'module' : f.__module__,
+                 'args': [a for a in args if isuseful(a, ignores)],
+                 'kwargs': kwargs})
+        m.update(s)
+        if key_override is not None:
+            key = key_override
+        else:
+            key = m.hexdigest()
+        return key
 
-            if key_override is not None:
-                key = key_override
+    def compute_and_cache(f, key, args, kwargs):
+        # HACK: There's a slight race condition here, where we
+        # might recompute twice.
+        cache.set(key, 'Processing', timeout)
+        function_argspec = inspect.getargspec(f)
+        if function_argspec.varargs or function_argspec.args:
+            if function_argspec.keywords:
+                results = f(*args, **kwargs)
             else:
-                m = hashlib.new("md4")
-                s = str({'uniquifier': 'anevt.memoize',
-                         'name' : f.__name__,
-                         'module' : f.__module__,
-                         'args': [a for a in args if isuseful(a, ignores)],
-                         'kwargs': kwargs})
-                m.update(s)
-                key = m.hexdigest()
+                results = f(*args)
+        else:
+            results = f()
+        cache.set(key, results, cache_time)
+        return results
 
-            # Check if we've cached the computation, or are in the
-            # process of computing it
+
+    def get_from_cache_if_possible(f, key):
+        cached = cache.get(key)
+        # If we're already computing it, wait to finish
+        # computation
+        while cached == 'Processing':
             cached = cache.get(key)
-            if cached:
-                # print "Cache hit", f.__name__, key
-                # If we're already computing it, wait to finish
-                # computation
-                while cached == 'Processing':
-                    cached = cache.get(key)
-                    time.sleep(0.1)
-                    # At this point, cached should be the result of the
-                # cache line, unless we had a failure/timeout, in
-                # which case, it is false
-                results = cached
+            time.sleep(0.1)
+        # At this point, cached should be the result of the
+        # cache line, unless we had a failure/timeout, in
+        # which case, it is false
+        results = cached
+        return results
 
-            if not cached:
-                # print "Cache miss",f.__name__, key
-                # HACK: There's a slight race condition here, where we
-                # might recompute twice.
-                cache.set(key, 'Processing', timeout)
-                function_argspec = inspect.getargspec(f)
-                if function_argspec.varargs or function_argspec.args:
-                    if function_argspec.keywords:
-                        results = f(*args, **kwargs)
-                    else:
-                        results = f(*args)
-                else:
-                    results = f()
-                cache.set(key, results, cache_time)
-
+    def factory(f):
+        print "in factory"
+        def opmode_default(f, *args, **kwargs):
+            print "in opmode_default"
+            key = make_cache_key(f, args, kwargs)
+            results = get_from_cache_if_possible(f, key)
+            if results:
+                print "Cache hit %s %s" % (f.__name__, key)
+                pass
+            else:
+                print "Cache miss %s %s" % (f.__name__, key)
+                results = compute_and_cache(f,key, args, kwargs)
             return results
-        return decorator(wrap_function,f)
-    return view_factory
 
-def cron(run_every, params=None):
+        def opmode_forcememoize(*args, **kwargs):
+            # Recompute and store in cache, regardless of whether key
+            # is in cache.
+            key = make_cache_key(f, args, kwargs)
+            print "Forcing memoize %s %s " % (f.__name__, key)
+            results = compute_and_cache(f, key, args, kwargs)
+            return results
+
+        def opmode_forceretrieve(*args, **kwargs):
+            # Retrieve from cache if possible otherwise exception
+            print "Forcing retrieve %s %s " % (f.__name__, key)
+            key = make_cache_key(f, args, kwargs)
+            results = get_from_cache_if_possible(f, key)
+            if not results:
+                raise KeyError('key %s not found in cache' % key) # TODO better exception class?
+            return results
+
+        decfun = decorator(opmode_default,f)
+        decfun.force_memoize = opmode_forcememoize
+        decfun.force_retrieve = opmode_forceretrieve
+        return decfun
+    return factory
+
+def cron(run_every, force_memoize=False, params={}):
     ''' Run command periodically
 
     The task scheduler process (typically celery beat) needs to be started 
@@ -172,13 +223,23 @@ def cron(run_every, params=None):
     python manage.py celery worker -B --loglevel=INFO
     Celery beat will automatically add tasks from files named 'tasks.py'    
     '''
+    print "in cron"
+
     def factory(f):
+        print "in factory"
+
         @periodic_task(run_every=run_every, name=f.__name__)
-        def run(func=None):
-            if func:
-                result = optional_parameter_call(func, default_optional_kwargs, params)
-            else:
-                result = optional_parameter_call(f, default_optional_kwargs, params)
+        def run(func=None, *args, **kw):
+
+            if not func:
+                #called as a periodic task... func will be None
+                func = f
+
+            if force_memoize:
+                func = mq_force_memoize(func)
+
+            result = optional_parameter_call(func, default_optional_kwargs, params)
+
             return result
         return decorator(run, f)
     return factory
