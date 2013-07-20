@@ -24,6 +24,26 @@ to on-line batched analytics (e.g. for an instructor dashboard), to
 on-line realtime analytics (e.g. for the system to react to an event
 the analytics detects).
 
+The model behind Insights is the app store model: 
+![App store](docs/app_store.png)
+We provide a runtime. This runtime provides a fixed set of
+technologies (Python, numpy, scipy, pylab, pandas, mongo, a cache,
+etc.). If you restrict yourself to this set of analytics, anyone
+running Insights can host your analytic. If you'd like to move outside
+this set of tools, you can do that too, but then you may have to
+host your own analytics server.
+
+Comparison to other systems: 
+* Tincan is an SOA and a format for streaming analytics. Insights is
+  an API and runtime for handling those events. The two are very
+  complementary.
+* Twitter Storm is a framework for sending events around. Insights is
+  an API and runtime which would benefit from moving to something like
+  storm.
+* Hadoop is a distributed computation engine. For most learning
+  analytics, hadoop is overkill, but it could be embedded in an
+  analytics module if desired.
+
 Examples
 --------
 
@@ -243,11 +263,14 @@ per-course/per-student. An instructor of that course might want to
 have that fixed to the course (so it transforms into a per-student
 analytic). djobject's transform_embed defines a DSL for restricting
 permissions to analytics, as well as for fixing specific commandline
-parameters. 
+parameters. This DSL should be cleaned up, but it's good enough for
+now. 
+
+Multiple analytics servers can be merged into one djobject. 
 
 There is an issue of network reliability and timeouts when access
-remotely. This is planned to be handled by being able to set timeouts
-on djembed objects.
+remotely. You can set timeouts on djembed objects to manage those
+issues.
 
 Shortcuts/invariants
 --------------------
@@ -316,8 +339,10 @@ Gotchas
 
 * For events to flow in, a decorator in core.views must be
   called. This must be iported from the main appliction. 
-* Number 1 bug: Python path issues if you have this installed and are
-  developing from source.
+* Sometimes, the network transparency isn't quite right. This is a 
+  bug. 
+* Are there still any Python path issues if you have this installed
+  and are developing from source?
 
 Product Backlog
 ---------------
