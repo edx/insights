@@ -24,6 +24,64 @@ to on-line batched analytics (e.g. for an instructor dashboard), to
 on-line realtime analytics (e.g. for the system to react to an event
 the analytics detects).
 
+Examples
+--------
+
+Views show up in the dashboards. To define an analytic which just
+shows "Hello World" in the analytics dashboard:
+
+    @view()
+    def hello_world():
+       return "<html>Hello world!</html>"
+
+Queries return data for use in other parts of the system. If you would
+like to define a new analytic which shows a histogram of grades, the
+first step would be to define a query while will return grades. How
+this is done depends on your LMS, but it is often convenient to define
+a dummy one which does not rely on having a functioning LMS
+present. This is convenient for off-line development without live
+student data:
+
+    @query()
+    def get_grades(course):
+        ''' Dummy data module. Returns grades  
+        '''
+        grades = 3*numpy.random.randn(1000,4)+ \
+            12*numpy.random.binomial(1,0.3,(1000,4))+40
+        return grades
+
+Once this is in place, you can define a view which will call this query: 
+
+    @view()
+    def plot_grades(fs, query, course):
+        grades = query.get_grades(course)
+        filename = course+"_"+str(time.time())+".png"
+        title("Histogram of course grades")
+        hist(grades)
+        f = fs.open(filename, "w")
+        savefig(f)
+        f.close()
+        fs.expire(filename, 5*60)
+        return "<img src="+fs.get_url(filename)+">"
+
+At this point, the following will show up in the instructor dashboard: 
+
+![Grade histogram](docs/grade_histogram.png)
+
+Note that the query and the view don't have to live on the same
+machine. If someone wants to reuse your grade histogram in a different
+LMS, all they need to do is define a new get_grades query.
+
+To build a module which takes all in coming events and dumps them into
+a database:
+
+   @event_handler()
+   def dump_to_db(mongodb, events):
+       collection = mongodb['event_log']
+       collection.insert([e.event for e in events])
+
+Except for imports, that's all that's required. 
+
 Architecture
 ------------
 
