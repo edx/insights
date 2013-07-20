@@ -75,25 +75,28 @@ LMS, all they need to do is define a new get_grades query.
 To build a module which takes all in coming events and dumps them into
 a database:
 
-   @event_handler()
-   def dump_to_db(mongodb, events):
-       collection = mongodb['event_log']
-       collection.insert([e.event for e in events])
+    @event_handler()
+    def dump_to_db(mongodb, events):
+        collection = mongodb['event_log']
+        collection.insert([e.event for e in events])
 
 Except for imports, that's all that's required. 
 
 Architecture
 ------------
 
-A block diagram of the overall system is: 
+A block diagram of where the analytics might fit into an overall
+learning system is:
 
 ![System structure](docs/system_structure.png)
 
-The learning management streams events to the analytics framework. In
-addition, the modules in the framework will typically have access to
-read replicas of production databases. In practice, a lot of analytics
-can be performed directly from the LMS databases with a lot less
-effort than processing events.
+The learning management system (and potentially other sources) stream
+events to the analytics framework. In addition, the modules in the
+framework will typically have access to read replicas of production
+databases. In practice, a lot of analytics can be performed directly
+from the LMS databases with a lot less effort than processing events.
+
+A single module
 
 A rough diagram of a single analytics module is: 
 
@@ -123,10 +126,47 @@ The views and queries are automatically inspect for parameters, and
 the system will do the right thing. If you would like to have a
 per-module database, simply take a db parameter. Etc.
 
-To understand the system, the best place to start is by reading the
-module which defines testcases -- the file
+To understand how to build modules in more detail, the best place to
+start is by reading the module which defines testcases -- the file
 modules/testmodule/__init__.py. Next place is to look at the code for
 the decorators. Final place is for the main views and dashboard.
+
+Using with other LMSes
+
+The architecture is designed to be usable with common analytics shared
+between multiple LMSes. The structure for this is:
+
+![Multipule LMSes](docs/multilms.png)
+
+Here, each instance has a data layer module. This module translates
+the data generate by the particular LMS into a common
+representation. Higher-level analytics are built on top of that common
+representation. We're trying to come up with process for creating this
+data layer, but it's not essential we get it 100% right. In most
+cases, it is relatively easy to include backwards-compatibility
+queries.
+
+Structuring servers
+
+The system is transparent to how analytics are split across
+servers. There are several models for how this might be used. 
+
+First, we might have a production-grade code on e.g. a critical server
+which keeps student profile/grading/etc. information, while still
+maintaining prototype analytics servers, which may be on-line more
+intermittently: 
+
+![Multiple servers](docs/multiserver.png)
+
+A second way to use this might be by function. For example, we might
+embed analytics in the LMS, in the forums, in the wiki, in the student
+registration system, and in other parts of the system. Those would
+provide access to data from those subsystems. We may also wish to have
+specialized runtimes providing access to additional tools like Hadoop
+or R. A single computer can query across all of these servers from the
+Insights API:
+
+![Per-system analytic](docs/heterogenous.png)
 
 Installing
 ----------
@@ -347,44 +387,16 @@ students, instructors, researchers, marketers, etc.
 Architecture Expansions
 =======================
 
-This section lists some long-term architectural design goals of the
-system. 
 
-The architecture is explicitly designed to eventually scale to running
-different analytics on different servers. edinsights.core.djobject
-(TODO: change to insights.core) provides a query object and a view
-object, which can be used to access queries and views in an identical
-way, regardless of whether or not there is a network in between. In
-the future, we would like to support an architecture where we have
-multiple analytics servers:
 
-![Multipule servers](docs/multiserver.png)
 
-This way, we can have production-grade code on e.g. a critical server
-which keeps student profile/grading/etc. information, while still
-maintaining prototype analytics servers, which may be on-line more
-intermittently. In order to support this, the djobject abstraction
-would have to be extended to support multiple servers. In addition,
-the current way the analytics embed in the courseware would have to
-change substantially.
-
-In addition, the architecture is designed to scale to sharing
-analytics between LMSes. A potential structure for this is: 
-
-![Multipule LMSes](docs/multilms.png)
-
-Here, each instance would have a data layer module. This module would
-translate the data generate by the particular LMS into a common
-representation. Analytics would be built on top of that common
-representation. 
-
-We would like to also support FERPA-compliance. This could be built in
+We would like to also support FERPA-compliance. This could be built in 
 one of two ways. Per-school stacks, including analytics: 
 
 Split analytics: 
 
 The API supports either. Building out back-end support for either
-would be substantial.
+would be substantial work.
 
 Other edX Code
 ==============
