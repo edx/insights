@@ -26,12 +26,12 @@ the analytics detects).
 
 The model behind Insights is the app store model: 
 ![App store](docs/app_store.png)
-We provide a runtime. This runtime provides a fixed set of
-technologies (Python, numpy, scipy, pylab, pandas, mongo, a cache,
-etc.). If you restrict yourself to this runtime, anyone
-running Insights can host your analytic. If you'd like to move outside
-this set of tools, you can do that too, but then you may have to
-host your own analytics server.
+As with an app store (Android shown above), we provide a runtime. This
+runtime provides a fixed set of technologies (Python, numpy, scipy,
+pylab, pandas, mongo, a cache, etc.). If you restrict yourself to this
+runtime, anyone running Insights can host your analytic. If you'd like
+to move outside this set of tools, you can do that too, but then you
+may have to host your own analytics server.
 
 Comparison to other systems: 
 * Tincan is an SOA and a format for streaming analytics. Insights is
