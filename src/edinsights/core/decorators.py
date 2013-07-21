@@ -99,18 +99,18 @@ def query(category = None, name = None, description = None, args = None):
 
 def mq_force_memoize(func):
     if hasattr(func, 'force_memoize'):
-        print "it has it"
+        print "FORCING MEMOIZE"
         return func.force_memoize
     else:
-        print "it has not"
+        print "not forcing memoize"
         return func
 
 def mq_force_retrieve(func):
     if hasattr(func, 'force_retrieve'):
-        print "it has it"
+        print "FORCING RETRIEVE"
         return func.force_retrieve
     else:
-        print "it has not"
+        print "not forcing retrieve"
         return func
 
 
@@ -201,9 +201,9 @@ def memoize_query(cache_time = 60*4, timeout = 60*15, ignores = ["<class 'pymong
             return results
 
         def opmode_forceretrieve(*args, **kwargs):
-            # Retrieve from cache if possible otherwise exception
-            print "Forcing retrieve %s %s " % (f.__name__, key)
+            # Retrieve from cache if possible otherwise throw an exception
             key = make_cache_key(f, args, kwargs)
+            print "Forcing retrieve %s %s " % (f.__name__, key)
             results = get_from_cache_if_possible(f, key)
             if not results:
                 raise KeyError('key %s not found in cache' % key) # TODO better exception class?
@@ -218,6 +218,10 @@ def memoize_query(cache_time = 60*4, timeout = 60*15, ignores = ["<class 'pymong
 def cron(run_every, force_memoize=False, params={}):
     ''' Run command periodically
 
+    force_memoize: if the function being decorated is also decorated by
+    @memoize_query, setting this to True will redo the computation
+    regardless of whether the results of the computation already exist in cache
+
     The task scheduler process (typically celery beat) needs to be started 
     manually by the client module with:
     python manage.py celery worker -B --loglevel=INFO
@@ -231,12 +235,21 @@ def cron(run_every, force_memoize=False, params={}):
         @periodic_task(run_every=run_every, name=f.__name__)
         def run(func=None, *args, **kw):
 
-            if not func:
-                #called as a periodic task... func will be None
-                func = f
+            # if the call originated from the periodic_task decorator
+            # func will be None. If the call originated from the rest of
+            # the code, func will be the same as f
+            called_as_periodic = True if func is None else False
 
-            if force_memoize:
-                func = mq_force_memoize(func)
+            if called_as_periodic:
+                print "called as periodic"
+                if force_memoize:
+                    func = mq_force_memoize(f)
+                else:
+                    func = f
+            else:
+                #called from code
+                print "called from code"
+                func = f
 
             result = optional_parameter_call(func, default_optional_kwargs, params)
 
