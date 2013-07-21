@@ -151,3 +151,8 @@ class SimpleTest(TestCase):
         c = Client()
         response = c.get('/view/djt_fake_user_count').content
         self.assertEqual(response, "<html>Users: 2</html>")
+
+    def test_multiname(self):
+        c = Client()
+        response = c.get('/query/djt_check_three_name').content
+        self.assertEqual(response, "Works")

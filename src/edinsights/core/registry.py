@@ -33,11 +33,21 @@ def register_handler(cls, category, name, description, f, args):
                 category+="+"
     if cls not in request_handlers:
         request_handlers[cls] = {}
-    if name in request_handlers[cls]:
-        # We used to have this be an error.
-        # We changed to a warning for the way we handle dummy values.
-        log.warn("{0} already in {1}".format(name, category))  # raise KeyError(name+" already in "+category)
-    request_handlers[cls][name] = {'function': f, 'name': name, 'doc': description, 'category' : category}
+
+    # We may want to register under multiple names. E.g. 
+    # edx.get_grades and (once adopted globally) generic 
+    # get_grades
+    if isinstance(name, list):
+        names = name
+    else:
+        names = [name]
+    for n in names: 
+        if n in request_handlers[cls]:
+            # We used to have this be an error.
+            # We changed to a warning for the way we handle dummy values.
+            log.warn("{0} already in {1}".format(n, category))  # raise KeyError(name+" already in "+category)
+
+        request_handlers[cls][n] = {'function': f, 'name': n, 'doc': description, 'category' : category}
 
 class StreamingEvent:
     ''' Event object. Behaves like the normal JSON event dictionary,

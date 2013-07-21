@@ -67,6 +67,10 @@ def view(category = None, name = None, description = None, args = None):
 
     args: Optional argspec for the function. This is generally better
       omitted.
+
+    TODO: human_name: Name without Python name restrictions -- e.g.
+    "Daily uploads" instead of "daily_uploads" -- for use in
+    human-usable dashboards.
     '''
     def view_factory(f):
         registry.register_handler('view',category, name, description, f, args)
