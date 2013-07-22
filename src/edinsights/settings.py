@@ -196,9 +196,23 @@ LOGGING = {
 #initialize celery
 import djcelery
 djcelery.setup_loader()
-#import the settings for celery from the edinsights module
-from edinsights.celerysettings_dev import *
+#import the settings for celery from the edinsights module and for cache
 
-
-# import django cache settings
-from edinsights.djangocachesettings_dev import *
+try: 
+    from celerysettings_dev import *
+    from djangocachesettings_dev import *
+except: 
+    # The code had the imports below. These fail when running test 
+    # cases stand-alone. I think the above fixes this, but I'm 
+    # leaving this in for now in case there are configurations I 
+    # haven't thought of. If the exception is raised, remove this
+    # comment, remove the exception, and add a comment explaining
+    # when the second set of imports is necessary. 
+    #
+    # If it's, say, October, and no one has run into the exception, 
+    # we should kill the extra code. 
+    # 
+    # pmitros -- 21/July/2013. 
+    raise Exception("Import failed. See instructions in settings.py")
+    from edinsights.djangocachesettings_dev import *
+    from edinsights.celerysettings_dev import *

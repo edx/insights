@@ -164,3 +164,15 @@ def djt_fake_user_count(query):
     the network, as well as optional parameters like fs, db, etc. 
     '''
     return "<html>Users: {uc}</html>".format(uc = query.djt_fake_user_count())
+
+@query(name=['djt_three_name', 'edx_djt_three_name', 'edx.djt_three_name'])
+def djt_three_name():
+    return "I have three names"
+
+@query(name = 'djt_check_three_name')
+def check_three_name(query):
+    if query.djt_three_name() != "I have three names":
+        raise Exception("oops")
+    if query.edx_djt_three_name() != "I have three names":
+        raise Exception("oops")
+    return "Works"
