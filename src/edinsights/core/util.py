@@ -104,7 +104,7 @@ def get_query(f):
 
     return get_embed('query', config = embed_config)
 
-def optional_parameter_call(function, optional_kwargs, passed_kwargs,  arglist = None):
+def optional_parameter_call(function, optional_kwargs, passed_kwargs, arglist = None): 
     ''' Calls a function with parameters: 
     passed_kwargs are input parameters the function must take. 
     Format: Dictionary mapping keywords to arguments. 
