@@ -56,7 +56,7 @@ class SimpleTest(TestCase):
         """
 
         truncate_tempfile('test_cron_task_counter')
-        run_celery_beat(seconds=3,verbose=True)
+        run_celery_beat(seconds=3,verbose=False)
 
         # verify number of calls and time of last call
         ncalls, last_call = count_timestamps('test_cron_task_counter')
@@ -74,7 +74,7 @@ class SimpleTest(TestCase):
 
         # clear the cache from any previous executions of this test
         cache.delete('test_cron_memoize_unique_cache_key')
-        run_celery_beat(seconds=3,verbose=True)
+        run_celery_beat(seconds=3,verbose=False)
         ncalls, last_call = count_timestamps('test_cron_memoize_task')
         self.assertEqual(ncalls,1)  # after the first call all subsequent calls should be cached
         self.assertAlmostEqual(last_call, time.time(), delta=100)
@@ -91,7 +91,7 @@ class SimpleTest(TestCase):
         # delete cache from previous executions of this unit test
         cache.delete('big_computation_key')
 
-        run_celery_beat(seconds=3, verbose=True)
+        run_celery_beat(seconds=3, verbose=False)
 
         ncalls_before, lastcall_before = count_timestamps('big_computation_counter')
         self.assertEqual(ncalls_before,1)  # after the first call all subsequent calls should be cached
@@ -120,7 +120,7 @@ class SimpleTest(TestCase):
 
         truncate_tempfile('big_computation_withfm_counter')
         cache.delete('big_computation_key_withfm')
-        run_celery_beat(seconds=3, verbose=True)
+        run_celery_beat(seconds=3, verbose=False)
         ncalls_before, lastcall_before = count_timestamps('big_computation_withfm_counter')
 
         self.assertGreaterEqual(ncalls_before,2)

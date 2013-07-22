@@ -101,7 +101,8 @@ def query(category = None, name = None, description = None, args = None):
     return query_factory
 
 
-
+class NotInCacheError(Exception):
+    pass
 
 def mq_force_memoize(func):
     """
@@ -232,7 +233,7 @@ def memoize_query(cache_time = 60*4, timeout = 60*15, ignores = ["<class 'pymong
             # print "Forcing retrieve %s %s " % (f.__name__, key)
             results = get_from_cache_if_possible(f, key)
             if not results:
-                raise KeyError('key %s not found in cache' % key) # TODO better exception class?
+                raise NotInCacheError('key %s not found in cache' % key)
             return results
 
         decfun = decorator(opmode_default,f)
