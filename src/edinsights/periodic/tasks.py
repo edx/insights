@@ -14,17 +14,19 @@ def timestamp_to_tempfile(filename):
 # methods(the support of @periodic_task for these is experimental)
 # The @cron decorator should precede all other decorators
 
+
 @cron(run_every=timedelta(seconds=1))
 def test_cron_task():
     """ Simple task that gets executed by the scheduler (celery beat).
         tested by: tests.SimpleTest.test_cron
     """
+
     timestamp_to_tempfile('test_cron_task_counter')
 
 
 @cron(run_every=timedelta(seconds=1), force_memoize=False)  # cron decorators should go on top
-@memoize_query(60, key_override='test_cron_memoize_unique_cache_key')
-def test_cron_memoize_task():
+@memoize_query(60)
+def test_cron_memoize_task(fs):
     """
         Simple task that gets executed by the scheduler (celery beat).
         Combines periodic tasks and memoization, with force_memoize=False.
@@ -33,12 +35,13 @@ def test_cron_memoize_task():
 
         tested by: tests.SimpleTest.test_cron_and_memoize
     """
+
     timestamp_to_tempfile('test_cron_memoize_task')
     return 42
 
 
 @cron(run_every=timedelta(seconds=1), force_memoize=False)  # cron decorators should go on top
-@memoize_query(cache_time=60, key_override='big_computation_key')
+@memoize_query(cache_time=60)
 def big_computation():
     """
         Simple task that gets executed by the scheduler (celery beat) and also by @view
@@ -54,7 +57,7 @@ def big_computation():
 
 
 @cron(run_every=timedelta(seconds=1), force_memoize=True)  # cron decorators should go on top
-@memoize_query(cache_time=60, key_override='big_computation_key_withfm')
+@memoize_query(cache_time=60)
 def big_computation_withfm():
     """
      Simple task that gets executed by the scheduler (celery beat) and also by @view

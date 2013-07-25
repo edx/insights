@@ -5,7 +5,7 @@ import time
 from django.test import TestCase
 from django.test.client import Client
 from django.core.cache import cache
-
+from core.decorators import use_clearcache
 
 def count_timestamps(tempfilename):
     with open(tempfile.gettempdir() + '/' + tempfilename, 'r') as temp_file:
@@ -73,7 +73,11 @@ class SimpleTest(TestCase):
         truncate_tempfile('test_cron_memoize_task')
 
         # clear the cache from any previous executions of this test
-        cache.delete('test_cron_memoize_unique_cache_key')
+        # cache.delete('test_cron_memoize_unique_cache_key')
+        from tasks import test_cron_memoize_task
+
+        use_clearcache(test_cron_memoize_task)()
+
         run_celery_beat(seconds=3,verbose=False)
         ncalls, last_call = count_timestamps('test_cron_memoize_task')
         self.assertEqual(ncalls,1)  # after the first call all subsequent calls should be cached
@@ -89,7 +93,8 @@ class SimpleTest(TestCase):
         truncate_tempfile('big_computation_counter')
 
         # delete cache from previous executions of this unit test
-        cache.delete('big_computation_key')
+        from tasks import big_computation
+        use_clearcache(big_computation)()
 
         run_celery_beat(seconds=3, verbose=False)
 
@@ -119,7 +124,10 @@ class SimpleTest(TestCase):
         """
 
         truncate_tempfile('big_computation_withfm_counter')
-        cache.delete('big_computation_key_withfm')
+
+        from tasks import big_computation_withfm
+        use_clearcache(big_computation_withfm)()
+
         run_celery_beat(seconds=3, verbose=False)
         ncalls_before, lastcall_before = count_timestamps('big_computation_withfm_counter')
 

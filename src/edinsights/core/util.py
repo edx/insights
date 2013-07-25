@@ -136,6 +136,8 @@ def optional_parameter_call(function, optional_kwargs, passed_kwargs, arglist = 
         # precedence. 
         if arg in optional_kwargs:
             args[arg] = optional_kwargs[arg](function)
+            #ignore default arguments in memoize
+            args[arg].memoize_ignore = True
         elif arg in passed_kwargs: 
             args[arg] = passed_kwargs[arg]
         else: 

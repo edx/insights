@@ -9,12 +9,11 @@
 
 import hashlib
 import inspect
-import json
 import logging
 import time
-import traceback
 
-from datetime import timedelta
+
+
 from decorator import decorator
 
 from django.core.cache import cache
@@ -101,10 +100,15 @@ def query(category = None, name = None, description = None, args = None):
     return query_factory
 
 
-class NotInCacheError(Exception):
+class MemoizeNotInCacheError(Exception):
     pass
 
-def mq_force_memoize(func):
+
+class MemoizeAttributeError(Exception):
+    pass
+
+
+def use_forcememoize(func):
     """
     Forces memoization for a function func that has been decorated by
     @memoize_query. This means that it will always redo the computation
@@ -114,22 +118,39 @@ def mq_force_memoize(func):
     if hasattr(func, 'force_memoize'):
         return func.force_memoize
     else:
-        return func
+        raise MemoizeAttributeError("Function %s does not have attribute %s" %
+        func.__name__, "force_memoize")
 
-def mq_force_retrieve(func):
+
+def use_fromcache(func):
     """
     Forces retrieval from cache for a function func that has been decorated by
     @memoize_query. This means that it will try to get the result from cache.
     If the result is not available in cache, it will throw an exception instead
     of computing the result.
     """
-    if hasattr(func, 'force_retrieve'):
-        return func.force_retrieve
+    if hasattr(func, 'from_cache'):
+        return func.from_cache
     else:
-        return func
+        raise MemoizeAttributeError("Function %s does not have attribute %s" %
+        func.__name__, "from_cache")
 
 
-def memoize_query(cache_time = 60*4, timeout = 60*15, ignores = ["<class 'pymongo.database.Database'>", "<class 'fs.osfs.OSFS'>"], key_override=None):
+def use_clearcache(func):
+    if hasattr(func, 'clear_cache'):
+        return func.clear_cache
+    else:
+        raise MemoizeAttributeError("Function %s does not have attribute %s" %
+        func.__name__, "clear_cache")
+
+# classes to ignore when creating a cache key
+from pymongo.database import Database
+import fs.osfs
+from core.util import CacheHelper
+import django.core.cache
+DEFAULT_IGNORES = (Database, fs.osfs, CacheHelper, django.core.cache)
+
+def memoize_query(cache_time = 60*4, timeout = 60*15, ignores = DEFAULT_IGNORES):
     ''' Call function only if we do not have the results for its execution already
         We ignore parameters of type pymongo.database.Database and fs.osfs.OSFS. These
         will be different per call, but function identically.
@@ -139,10 +160,11 @@ def memoize_query(cache_time = 60*4, timeout = 60*15, ignores = ["<class 'pymong
     '''
 
     # Helper functions
-    def isuseful(a, ignores):
-        if str(type(a)) in ignores:
+    def isuseful(a):
+        if hasattr(a, 'memoize_ignore') and a.memoize_ignore is True:
             return False
         return True
+
 
     def make_cache_key(f, args, kwargs):
         """
@@ -158,14 +180,11 @@ def memoize_query(cache_time = 60*4, timeout = 60*15, ignores = ["<class 'pymong
         m = hashlib.new("md4")
         s = str({'uniquifier': 'anevt.memoize',
                  'name' : f.__name__,
-                 'module' : f.__module__,
-                 'args': [a for a in args if isuseful(a, ignores)],
+                 'file' : inspect.getmodule(f).__file__,
+                 'args': [a for a in args if isuseful(a)],
                  'kwargs': kwargs})
         m.update(s)
-        if key_override is not None:
-            key = key_override
-        else:
-            key = m.hexdigest()
+        key = m.hexdigest()
         return key
 
     def compute_and_cache(f, key, args, kwargs):
@@ -175,6 +194,7 @@ def memoize_query(cache_time = 60*4, timeout = 60*15, ignores = ["<class 'pymong
 
         # HACK: There's a slight race condition here, where we
         # might recompute twice.
+
         cache.set(key, 'Processing', timeout)
         function_argspec = inspect.getargspec(f)
         if function_argspec.varargs or function_argspec.args:
@@ -206,7 +226,8 @@ def memoize_query(cache_time = 60*4, timeout = 60*15, ignores = ["<class 'pymong
 
     def factory(f):
 
-        def opmode_default(f, *args, **kwargs):
+
+        def operation_mode_default(f, *args, **kwargs):
             # Get he result from cache if possible, otherwise recompute
             # and store in cache
             key = make_cache_key(f, args, kwargs)
@@ -219,7 +240,7 @@ def memoize_query(cache_time = 60*4, timeout = 60*15, ignores = ["<class 'pymong
                 results = compute_and_cache(f,key, args, kwargs)
             return results
 
-        def opmode_forcememoize(*args, **kwargs):
+        def operation_mode_forcememoize(*args, **kwargs):
             # Recompute and store in cache, regardless of whether key
             # is in cache.
             key = make_cache_key(f, args, kwargs)
@@ -227,18 +248,24 @@ def memoize_query(cache_time = 60*4, timeout = 60*15, ignores = ["<class 'pymong
             results = compute_and_cache(f, key, args, kwargs)
             return results
 
-        def opmode_forceretrieve(*args, **kwargs):
+        def operation_mode_fromcache(*args, **kwargs):
             # Retrieve from cache if possible otherwise throw an exception
-            key = make_cache_key(f, args, kwargs)
             # print "Forcing retrieve %s %s " % (f.__name__, key)
+            key = make_cache_key(f, args, kwargs)
             results = get_from_cache_if_possible(f, key)
             if not results:
-                raise NotInCacheError('key %s not found in cache' % key)
+                raise MemoizeNotInCacheError('key %s not found in cache' % key)
             return results
 
-        decfun = decorator(opmode_default,f)
-        decfun.force_memoize = opmode_forcememoize   # activated by mq_force_memoize
-        decfun.force_retrieve = opmode_forceretrieve  # activated by mq_force_retrieve
+        def operation_mode_clearcache(*args, **kwargs):
+            key = make_cache_key(f, args, kwargs)
+
+            return cache.delete(key)
+
+        decfun = decorator(operation_mode_default,f)
+        decfun.force_memoize = operation_mode_forcememoize   # activated by use_forcememoize
+        decfun.from_cache = operation_mode_fromcache  # activated by use_fromcache
+        decfun.clear_cache = operation_mode_clearcache
         return decfun
     return factory
 
@@ -257,15 +284,20 @@ def cron(run_every, force_memoize=False, params={}):
     def factory(f):
         @periodic_task(run_every=run_every, name=f.__name__)
         def run(func=None, *args, **kw):
-            # if the call originated from the periodic_task decorator
-            # func will be None. If the call originated from the rest of
-            # the code, func will be the same as f
+            # This function can be called from two distinct places. It can be
+            # called by the task scheduler (due to @periodic_task),
+            # in which case func will be None.
+            # It can also be called as a result of calling the function we
+            # are currently decorating with @cron. In this case func will be
+            # the same as f.
+
+            # Was it called from the task scheduler?
             called_as_periodic = True if func is None else False
 
             if called_as_periodic:
                 #print "called as periodic"
                 if force_memoize:
-                    func = mq_force_memoize(f)
+                    func = use_forcememoize(f)
                 else:
                     func = f
             else:
