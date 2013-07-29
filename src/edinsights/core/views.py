@@ -13,7 +13,6 @@ from django.conf import settings
 from djeventstream.signals import event_received
 
 from registry import event_handlers, request_handlers
-from util import default_optional_kwargs
 
 import auth
 import util
@@ -124,12 +123,12 @@ def handle_event(sender, **kwargs):
         if not batch: ## Message was a list of events, but handler cannot batch events
             for event in msg:
                 try:
-                    optional_parameter_call(event_func, default_optional_kwargs, {'events':[event]})
+                    optional_parameter_call(event_func, {'events':[event]})
                 except:
                     handle_event_exception(e['function'])
         else: ## Message was a list of events, and handler can batch events
             try:
-                optional_parameter_call(event_func, default_optional_kwargs, {'events':msg})
+                optional_parameter_call(event_func, {'events':msg})
             except:
                 handle_event_exception(e['function'])
 

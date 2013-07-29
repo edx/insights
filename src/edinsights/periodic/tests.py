@@ -73,9 +73,7 @@ class SimpleTest(TestCase):
         truncate_tempfile('test_cron_memoize_task')
 
         # clear the cache from any previous executions of this test
-        # cache.delete('test_cron_memoize_unique_cache_key')
         from tasks import test_cron_memoize_task
-
         use_clearcache(test_cron_memoize_task)()
 
         run_celery_beat(seconds=3,verbose=False)

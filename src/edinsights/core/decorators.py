@@ -12,16 +12,13 @@ import inspect
 import logging
 import time
 
-
-
 from decorator import decorator
 
 from django.core.cache import cache
 from django.conf import settings
 
-from celery.task import PeriodicTask, periodic_task
+from celery.task import periodic_task
 from util import optional_parameter_call
-from util import default_optional_kwargs
 
 import registry
 from registry import event_handlers, request_handlers
@@ -101,10 +98,17 @@ def query(category = None, name = None, description = None, args = None):
 
 
 class MemoizeNotInCacheError(Exception):
+    """ Raised when using use_fromcache and the requested cache key is not in
+    the cache
+    """
     pass
 
 
 class MemoizeAttributeError(Exception):
+    """ Raised when requesting to use one of a function's following attributes:
+    force_memoize, from_cache, clear_cache, but the function does not have the
+    requested attribute because it was not decorated by @memoize_query
+    """
     pass
 
 
@@ -143,28 +147,18 @@ def use_clearcache(func):
         raise MemoizeAttributeError("Function %s does not have attribute %s" %
         func.__name__, "clear_cache")
 
-# classes to ignore when creating a cache key
-from pymongo.database import Database
-import fs.osfs
-from core.util import CacheHelper
-import django.core.cache
-DEFAULT_IGNORES = (Database, fs.osfs, CacheHelper, django.core.cache)
-
-def memoize_query(cache_time = 60*4, timeout = 60*15, ignores = DEFAULT_IGNORES):
+def memoize_query(cache_time = 60*4, timeout = 60*15, ignores = ()):
     ''' Call function only if we do not have the results for its execution already
-        We ignore parameters of type pymongo.database.Database and fs.osfs.OSFS. These
-        will be different per call, but function identically.
 
-        key_override: use this as a cache key instead of computing a key from the
-        function signature.
+        ignores: a list of classes to ignore when creating a cache key. Arguments
+        having a memoize_ignore attribute set to True are automatically ignored.
     '''
 
     # Helper functions
     def isuseful(a):
-        if hasattr(a, 'memoize_ignore') and a.memoize_ignore is True:
+        if hasattr(a, 'memoize_ignore') and a.memoize_ignore is True and not isinstance(a, ignores):
             return False
         return True
-
 
     def make_cache_key(f, args, kwargs):
         """
@@ -190,12 +184,16 @@ def memoize_query(cache_time = 60*4, timeout = 60*15, ignores = DEFAULT_IGNORES)
     def compute_and_cache(f, key, args, kwargs):
         """
         Runs f and stores the results in cache
+
+        HACK: There's slight race condition here, where we might recompute twice
         """
+        if cache.get(key) is None:
+            # While processing the request set the cache value to a unique
+            # string that cannot be mistaken for an actual result. Do this
+            # only if there was not cached result already -- this will allow
+            # callers to access the old cached value while we compute the new.
+            cache.set(key, 'Processing-14c44a51-31a6-4ba0-aed5-a52164ce4613', timeout)
 
-        # HACK: There's a slight race condition here, where we
-        # might recompute twice.
-
-        cache.set(key, 'Processing', timeout)
         function_argspec = inspect.getargspec(f)
         if function_argspec.varargs or function_argspec.args:
             if function_argspec.keywords:
@@ -215,7 +213,7 @@ def memoize_query(cache_time = 60*4, timeout = 60*15, ignores = DEFAULT_IGNORES)
         cached = cache.get(key)
         # If we're already computing it, wait to finish
         # computation
-        while cached == 'Processing':
+        while cached == 'Processing-14c44a51-31a6-4ba0-aed5-a52164ce4613':
             cached = cache.get(key)
             time.sleep(0.1)
         # At this point, cached should be the result of the
@@ -226,31 +224,30 @@ def memoize_query(cache_time = 60*4, timeout = 60*15, ignores = DEFAULT_IGNORES)
 
     def factory(f):
 
-
-        def operation_mode_default(f, *args, **kwargs):
-            # Get he result from cache if possible, otherwise recompute
-            # and store in cache
+        def operationmode_default(f, *args, **kwargs):
+            """ Get he result from cache if possible, otherwise recompute
+            and store in cache
+            """
             key = make_cache_key(f, args, kwargs)
             results = get_from_cache_if_possible(f, key)
             if results:
-                #print "Cache hit %s %s" % (f.__name__, key)
+                # we got the results from cache, do not recompute
                 pass
             else:
-                #print "Cache miss %s %s" % (f.__name__, key)
                 results = compute_and_cache(f,key, args, kwargs)
             return results
 
-        def operation_mode_forcememoize(*args, **kwargs):
-            # Recompute and store in cache, regardless of whether key
-            # is in cache.
+        def operationmode_forcememoize(*args, **kwargs):
+            """ Recompute and store in cache, regardless of whether key
+            is in cache.
+            """
             key = make_cache_key(f, args, kwargs)
-            # print "Forcing memoize %s %s " % (f.__name__, key)
             results = compute_and_cache(f, key, args, kwargs)
             return results
 
-        def operation_mode_fromcache(*args, **kwargs):
-            # Retrieve from cache if possible otherwise throw an exception
-            # print "Forcing retrieve %s %s " % (f.__name__, key)
+        def operationmode_fromcache(*args, **kwargs):
+            """ Retrieve from cache if possible otherwise throw an exception
+            """
             key = make_cache_key(f, args, kwargs)
             results = get_from_cache_if_possible(f, key)
             if not results:
@@ -262,9 +259,9 @@ def memoize_query(cache_time = 60*4, timeout = 60*15, ignores = DEFAULT_IGNORES)
 
             return cache.delete(key)
 
-        decfun = decorator(operation_mode_default,f)
-        decfun.force_memoize = operation_mode_forcememoize   # activated by use_forcememoize
-        decfun.from_cache = operation_mode_fromcache  # activated by use_fromcache
+        decfun = decorator(operationmode_default,f)
+        decfun.force_memoize = operationmode_forcememoize   # activated by use_forcememoize
+        decfun.from_cache = operationmode_fromcache  # activated by use_fromcache
         decfun.clear_cache = operation_mode_clearcache
         return decfun
     return factory
@@ -284,27 +281,29 @@ def cron(run_every, force_memoize=False, params={}):
     def factory(f):
         @periodic_task(run_every=run_every, name=f.__name__)
         def run(func=None, *args, **kw):
-            # This function can be called from two distinct places. It can be
-            # called by the task scheduler (due to @periodic_task),
-            # in which case func will be None.
-            # It can also be called as a result of calling the function we
-            # are currently decorating with @cron. In this case func will be
-            # the same as f.
+            """ Executes the function decorated by @cron
+
+                This function can be called from two distinct places. It can be
+                called by the task scheduler (due to @periodic_task),
+                in which case func will be None.
+
+                It can also be called as a result of calling the function we
+                are currently decorating with @cron. In this case func will be
+                the same as f.
+            """
 
             # Was it called from the task scheduler?
             called_as_periodic = True if func is None else False
 
             if called_as_periodic:
-                #print "called as periodic"
                 if force_memoize:
                     func = use_forcememoize(f)
                 else:
                     func = f
             else:
-                #print "called from code"
                 func = f
 
-            result = optional_parameter_call(func, default_optional_kwargs, params)
+            result = optional_parameter_call(func, params)
 
             return result
         return decorator(run, f)

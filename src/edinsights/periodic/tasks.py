@@ -14,13 +14,11 @@ def timestamp_to_tempfile(filename):
 # methods(the support of @periodic_task for these is experimental)
 # The @cron decorator should precede all other decorators
 
-
 @cron(run_every=timedelta(seconds=1))
 def test_cron_task():
     """ Simple task that gets executed by the scheduler (celery beat).
         tested by: tests.SimpleTest.test_cron
     """
-
     timestamp_to_tempfile('test_cron_task_counter')
 
 
@@ -35,7 +33,6 @@ def test_cron_memoize_task(fs):
 
         tested by: tests.SimpleTest.test_cron_and_memoize
     """
-
     timestamp_to_tempfile('test_cron_memoize_task')
     return 42
 

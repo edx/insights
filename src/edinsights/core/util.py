@@ -104,7 +104,14 @@ def get_query(f):
 
     return get_embed('query', config = embed_config)
 
-def optional_parameter_call(function, optional_kwargs, passed_kwargs, arglist = None): 
+default_optional_kwargs = {'fs' : get_filesystem,
+                           'mongodb' : get_mongo,
+                           'cache' : get_cache,
+#                           'analytics' : get_djobject,
+                           'view' : get_view,
+                           'query' : get_query}
+
+def optional_parameter_call(function, passed_kwargs, arglist = None):
     ''' Calls a function with parameters: 
     passed_kwargs are input parameters the function must take. 
     Format: Dictionary mapping keywords to arguments. 
@@ -133,10 +140,12 @@ def optional_parameter_call(function, optional_kwargs, passed_kwargs, arglist = 
     for arg in arglist:
         # This order is important for security. We don't want users
         # being able to pass in 'fs' or 'db' and having that take
-        # precedence. 
-        if arg in optional_kwargs:
-            args[arg] = optional_kwargs[arg](function)
-            #ignore default arguments in memoize
+        # precedence.
+
+        global default_optional_kwargs
+        if arg in default_optional_kwargs:
+            args[arg] = default_optional_kwargs[arg](function)
+            #ignore default arguments in memoize when building cache key
             args[arg].memoize_ignore = True
         elif arg in passed_kwargs: 
             args[arg] = passed_kwargs[arg]
@@ -144,10 +153,3 @@ def optional_parameter_call(function, optional_kwargs, passed_kwargs, arglist = 
             raise TypeError("Missing argument needed for handler ", arg)
 
     return function(**args)
-
-default_optional_kwargs = {'fs' : get_filesystem, 
-                           'mongodb' : get_mongo, 
-                           'cache' : get_cache,
-#                           'analytics' : get_djobject, 
-                           'view' : get_view, 
-                           'query' : get_query}
