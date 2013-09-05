@@ -6,7 +6,7 @@ Prior to installing, install djeventstream and loghandlersplus:
 To install a development setup: 
 
     sudo apt-get install python-pip python-matplotlib python-scipy emacs mongodb apache2-utils python-mysqldb subversion ipython nginx git redis-server
-    git clone https://github.com/edx/ed-insights
+    git clone https://github.com/edx/insights
     cd insights
     pip install -r requirements.txt    
     cd src/edinsights/
