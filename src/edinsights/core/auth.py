@@ -8,8 +8,7 @@ DJA_AUTH setting maps function names to authentication decorators. For
 example, to require all edinsights URLs to have a login, add the
 following to settings.py:
 
-import django.contrib.auth.decorators
-DJA_AUTH = { '.*' : django.contrib.auth.decorators.login_required } 
+DJA_AUTH = { '.*' : 'django.contrib.auth.decorators.login_required' } 
 
 The goal of this is to, for example, be able to add login_required for
 views, but some kind of secret key authentication for queries, and
@@ -19,6 +18,7 @@ likely to be by the time you read this).
 '''
 
 from django.conf import settings
+from django.core.urlresolvers import get_callable
 import re
 
 def auth(f):
@@ -37,6 +37,10 @@ def auth(f):
 
     for key in dja:
         if re.match(key, f.func_name):
-            return dja[key](f)
+            if type(dja[key]) == str:
+                wrapper = get_callable(dja[key])
+            else:
+                wrapper = dja[key]
+            return wrapper(f)
 
     return f
