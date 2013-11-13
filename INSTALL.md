@@ -9,7 +9,7 @@ To install a development setup:
     git clone https://github.com/edx/insights
     cd insights
     pip install -r requirements.txt    
-    cd src/edinsights/
+    cd src
     python manage.py syncdb
     python manage.py migrate
     python manage.py runserver localhost:9022

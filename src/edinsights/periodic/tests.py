@@ -5,13 +5,13 @@ import time
 from django.test import TestCase
 from django.test.client import Client
 from django.core.cache import cache
-from core.decorators import use_clearcache
+from edinsights.core.decorators import use_clearcache
 
 def count_timestamps(tempfilename):
     with open(tempfile.gettempdir() + '/' + tempfilename, 'r') as temp_file:
         timestamps = temp_file.readlines()
         ncalls = len(timestamps)
-        last_call = float(timestamps[-1].rstrip())
+        last_call = float(timestamps[-1].rstrip()) if ncalls > 0 else None
     return ncalls, last_call
 
 def truncate_tempfile(tempfilename):
