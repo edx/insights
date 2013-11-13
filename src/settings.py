@@ -7,8 +7,8 @@ import datetime
 # DJOBJECT_CONFIG = [{}, {'baseurl' : 'http://127.0.0.1:9022/'}]
 
 
-# Types of parameters that queries and views can take. 
-# This is not properly used yet. 
+# Types of parameters that queries and views can take.
+# This is not properly used yet.
 DJANALYTICS_PARAMETERS = ['user', 'filename', 'key']
 DJFS = { 'type' : 'osfs',
          'directory_root' : '/tmp/djfsmodule',
@@ -18,11 +18,14 @@ DJFS = { 'type' : 'osfs',
 
 TIME_BETWEEN_DATA_REGENERATION = datetime.timedelta(minutes=1)
 
-INSTALLED_ANALYTICS_MODULES = ('modules.testmodule',)
+INSTALLED_ANALYTICS_MODULES = (
+    # Add testmodule package here for tests to be able to run.
+    'edinsights.modules.testmodule',
+)
 
 SNS_SUBSCRIPTIONS = []
 
-#### Default Django settings below. 
+#### Default Django settings below.
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -34,7 +37,7 @@ ADMINS = (
 MANAGERS = ADMINS
 
 DATABASES = {
-    'default': { 
+    'default': {
         'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
         'NAME': '../../localdb.sql',            # Or path to database file if using sqlite3.
         'USER': '',                      # Not used with sqlite3.
@@ -102,7 +105,7 @@ STATICFILES_DIRS = (
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-    'core.render.ModuleFileFinder',
+    'edinsights.core.render.ModuleFileFinder',
 #    'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
 
@@ -134,13 +137,15 @@ TEMPLATE_DIRS = (
     # Don't forget to use absolute paths, not relative paths.
 )
 
-DJ_REQUIRED_APPS = ( 'djeventstream.httphandler',
+DJ_REQUIRED_APPS = (
+    'djeventstream.httphandler',
     'djcelery',
     'south',
-    'core',
-    'modulefs',
-    'modules',
-    'periodic',)
+    'edinsights.core',
+    'edinsights.modulefs',
+    'edinsights.modules',
+    'edinsights.periodic',
+)
 
 INSTALLED_APPS = (
     'django.contrib.auth',
@@ -193,26 +198,10 @@ LOGGING = {
 #        'error', r"DateTimeField received a naive datetime",
 #        RuntimeWarning, r'django\.db\.models\.fields')
 
-#initialize celery
+# initialize celery
 import djcelery
 djcelery.setup_loader()
-#import the settings for celery from the edinsights module and for cache
 
-try: 
-    from celerysettings_dev import *
-    from djangocachesettings_dev import *
-except: 
-    # The code had the imports below. These fail when running test 
-    # cases stand-alone. I think the above fixes this, but I'm 
-    # leaving this in for now in case there are configurations I 
-    # haven't thought of. If the exception is raised, remove this
-    # comment, remove the exception, and add a comment explaining
-    # when the second set of imports is necessary. 
-    #
-    # If it's, say, October, and no one has run into the exception, 
-    # we should kill the extra code. 
-    # 
-    # pmitros -- 21/July/2013. 
-    raise Exception("Import failed. See instructions in settings.py")
-    from edinsights.djangocachesettings_dev import *
-    from edinsights.celerysettings_dev import *
+# import the settings for celery from the edinsights module and for cache
+from edinsights.celerysettings_dev import *
+from edinsights.djangocachesettings_dev import *
