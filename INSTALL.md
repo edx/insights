@@ -1,11 +1,10 @@
-Prior to installing, install djeventstream and loghandlersplus:
+Prior to installing, install djeventstream:
 
     https://github.com/edx/djeventstream
-    https://github.com/edx/loghandlersplus
 
 To install a development setup: 
 
-    sudo apt-get install python-pip python-matplotlib python-scipy emacs mongodb apache2-utils python-mysqldb subversion ipython nginx git redis-server
+    cat apt-packages.txt | xargs sudo apt-get -yq install
     git clone https://github.com/edx/insights
     cd insights
     pip install -r requirements.txt    
@@ -16,7 +15,7 @@ To install a development setup:
 
 To install a setup to build from: 
 
-    sudo apt-get install python-pip python-matplotlib python-scipy emacs mongodb apache2-utils python-mysqldb subversion ipython nginx git redis-server
+    cat apt-packages.txt | xargs sudo apt-get -yq install
     git clone https://github.com/edx/insights
     cd insights
     pip install -r requirements.txt    

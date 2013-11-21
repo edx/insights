@@ -1,13 +1,6 @@
-python-matplotlib
-python-scipy
-emacs
-mongodb
-apache2-utils
-python-mysqldb
-subversion
-ipython
-nginx
 git
+python-pip
+python-virtualenv
 redis-server
-libmysqlclient-dev
-yui-compressor
+mongodb
+nginx

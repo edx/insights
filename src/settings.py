@@ -139,12 +139,10 @@ TEMPLATE_DIRS = (
 
 DJ_REQUIRED_APPS = (
     'djeventstream.httphandler',
-    'djcelery',
     'south',
     'edinsights.core',
     'edinsights.modulefs',
     'edinsights.modules',
-    'edinsights.periodic',
 )
 
 INSTALLED_APPS = (
@@ -198,10 +196,10 @@ LOGGING = {
 #        'error', r"DateTimeField received a naive datetime",
 #        RuntimeWarning, r'django\.db\.models\.fields')
 
-# initialize celery
-import djcelery
-djcelery.setup_loader()
+# Don't initialize celery
+# import djcelery
+# djcelery.setup_loader()
 
-# import the settings for celery from the edinsights module and for cache
-from edinsights.celerysettings_dev import *
-from edinsights.djangocachesettings_dev import *
+# Don't import the settings for celery from the edinsights module and for cache
+# from edinsights.celerysettings_dev import *
+# from edinsights.djangocachesettings_dev import *

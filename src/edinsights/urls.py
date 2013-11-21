@@ -11,9 +11,6 @@ urlpatterns = patterns('',
     url(r'^$', 'edinsights.core.views.index'),
     url('^', include('edinsights.core.urls')),
     url(r'^httpevent$', 'djeventstream.httphandler.views.http_view'),
-    # url(r'^view/([A-Za-z_+]+)/([A-Za-z_+]+)$', 'core.views.handle_view'),
-    # url(r'^view/([A-Za-z_+]+)/([A-Za-z_+]+)/([A-Za-z_0-9]+)$', 'core.views.handle_view'),
-    # url(r'^view/([A-Za-z_+]+)/([A-Za-z_+]+)/([A-Za-z_0-9]+)/([A-Za-z_0-9]+)$', 'core.views.handle_view'),
     # url(r'^query/([A-Za-z_+]+)/([A-Za-z_+]+)$', 'core.views.handle_query'),
     # url(r'^query/([A-Za-z_+]+)/([A-Za-z_+]+)/([A-Za-z_0-9+]+)$', 'core.views.handle_query'),
     # url(r'^query/([A-Za-z_+]+)/([A-Za-z_+]+)/([A-Za-z_0-9+]+)/([A-Za-z_0-9+]+)$', 'core.views.handle_query'),
@@ -23,7 +20,6 @@ urlpatterns = patterns('',
     # url(r'^probe/([A-Za-z_+]+)/([A-Za-z_+]+)$', 'core.views.handle_probe'),
     # url(r'^probe/([A-Za-z_+]+)/([A-Za-z_+]+)/([A-Za-z_+]+)$', 'core.views.handle_probe'),
     # url(r'^probe/([A-Za-z_+]+)/([A-Za-z_+]+)/([A-Za-z_+]+)/([A-Za-z_+]+)$', 'core.views.handle_probe'),
-    url('^tasks/', include('djcelery.urls')),
 )
 
 if settings.DEBUG and settings.DJFS['type'] == 'osfs':

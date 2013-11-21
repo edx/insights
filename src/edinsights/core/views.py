@@ -46,29 +46,10 @@ def schema(request):
         return HttpResponse("\n".join(sorted(["<dt><p><b>{class}/{name}</b> <i>{category}</i></dt><dd>{doc}</dd>".format(**rh) for rh in endpoints])))
     return HttpResponse(json.dumps(endpoints))
 
-view_object=None    
-@auth.auth
-def handle_view(request, name, **kwargs):
-    ''' Handles generic view. 
-        Category is where this should be place (per student, per problem, etc.)
-        Name is specific 
-    '''
-    global view_object
-    if view_object is None: 
-        from util import get_view
-        view_object = get_view(None)
-    if name[0] == '_':
-        raise SuspiciousOperation(name+' called')
-    kwargs.update(request.POST.items())
-    kwargs.update(request.GET.items())
-    results = view_object.__getattr__(name)(**kwargs)
-    return HttpResponse(results)
-
 query_object = None
 @auth.auth
 def handle_query(request, name, **kwargs):
-    ''' Handles generic view. 
-        Category is where this should be place (per student, per problem, etc.)
+    ''' Handles generic query. 
         Name is specific 
     '''
     global query_object

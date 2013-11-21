@@ -12,12 +12,11 @@ import imp
 
 from pkg_resources import resource_filename
 
-DJ_REQUIRED_APPS = ( 'djeventstream.httphandler',
-    'djcelery',
+DJ_REQUIRED_APPS = (
+    'djeventstream.httphandler',
     'south',
     'edinsights.core',
     'edinsights.modulefs',
-#    'modules',
 )
 
 # Types of parameters that queries and views can take. 
@@ -31,13 +30,9 @@ DJFS = { 'type' : 'osfs',
 
 TIME_BETWEEN_DATA_REGENERATION = datetime.timedelta(minutes=1)
 
-INSTALLED_ANALYTICS_MODULES = ['modules.dump_to_db'] #'modules.testmodule',)
+INSTALLED_ANALYTICS_MODULES = ['modules.dump_to_db']
 
 print INSTALLED_ANALYTICS_MODULES
-
-#Initialize celery
-import djcelery
-djcelery.setup_loader()
 
 SNS_SUBSCRIPTIONS = []
 
@@ -198,19 +193,3 @@ LOGGING = {
         },
     }
 }
-
-#Celery settings
-BROKER_URL = 'redis://localhost:6379/0'
-BROKER_TRANSPORT_OPTIONS = {'visibility_timeout': 3600}
-CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
-CELERY_TASK_RESULT_EXPIRES = 60 * 60 #1 hour
-MODULE_DIR = "modules"
-
-CELERY_IMPORTS = ()
-for analytics_module in INSTALLED_ANALYTICS_MODULES:
-    module_name = "{0}.{1}.{2}".format(MODULE_DIR,analytics_module,"tasks")
-    try:
-        imp.find_module(module_name)
-        CELERY_IMPORTS += (module_name,)
-    except:
-        pass
