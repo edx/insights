@@ -4,13 +4,7 @@
 
 modules_to_import = []
 
-from edinsights.core.decorators import query, event_handler, view, event_property
-
-@view()
-def djt_hello_template():
-    ''' Example of how to use mako templates in a view '''
-    from edinsights.core.render import render
-    return render("hello.html", {})
+from edinsights.core.decorators import query, event_handler, event_property
 
 @query()
 def djt_event_count(mongodb):
@@ -157,13 +151,6 @@ def djt_event_property_check(cache, events):
 def djt_fake_user_count():
     ''' Used as test case for query objects '''
     return 2
-
-@view()
-def djt_fake_user_count(query):
-    ''' Test of an abstraction used to call queries, abstracting away
-    the network, as well as optional parameters like fs, db, etc. 
-    '''
-    return "<html>Users: {uc}</html>".format(uc = query.djt_fake_user_count())
 
 @query(name=['djt_three_name', 'edx_djt_three_name', 'edx.djt_three_name'])
 def djt_three_name():

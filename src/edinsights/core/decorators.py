@@ -1,9 +1,7 @@
 ''' Decorators for analytics modules.
 
-@view defines a user-visible view
 @query defines a machine-readable SOA
 @event_handler takes the user tracking event stream
-@cron allows for periodic and delayed events
 '''
 
 
@@ -17,7 +15,6 @@ from decorator import decorator
 from django.core.cache import cache
 from django.conf import settings
 
-from celery.task import periodic_task
 from util import optional_parameter_call
 
 import registry
@@ -25,53 +22,14 @@ from registry import event_handlers, request_handlers
 
 log=logging.getLogger(__name__)
 
-def event_handler(batch=True, per_user=False, per_resource=False,
-    single_process=False, source_queue=None):
-    ''' Decorator to register an event handler.
-
-    batch=True ==> Normal mode of operation. Cannot break system (unimplemented)
-    batch=False ==> Event handled immediately operation. Slow handlers can break system.
-
-    per_user = True ==> Can be sharded on a per-user basis (default: False)
-    per_resource = True ==> Can be sharded on a per-resource basis (default: False)
-
-    single_process = True ==> Cannot be distributed across process/machines. Queued must be true.
-
-    source_queue ==> Not implemented. For a pre-filter (e.g. video)
-    '''
-
-    if single_process or source_queue or not batch:
-        raise NotImplementedError("Framework isn't done. Sorry. batch=True, source_queue=None, single_proces=False")
+def event_handler():
+    ''' Decorator to register an event handler.'''
+    batch = True
     def event_handler_factory(func):
         event_handlers.append({'function' : func, 'batch' : batch})
         return func
     return event_handler_factory
 
-def view(category = None, name = None, description = None, args = None):
-    ''' This decorator is appended to a view in an analytics module. A
-    view will return HTML which will be shown to the user.
-
-    category: Optional specification for type (global, per-user,
-      etc.). If not given, this will be extrapolated from the
-      argspec. This should typically be omitted.
-
-    name: Optional specification for name shown to the user. This will
-      default to function name. In most cases, this is recommended.
-
-    description: Optional description. If not given, this will default
-      to the docstring.
-
-    args: Optional argspec for the function. This is generally better
-      omitted.
-
-    TODO: human_name: Name without Python name restrictions -- e.g.
-    "Daily uploads" instead of "daily_uploads" -- for use in
-    human-usable dashboards.
-    '''
-    def view_factory(f):
-        registry.register_handler('view',category, name, description, f, args)
-        return f
-    return view_factory
 
 def query(category = None, name = None, description = None, args = None):
     ''' This decorator is appended to a query in an analytics
@@ -266,48 +224,6 @@ def memoize_query(cache_time = 60*4, timeout = 60*15, ignores = ()):
         return decfun
     return factory
 
-def cron(run_every, force_memoize=False, params={}):
-    ''' Run command periodically
-
-    force_memoize: if the function being decorated is also decorated by
-    @memoize_query, setting this to True will redo the computation
-    regardless of whether the results of the computation already exist in cache
-
-    The task scheduler process (typically celery beat) needs to be started 
-    manually by the client module with:
-    python manage.py celery worker -B --loglevel=INFO
-    Celery beat will automatically add tasks from files named 'tasks.py'    
-    '''
-    def factory(f):
-        @periodic_task(run_every=run_every, name=f.__name__)
-        def run(func=None, *args, **kw):
-            """ Executes the function decorated by @cron
-
-                This function can be called from two distinct places. It can be
-                called by the task scheduler (due to @periodic_task),
-                in which case func will be None.
-
-                It can also be called as a result of calling the function we
-                are currently decorating with @cron. In this case func will be
-                the same as f.
-            """
-
-            # Was it called from the task scheduler?
-            called_as_periodic = True if func is None else False
-
-            if called_as_periodic:
-                if force_memoize:
-                    func = use_forcememoize(f)
-                else:
-                    func = f
-            else:
-                func = f
-
-            result = optional_parameter_call(func, params)
-
-            return result
-        return decorator(run, f)
-    return factory
 
 def event_property(name=None, description=None):
     ''' This is used to add properties to events. 
@@ -319,4 +235,3 @@ def event_property(name=None, description=None):
         registry.register_event_property(f, name, description)
         return f
     return register
-

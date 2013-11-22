@@ -10,15 +10,15 @@ from edinsights.core.util import default_optional_kwargs
 funcskips = default_optional_kwargs.keys()+['params'] # params are additional GET/POST parameters
 
 def register_handler(cls, category, name, description, f, args):
-    ''' Helper function for @view and @query decorators. 
+    ''' Helper function for @query decorators.
     '''
     log.debug("Register {0} {1} {2} {3}".format(cls, category, name, f))
     # Figure out where this goes. See if there are parameters, and if not, 
     # create them by inspecting the function. 
     if args == None:
         args = inspect.getargspec(f).args
-    if cls not in ['view', 'query']:
-        raise ValueError("We can only register views and queries")
+    if cls not in ['query']:
+        raise ValueError("We can only register queries")
     if not name:
         name = str(f.func_name)
     if not description:
