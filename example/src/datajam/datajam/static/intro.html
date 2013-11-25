@@ -1,0 +1,33 @@
+<html>
+<head><title>It's running!</title></head>
+<body>
+<h1> The Datajam Insights application is running.</h1>
+
+<p> If a datajam LMS is also running, it should be sending events that
+an event handler in the datajam Insights will store in a mongo
+database.
+
+<p> To verify, connect to the database, and see what events are there: 
+<pre>
+$ mongo
+MongoDB shell version: 2.0.4
+connecting to: test
+> show dbs
+...
+modules_dump_to_db
+...
+> use modules_dump_to_db
+switched to db modules_dump_to_db
+> show collections
+event_log
+system.indexes
+> db.event_log.find()
+
+[ should show all events sent to database ]
+</pre>
+<p> Query connectivity may be checked by going to the datajam LMS,
+logging in as an instructor of a course (such as the demo course),
+navigating to the analytics tab of the instructor dash, and verifying
+that fabricated data from Insights appears there.
+</body>
+</html>
