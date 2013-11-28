@@ -33,6 +33,7 @@ TIME_BETWEEN_DATA_REGENERATION = datetime.timedelta(minutes=1)
 INSTALLED_ANALYTICS_MODULES = [
     'modules.dump_to_db',
     'modules.instructor_dash',
+    'modules.problem_answers',
 ]
 
 print INSTALLED_ANALYTICS_MODULES
