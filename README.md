@@ -1,5 +1,16 @@
-edX Insights
-===========
+edX Insights Early Prototype
+============================
+
+***Warning***: This repository contains an early prototype of the edX analytics
+infrastructure. The code base for the current version of the
+[Insights](http://edx-insights.readthedocs.org/en/latest/) product can
+be found in the following repositories:
+
+* https://github.com/edx/edx-analytics-dashboard
+* https://github.com/edx/edx-analytics-data-api
+* https://github.com/edx/edx-analytics-pipeline
+
+---
 
 This is a development version of an analytics framework for the edX
 infrastructure. It will replace the ad-hoc analytics used in the
@@ -10,10 +21,10 @@ must have the following properties:
 1. Easy to use. Professors, graduate students, etc. should be able to
 write plug-ins quickly and easily. These should be able to run in the
 system without impacting the overall stability. Results should be
-automatically shown to customers. 
+automatically shown to customers.
 2. The API must support robust, scalable implementations. The current
-back-end is not designed for mass scaling, but the API for the modules 
-should permit e.g. sharding in the future. 
+back-end is not designed for mass scaling, but the API for the modules
+should permit e.g. sharding in the future.
 3. Reusable. The individual analytics modules should be able to use
 the results from other modules, and people should be able to build on
 each others' work.
@@ -24,7 +35,7 @@ to on-line batched analytics (e.g. for an instructor dashboard), to
 on-line realtime analytics (e.g. for the system to react to an event
 the analytics detects).
 
-The model behind Insights is the app store model: 
+The model behind Insights is the app store model:
 ![App store](docs/app_store.png)
 As with an app store (Android shown above), we provide a runtime. This
 runtime provides a fixed set of technologies (Python, numpy, scipy,
@@ -33,7 +44,7 @@ runtime, anyone running Insights can host your analytic. If you'd like
 to move outside this set of tools, you can do that too, but then you
 may have to host your own analytics server.
 
-Comparison to other systems: 
+Comparison to other systems:
 * Tincan is an SOA and a format for streaming analytics. Insights is
   an API and runtime for handling those events. The two are very
   complementary.
@@ -64,13 +75,13 @@ student data:
 
     @query()
     def get_grades(course):
-        ''' Dummy data module. Returns grades  
+        ''' Dummy data module. Returns grades
         '''
         grades = 3*numpy.random.randn(1000,4)+ \
             12*numpy.random.binomial(1,0.3,(1000,4))+40
         return grades
 
-Once this is in place, you can define a view which will call this query: 
+Once this is in place, you can define a view which will call this query:
 
     @view()
     def plot_grades(fs, query, course):
@@ -84,7 +95,7 @@ Once this is in place, you can define a view which will call this query:
         fs.expire(filename, 5*60)
         return "<img src="+fs.get_url(filename)+">"
 
-At this point, the following will show up in the instructor dashboard: 
+At this point, the following will show up in the instructor dashboard:
 
 ![Grade histogram](docs/grade_histogram.png)
 
@@ -100,7 +111,7 @@ a database:
         collection = mongodb['event_log']
         collection.insert([e.event for e in events])
 
-Except for imports, that's all that's required. 
+Except for imports, that's all that's required.
 
 Architecture
 ------------
@@ -118,7 +129,7 @@ from the LMS databases with a lot less effort than processing events.
 
 A single module
 
-A rough diagram of a single analytics module is: 
+A rough diagram of a single analytics module is:
 
 ![Analytics module](docs/analytics-module.png)
 
@@ -169,12 +180,12 @@ queries.
 Structuring servers
 
 The system is transparent to how analytics are split across
-servers. There are several models for how this might be used. 
+servers. There are several models for how this might be used.
 
 First, we might have a production-grade code on e.g. a critical server
 which keeps student profile/grading/etc. information, while still
 maintaining prototype analytics servers, which may be on-line more
-intermittently: 
+intermittently:
 
 ![Multiple servers](docs/multiserver.png)
 
@@ -198,28 +209,28 @@ the test module will be at:
 
     http://127.0.0.1:8000/static/index.html
 
-Running periodic tasks 
+Running periodic tasks
 -------------------------------------
-Periodic tasks (which are scheduled with core.decorators.cron) 
+Periodic tasks (which are scheduled with core.decorators.cron)
 rely on Celery for execution. It is the reponsability of the
 client django project to ensure Celery is configured and running.
 To configure, add the following to settings.py of your django
-project: 
+project:
 
-    from edinsights.celerysettings import * 
+    from edinsights.celerysettings import *
 
-To start celery, run from your django project 
+To start celery, run from your django project
 
     python manage.py celery worker -B
 
-Only tasks located in files named "tasks.py" located in the main 
+Only tasks located in files named "tasks.py" located in the main
 directory of your django project or installed django app will
 be scheduled.
 
 Building on top of the framework
 --------------------------------
 
-To build on top of the framework, you will need several things: 
+To build on top of the framework, you will need several things:
 * A log handler which can stream the events out over an SOA. The ones
   we wrote for edX are available at:
     https://github.com/edx/loghandlersplus
@@ -231,7 +242,7 @@ To build on top of the framework, you will need several things:
   dictionaries. The event handler can handle either dictionaries,
   lists of dictionaries, or JSON-encoded string representations of
   both.
-* A way of embedding the analytics in your LMS based on the SOA. 
+* A way of embedding the analytics in your LMS based on the SOA.
 * Potentially, some set of analytics modules. At the very least, you
   should define appropriate (TBD) properties to ornament your events
   with and appropriate queries (TBD) to get data out of your
@@ -248,7 +259,7 @@ Using Analytics Externally (djobject)
 djobject.py has an abstraction for accessing analytics both locally
 (function calls) and remotely (RPC). This is a standard Python
 object. All of the standard Python introspection of the methods in
-this object works. 
+this object works.
 
 This is, in particular, useful for off-line analytics. You have access
 to the raw data, analyzed data, and queries defined by other analytics
@@ -264,9 +275,9 @@ have that fixed to the course (so it transforms into a per-student
 analytic). djobject's transform_embed defines a DSL for restricting
 permissions to analytics, as well as for fixing specific commandline
 parameters. This DSL should be cleaned up, but it's good enough for
-now. 
+now.
 
-Multiple analytics servers can be merged into one djobject. 
+Multiple analytics servers can be merged into one djobject.
 
 There is an issue of network reliability and timeouts when access
 remotely. You can set timeouts on djembed objects to manage those
@@ -275,8 +286,8 @@ issues.
 Shortcuts/invariants
 --------------------
 
-* Template rendering is a hack. 
-* Duplicate events/downtime is not handled. 
+* Template rendering is a hack.
+* Duplicate events/downtime is not handled.
 * At present, events come into the system through an SOA. The tracking
   framework is modified to use a Python HTTP logger, which are
   received by the framework. For most events, this should be replaced
@@ -293,10 +304,10 @@ Shortcuts/invariants
   without worrying about thread safety (e.g. while(true) {
   get_event(); handle_event(); }). The API is designed to support
   this, but this is not implemented.
-* The analytics framework has no way to generate new events. This would be 
-  useful for chaining analytics. This is trivial to add. 
+* The analytics framework has no way to generate new events. This would be
+  useful for chaining analytics. This is trivial to add.
 * There are no filters. E.g. an event handler cannot ask for all video
-  events. This is high priority. This is trivial to add. 
+  events. This is high priority. This is trivial to add.
 
 Desired Modes of operation
 --------------------------
@@ -306,14 +317,14 @@ Desired Modes of operation
    can extract results from the analytic.
 2. Soft realtime. There is a queue, but processing is fast enough that
    the queue is assumed to be nearly empty.
-3. Queued. There is a queue with potentially a significant backlog. 
-4. Batched. Processing runs at e.g. 5 minute or 1 day intervals. 
+3. Queued. There is a queue with potentially a significant backlog.
+4. Batched. Processing runs at e.g. 5 minute or 1 day intervals.
 5. Off-line. There is a database populated with data, and the data is
    analyzed by hand.
 
 For developing the system, hard realtime is the most critical, and
 we'd like to keep the invariant that it works. Next most useful is
-either queued or batched. 
+either queued or batched.
 
 Sharding
 --------
@@ -324,7 +335,7 @@ optimization and cannot be sharede (e.g. IRT). This is something we'll
 need to eventually think about, but this is a 2.0 feature. Note that
 the current decorator design pattern does not help -- it merely helps
 define a storage API. A statistic like class rank may be per-user, but
-require data from all users. 
+require data from all users.
 
 Useful pointers
 ---------------
@@ -338,9 +349,9 @@ Gotchas
 -------
 
 * For events to flow in, a decorator in core.views must be
-  called. This must be iported from the main appliction. 
-* Sometimes, the network transparency isn't quite right. This is a 
-  bug. 
+  called. This must be iported from the main appliction.
+* Sometimes, the network transparency isn't quite right. This is a
+  bug.
 * Are there still any Python path issues if you have this installed
   and are developing from source?
 
@@ -350,10 +361,10 @@ Product Backlog
 1. Add support for asynchronous views. When the client issues a
    request for a view which takes a while to calculate, there should
    be visual feedback.
-2. Move views into an iframe. 
+2. Move views into an iframe.
 3. Create appropriate userspace. We need higher-level functions to
    extract information from events.
-4. Find ways to handle and drop duplicate events. 
+4. Find ways to handle and drop duplicate events.
 5. Find ways to handle robust, queued events
 6. The API for genetic event properties (e.g. event.actor) should
    support namespaces (e.g. event.tincan.actor) and generic dispatch
@@ -362,8 +373,8 @@ Product Backlog
    called). Note that, in the short term, no namespace is required
    (for being able to access data), while namespaces is only important
    (for clean abstractions).
-7. Better error handling and escalation. 
-8. Better off-line support. 
+7. Better error handling and escalation.
+8. Better off-line support.
 9. Extend the property API to support not just events. We'd like to
    have things like problem.difficulty (from IRT), or video.rewinds,
    etc.
@@ -378,12 +389,12 @@ Other useful next steps
 1. Test infrastructure. We should have a dummy dataset and database,
 and be able to confirm output of all queries.
 2. Development data. We need sample outputs for all queries for when
-the DB is not available for UI development (some of this exists). 
+the DB is not available for UI development (some of this exists).
 
 Needs of edX
 ------------
 
-edX currently has many sources of data: 
+edX currently has many sources of data:
 
 1. User tracking events. The software has a middleware layer which
    captures all data (within reason) that the user sends to the
@@ -396,15 +407,15 @@ edX currently has many sources of data:
    into this framework. The structure of these events is
    (intentionally) quite simple and general. We are ontology-agnostic.
 2. Databases. The application-layer of the analytics framework has or
-   will have access to databases through read replicas. 
+   will have access to databases through read replicas.
 3. External services used for surveys and mailings. This is not
    currently integrated.
 4. Course data. Most of this is in the read replica databases, but for
    some courses, this lives in github repositories of XML files. This
    is not currently integrated.
 5. Course-specific services (e.g. CS50 forums, Berkeley graders, etc.)
-6. E-mails to course staff. 
-7. Anecdotal interactions. 
+6. E-mails to course staff.
+7. Anecdotal interactions.
 
 We need to be able to aggregate these into useful information for
 students, instructors, researchers, marketers, etc.
@@ -415,10 +426,10 @@ Architecture Expansions
 
 
 
-We would like to also support FERPA-compliance. This could be built in 
-one of two ways. Per-school stacks, including analytics: 
+We would like to also support FERPA-compliance. This could be built in
+one of two ways. Per-school stacks, including analytics:
 
-Split analytics: 
+Split analytics:
 
 The API supports either. Building out back-end support for either
 would be substantial work.
