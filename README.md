@@ -2,7 +2,9 @@ edX Insights Early Prototype
 ============================
 
 ***Warning***: This repository contains an early prototype of the edX analytics
-infrastructure. The code base for the current version of the
+infrastructure. edX won't be conitnuing the developing of this source code, but interested parties are free to fork and modify.
+
+The code base for the current version of the
 [Insights](http://edx-insights.readthedocs.org/en/latest/) product can
 be found in the following repositories:
 
